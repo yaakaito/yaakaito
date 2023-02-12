@@ -1,6 +1,7 @@
 ### Hi there 👋
 
-UKYO Kazuma
+@yaakaito (UKYO Kazuma)
+
 
 <!--
 **yaakaito/yaakaito** is a ✨ _special_ ✨ repository because its `README.md` (this file) appears on your GitHub profile.
