@@ -1,0 +1,28 @@
+---
+import GlobalLayout from "../layouts/global-layout.astro";
+import * as README from "../../../README.md";
+import icon from "../../../icon/yaakaito.png";
+
+---
+<GlobalLayout>
+    <style>
+        .container {
+            max-width: 800px;
+            margin: 64px auto;
+            padding: 32px;
+            border-radius: 16px;
+            background-color: var(--bg-color-level-1);
+        }
+
+        .icon {
+            margin: 32px auto;
+            width: 120px;
+            height: 120px;
+            border-radius: 60px;
+        }
+    </style>
+    <div class="container">
+        <img class="icon" src={icon} />
+        <README.Content />
+    </div>
+</GlobalLayout>

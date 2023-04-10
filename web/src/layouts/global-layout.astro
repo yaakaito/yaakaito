@@ -1,0 +1,151 @@
+---
+import icon from "../../../icon/yaakaito.png";
+
+const doodleLight = `
+:doodle {
+    @grid: 32 / 8em;
+}
+@random { border-top: 1px solid #eee; }
+@random { border-left: 1px solid #eee; }
+@random(.075) { background-color: @pick(#ffefef, #ffeff7, #ffefff, #f7efff, #efefff, #eff7ff, #efffff, #effff7, #efffef, #f7ffef, #ffffef, #fff7ef); }
+`
+const doodleDark = `
+:doodle {
+    @grid: 32 / 8em;
+}
+@random { border-top: 1px solid #444; }
+@random { border-left: 1px solid #444; }
+@random(.075) { background-color: @pick(#4f1f1f, #4f1f2f, #4f1f3f, #4f1f4f, #3f1f4f, #2f1f4f, #1f1f4f, #1f2f4f, #1f3f4f, #1f4f3f, #1f4f2f, #1f4f1f); }
+`;
+---
+
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <link rel="icon" type="image/svg+xml" href={icon} />
+    <meta name="viewport" content="width=device-width" />
+    <meta name="generator" content={Astro.generator} />
+    <title>yaakai.to</title>
+    <style>
+        :root {
+            --bg-color-level-0: #ffffff;
+            --bg-color-level-1: #F8F9FA;
+            --bg-color-level-2: #F1F3F5;
+            --bg-color-level-3: #EAEDF0;
+            --bg-color-level-4: #E3E7EB;
+            --text-color-level-0: #182D3B;
+            --text-color-level-1: #304860;
+            --text-color-level-2: #486378;
+            --primary-color-level-0: #FF7043;
+            --primary-color-level-1: #FF8A65;
+            --primary-color-level-2: #FFA18A;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg-color-level-0: #1B1D28;
+                --bg-color-level-1: #21232E;
+                --bg-color-level-2: #262934;
+                --bg-color-level-3: #2B2F3A;
+                --bg-color-level-4: #303540;
+                --text-color-level-0: #FFFFFF;
+                --text-color-level-1: #E0E0E0;
+                --text-color-level-2: #C0C0C0;
+                --primary-color-level-0: #F44336;
+                --primary-color-level-1: #F66156;
+                --primary-color-level-2: #F77E76;
+            }
+        }
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Noto Sans JP', sans-serif;
+            -webkit-font-smoothing: antialiased;
+            font-size: 17px;
+            line-height: 31px;
+            font-feature-settings: "palt";
+            background-color: var(--bg-color-level-0);
+            color: var( --text-color-level-0);
+        }
+    </style>
+    <link rel="stylesheet" href="https://unpkg.com/@acab/reset.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://kit.fontawesome.com/57385c1b35.js" crossorigin="anonymous"></script>
+    <script src="https://unpkg.com/css-doodle@0.34.5/css-doodle.min.js"></script>
+    <style>
+        .background {
+            position: relative;
+            background-color: var(--bg-color-level-0);
+            width: 100vw;
+            height: min(100svh, 100vw);
+            overflow: hidden;
+            z-index: 0;
+        }
+        .doodle {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            color: var(--bg-color-level-0);
+            -webkit-font-smoothing: antialiased;
+            width: 100vw;
+            height: 100vw;
+        }
+
+        .doogle-dark {
+            background-color: var(--bg-color-level-0);
+        }
+
+        .doodle[aria-hidden="true"] {
+            display: none;
+        }
+
+        .fadeLayer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0) 0%, rgba(255, 2255, 255, 1) 100%);
+            z-index: 1;
+        }
+
+        .fadeLayer[aria-hidden="true"] {
+            display: none;
+        }
+
+        .container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1;
+        }
+        </style>
+</head>
+<body>
+    <div class="background">
+        <css-doodle class="doodle doogle-light" aria-hidden="true">{doodleLight}</css-doodle>
+        <css-doodle class="doodle doogle-dark" aria-hidden="true">{doodleDark}</css-doodle>
+        <script>
+            const light = document.querySelector('.doogle-light');
+            const dark = document.querySelector('.doogle-dark');
+            const fadeLayer = document.querySelector('.fadeLayer');
+            if(window.matchMedia('(prefers-color-scheme: dark)').matches === true){
+                dark!.setAttribute('aria-hidden', 'false');
+                fadeLayer!.setAttribute('aria-hidden', 'false');
+                fadeLayer!.setAttribute('style', 'background: linear-gradient(180deg, rgba(27, 29, 40, 0) 0%, rgba(27, 29, 40, 1) 100%);');
+            } else {
+                light!.setAttribute('aria-hidden', 'false');
+                fadeLayer!.setAttribute('aria-hidden', 'false');
+            }
+          </script>
+        <div class="fadeLayer" aria-hidden="true"></div>
+    </div>
+    <div class="container">
+        <slot />
+    </div>
+</body>
+</html>
