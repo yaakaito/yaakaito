@@ -44,11 +44,12 @@ const dateString = new Date(frontmatter.date).toLocaleDateString("en-US", {
         }
 
         .author {
-            margin-top: 0.2em;
+            margin-top: 2.4em;
             display: flex;
             align-items: center;
             justify-content: center;
-            color: var(--text-color-level-2);
+            font-weight: bold;
+            color: var(--text-color-level-1);
         }
 
         .author > img {
@@ -167,7 +168,7 @@ const dateString = new Date(frontmatter.date).toLocaleDateString("en-US", {
             <h1 class="title">{frontmatter.title}</h1>
         </hgroup>
         <div class="markdown"><slot /></div>
-        <p class="author"><img src={icon}>yaakaito</p>
+        <a href="/"><p class="author"><img src={icon}>yaakaito</p></a>
     </div>
     <script>
         document.addEventListener("DOMContentLoaded", function(event) {
