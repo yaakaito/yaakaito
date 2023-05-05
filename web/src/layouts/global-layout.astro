@@ -1,5 +1,6 @@
 ---
 import icon from "../../../icon/yaakaito.png";
+const { title } = Astro.props
 
 const doodleLight = `
 :doodle {
@@ -25,14 +26,20 @@ const doodleDark = `
     <link rel="icon" type="image/svg+xml" href={icon} />
     <meta name="viewport" content="width=device-width" />
     <meta name="generator" content={Astro.generator} />
-    <title>yaakai.to</title>
-    <style>
+    <title>{title ? `${title} - yaakai.to` : 'yaakai.to'}</title>
+    <link rel="stylesheet" href="https://unpkg.com/@acab/reset.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://kit.fontawesome.com/57385c1b35.js" crossorigin="anonymous"></script>
+    <script src="https://unpkg.com/css-doodle@0.34.5/css-doodle.min.js"></script>
+    <style is:global>
         :root {
             --bg-color-level-0: #ffffff;
-            --bg-color-level-1: #F8F9FA;
-            --bg-color-level-2: #F1F3F5;
-            --bg-color-level-3: #EAEDF0;
-            --bg-color-level-4: #E3E7EB;
+            --bg-color-level-1: #FEFEFE;
+            --bg-color-level-2: #FDFDFD;
+            --bg-color-level-3: #FCFCFC;
+            --bg-color-level-4: #FBFBFB;
             --text-color-level-0: #182D3B;
             --text-color-level-1: #304860;
             --text-color-level-2: #486378;
@@ -59,7 +66,7 @@ const doodleDark = `
         body {
             margin: 0;
             padding: 0;
-            font-family: 'Noto Sans JP', sans-serif;
+            font-family: 'Noto Sans JP', -apple-system, BlinkMacSystemFont, Segoe UI, Helvetica, Arial, sans-serif, Apple Color Emoji, Segoe UI Emoji;
             -webkit-font-smoothing: antialiased;
             font-size: 17px;
             line-height: 31px;
@@ -67,13 +74,33 @@ const doodleDark = `
             background-color: var(--bg-color-level-0);
             color: var( --text-color-level-0);
         }
+        a {
+            color: #4285F4;
+            text-decoration: none;
+        }
+
+        a:hover {
+            color: #5391FF;
+        }
+
+        a:visited {
+            color: #8AB4F8;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            a {
+                color: #82B1FF;
+            }
+
+            a:hover {
+                color: #92C9FF;
+            }
+
+            a:visited {
+                color: #AEDAFF;
+            }
+        }
     </style>
-    <link rel="stylesheet" href="https://unpkg.com/@acab/reset.css" />
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&display=swap" rel="stylesheet">
-    <script src="https://kit.fontawesome.com/57385c1b35.js" crossorigin="anonymous"></script>
-    <script src="https://unpkg.com/css-doodle@0.34.5/css-doodle.min.js"></script>
     <style>
         .background {
             position: relative;
@@ -123,7 +150,7 @@ const doodleDark = `
             right: 0;
             z-index: 1;
         }
-        </style>
+    </style>
 </head>
 <body>
     <div class="background">

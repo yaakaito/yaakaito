@@ -1,0 +1,183 @@
+---
+import GlobalLayout from "../layouts/global-layout.astro";
+import icon from "../../../icon/yaakaito.png";
+const { frontmatter } = Astro.props;
+const dateString = new Date(frontmatter.date).toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+});
+---
+<GlobalLayout title={frontmatter.title}>
+    <style>
+        .container {
+            max-width: 800px;
+            margin: 64px auto;
+            padding: 32px;
+            border-radius: 16px;
+            background-color: var(--bg-color-level-1);
+        }
+
+        .header {
+            margin-bottom: 2em;
+        }
+
+        .title {
+            font-size: 1.9em;
+            font-weight: bold;
+            margin: 0;
+        }
+
+        .emoji {
+            display: block;
+            font-size: 6em;
+            line-height: 1.3em;
+            margin: 0 0 -0.2em 0;
+            text-align: center;
+        }
+
+        time {
+            display: block;
+            font-size: 0.9em;
+            color: var(--text-color-level-2);
+            margin-bottom: 0.2em;
+        }
+
+        .author {
+            margin-top: 0.2em;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-color-level-2);
+        }
+
+        .author > img {
+            margin-top: 0.2em;
+            margin-right: 0.5em;
+            width: 1.4em;
+            height: 1.4em;
+            border-radius: 50%;
+            vertical-align: middle;
+        }
+    </style>
+    <style is:global>
+        .markdown p{
+            margin:1em 0;
+        }
+
+        .markdown img{
+            max-width:100%;
+        }
+
+        .markdown  h1,.markdown  h2,.markdown  h3,.markdown  h4,.markdown  h5,.markdown  h6{
+            font-weight:normal;
+            color: var(--text-color-level-0);
+            line-height:1em;
+        }
+        .markdown h3,.markdown  h4,.markdown  h5,.markdown  h6{
+            font-weight: bold;
+        }
+        .markdown  h1 {
+            font-size:1.95em;
+            margin-bottom: 1em;
+            font-weight: bold;
+        }
+        .markdown h2 {
+            font-size: 1.8em;
+            border-bottom: 1px solid var(--text-color-level-0);
+            padding-bottom: 0.3em;
+            margin-top: 1.2em;
+            margin-bottom: 0.3em;
+        }
+        .markdown  h3 {
+            font-size:1.5em;
+            margin-top: 1.2em;
+            margin-bottom: 0.2em;
+        }
+        .markdown   h4 {
+            font-size:1.2em;
+            margin-top: 1em;
+            margin-bottom: 0.2em;
+        }
+        .markdown    h5 {
+            font-size:1em;
+            margin-top: 1em;
+            margin-bottom: 0.2em;
+        }
+        .markdown    h6 {
+            font-size:0.9em;
+            margin-top: 1em;
+            margin-bottom: 0.2em;
+        }
+
+        .markdown    blockquote{
+            color: var(--text-color-level-2);
+            margin:0;
+            padding-left: 1.5em;
+            border-left: 0.2em var(--text-color-level-2) solid;
+        }
+        .markdown   pre, .markdown code, .markdown kbd, .markdown samp {
+            color: var(--text-color-level-0);
+            font-family: 'Courier New', monospace;
+            font-feature-settings: unset;
+        }
+        .markdown p > code {
+            background-color: var(--bg-color-level-4);
+            padding: 0.1em 0.2em;
+            border-radius: 2px;
+            font-size: 0.98em;
+        }
+        .markdown pre {
+            padding: 16px;
+             white-space: pre;
+             white-space: pre-wrap;
+             word-wrap: break-word;
+        }
+
+        .markdown b,.markdown  strong { font-weight: bold; }
+
+        .markdown ul, .markdown ol {
+            margin: 1em 0;
+             padding: 0 0 0 2em;
+        }
+        .markdown ul {
+            list-style: circle;
+        }
+        .markdown ol {
+            list-style: decimal;
+        }
+        .markdown         li p:last-child { margin:0 }
+        .markdown         dd { margin: 0 0 0 2em; }
+
+        .markdown         img { border: 0; -ms-interpolation-mode: bicubic; vertical-align: middle; }
+
+        .markdown table { border-collapse: collapse; border-spacing: 0; }
+        .markdown td { vertical-align: top; }
+
+        .footnotes {
+            margin-top: 3em;
+            font-size: 0.9em;
+            color: var(--text-color-level-2);
+        }
+    </style>
+    <div class="container">
+        <hgroup class="header">
+            <p class="emoji">{frontmatter.emoji}</p>
+            <time datetime={frontmatter.date}>{dateString}</time>
+            <h1 class="title">{frontmatter.title}</h1>
+        </hgroup>
+        <div class="markdown"><slot /></div>
+        <p class="author"><img src={icon}>yaakaito</p>
+    </div>
+    <script>
+        document.addEventListener("DOMContentLoaded", function(event) {
+            // a を target=_blank にする
+            const links = document.querySelectorAll("a");
+            links.forEach((link) => {
+                link.setAttribute("target", "_blank");
+                // norefferer
+                link.setAttribute("rel", "noopener noreferrer");
+            });
+        });
+    </script>
+</GlobalLayout>
