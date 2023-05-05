@@ -69,7 +69,7 @@ Dev Container の場合は、VSCode の設定から GitHub にある dotfiles �
 
 ### zsh のカスタマイズ
 
-とはいえ欲しい物が fish っぽく動いてほしい、くらいだったので、次の記事を参考に、[zsh-autosuggestions](https://github.com/zsh-users/zsh-autosuggestions) と [zsh-syntaxhighlight](https://github.com/zsh-users/zsh-syntax-highlighting/) を入れて、fish ライクに、peco で ctrl-r に履歴検索、ctrl-s でディレクトリ移動をバインドしています。
+とはいえ欲しい物が fish っぽく動いてほしいくらいだったので、次の記事を参考に [zsh-autosuggestions](https://github.com/zsh-users/zsh-autosuggestions) と [zsh-syntaxhighlight](https://github.com/zsh-users/zsh-syntax-highlighting/) を入れて、fish ライクに、peco で ctrl-r に履歴検索、ctrl-s でディレクトリ移動をバインドしています。
 
 - [Setup guide for ZSH in GitHub codespaces - DEV Community](https://dev.to/krish_agarwal/setup-guide-for-zsh-in-github-codespaces-5152)
 - [ghqでリポジトリ管理を簡単にする](https://zenn.dev/oreo2990/articles/13c80cf34a95af)
