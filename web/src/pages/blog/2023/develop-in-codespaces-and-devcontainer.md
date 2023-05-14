@@ -117,3 +117,14 @@ Codespaces や Dev Container を使った開発では、シェルの history が
 history が永続化できるとそもそも不要かもしれませんが、cheat を使ったスニペットを env リポジトリに含めて置けると便利そうです。
 
 - [cheat/cheat: cheat allows you to create and view interactive cheatsheets on the command-line. It was designed to help remind \*nix system administrators of options for commands that they use frequently, but not frequently enough to remember.](https://github.com/cheat/cheat)
+
+## 2023-5-14 追記
+
+いつの間にか Orb Stack のコンテナに繋がらない、VSCode の拡張機能がインストールされない、みたいな状態になっていたんですが、Japanese Language Pack for Visual Studio Code を消したら動くようになりました。
+
+- https://marketplace.visualstudio.com/items?itemName=MS-CEINTL.vscode-language-pack-ja
+
+ここにたどり着いた経緯としては、ビルドのログを眺めていたらどうもこのパッケージで止まっているらしいが、設定には含めていないよな...?というところからでした。
+一度 OrbStack が悪いのかと思い Docker Desktop を試してみましたが、そちらは関係なさそうでした。
+
+あまり詳しくは追っていないので、メモ程度です。
