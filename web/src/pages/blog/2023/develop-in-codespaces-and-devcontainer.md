@@ -9,8 +9,8 @@ tags:
   - vscode
 ---
 
-[Codespaces](https://github.com/features/codespaces) が利用できるようになってから、ちょっとした開発は Codespaces を行っていたのですが、最近は個人の開発はすべて Codespaces で十分だなぁと思うようになりました。
-ただ、基本的には無料枠でやっているので[^1]、ある程度腰を据えて開発していると枠が足りなくなったり、Chrome 拡張の開発は毎回成果物のダウンロードが必要だったりで不便なところは少しあるので、そこを埋めるために一部で [Dev Container](https://code.visualstudio.com/docs/devcontainers/containers) を使って、手元のマシン内で開発可能な環境を整えることにしました。
+[Codespaces](https://github.com/features/codespaces) が利用できるようになってから、ちょっとした開発は Codespaces を行っていたのですが、最近は個人の開発はすべて Codespaces で十分だと思えてきたので完全に移行しようと思いました。
+ただ、基本的には無料枠でやっているので[^1]、ある程度腰を据えて開発していると枠が足りなくなるのと、Chrome 拡張の開発は毎回成果物のダウンロードが必要だったりで不便なところは少しあるので、それを埋めるために一部で [Dev Container](https://code.visualstudio.com/docs/devcontainers/containers) を使って、手元のマシン内で開発可能な環境を整えることにしました。
 
 [^1]: 追加することに抵抗があるわけではないので、理由がなければ Codespaces を継続してます。
 
