@@ -139,4 +139,4 @@ FROM mcr.microsoft.com/vscode/devcontainers/base:0-${VARIANT}
 
 - https://docs.github.com/ja/codespaces/setting-up-your-project-for-codespaces/adding-a-dev-container-configuration/introduction-to-dev-containers
 
-そもそもトレンドとしては Dockerfile は使わず、devcontainer.json だけで完結するのがよいんですかね？
+そもそもトレンドとしては Dockerfile は使わず、devcontainer.json だけで完結するのがよいようにも思います。
