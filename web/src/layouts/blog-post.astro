@@ -173,8 +173,11 @@ const dateString = new Date(frontmatter.date).toLocaleDateString("en-US", {
     <script>
         document.addEventListener("DOMContentLoaded", function(event) {
             // a を target=_blank にする
-            const links = document.querySelectorAll("a");
+            const links = document.querySelectorAll(".markdown a");
             links.forEach((link) => {
+                if (link && link.getAttribute("href")?.startsWith("#")) {
+                    return;
+                }
                 link.setAttribute("target", "_blank");
                 // norefferer
                 link.setAttribute("rel", "noopener noreferrer");
