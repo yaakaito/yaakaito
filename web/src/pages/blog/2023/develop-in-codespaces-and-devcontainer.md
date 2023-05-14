@@ -118,13 +118,25 @@ history が永続化できるとそもそも不要かもしれませんが、che
 
 - [cheat/cheat: cheat allows you to create and view interactive cheatsheets on the command-line. It was designed to help remind \*nix system administrators of options for commands that they use frequently, but not frequently enough to remember.](https://github.com/cheat/cheat)
 
-## 2023-5-14 追記
+## 2023-05-14 追記
 
-いつの間にか Orb Stack のコンテナに繋がらない、VSCode の拡張機能がインストールされない、みたいな状態になっていたんですが、Japanese Language Pack for Visual Studio Code を消したら動くようになりました。
+しばらく触っていなかったリポジトリを同じ要領で触ってみたら、DevContainer 側で VSCode の Extention のインストールが全く進まずに困っていたのですが、Dockerfile が原因でした。
+かなり前に公式を参考に devcontainer.json と Dockerfile を作った際に、その Dockerfile はこんな感じに定義されていて、
 
-- https://marketplace.visualstudio.com/items?itemName=MS-CEINTL.vscode-language-pack-ja
+```
+ARG VARIANT=bullseye
+FROM --platform=linux/amd64 mcr.microsoft.com/vscode/devcontainers/base:0-${VARIANT}
+```
 
-ここにたどり着いた経緯としては、ビルドのログを眺めていたらどうもこのパッケージで止まっているらしいが、設定には含めていないよな...?というところからでした。
-一度 OrbStack が悪いのかと思い Docker Desktop を試してみましたが、そちらは関係なさそうでした。
+`linux/amd64` を指定していると M2 Mac 上のコンテナに Extention がインストールできなくなるようでした。platform は指定しなければ自動で選択してくれるので、
 
-あまり詳しくは追っていないので、メモ程度です。
+```
+ARG VARIANT=bullseye
+FROM mcr.microsoft.com/vscode/devcontainers/base:0-${VARIANT}
+```
+
+に変更して無事動くようになりました。当時参考にしたドキュメントが見つからなかったんですが、現在のものは platform を指定していないので問題なさそうです。
+
+- https://docs.github.com/ja/codespaces/setting-up-your-project-for-codespaces/adding-a-dev-container-configuration/introduction-to-dev-containers
+
+そもそもトレンドとしては Dockerfile は使わず、devcontainer.json だけで完結するのがよいんですかね？
