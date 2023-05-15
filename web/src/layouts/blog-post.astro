@@ -1,6 +1,5 @@
 ---
 import GlobalLayout from "../layouts/global-layout.astro";
-import icon from "../../../icon/yaakaito.png";
 const { frontmatter } = Astro.props;
 const dateString = new Date(frontmatter.date).toLocaleDateString("en-US", {
     year: "numeric",
@@ -12,7 +11,7 @@ const dateString = new Date(frontmatter.date).toLocaleDateString("en-US", {
     <style>
         .container {
             max-width: 800px;
-            margin: 64px auto;
+            margin: 32px auto;
             padding: 32px;
             border-radius: 16px;
             background-color: var(--bg-color-level-1);
@@ -168,7 +167,6 @@ const dateString = new Date(frontmatter.date).toLocaleDateString("en-US", {
             <h1 class="title">{frontmatter.title}</h1>
         </hgroup>
         <div class="markdown"><slot /></div>
-        <a href="/"><p class="author"><img src={icon}>yaakaito</p></a>
     </div>
     <script>
         document.addEventListener("DOMContentLoaded", function(event) {

@@ -103,6 +103,7 @@ const doodleDark = `
         }
     </style>
     <style>
+
         .background {
             position: relative;
             background-color: var(--bg-color-level-0);
@@ -144,6 +145,40 @@ const doodleDark = `
             display: none;
         }
 
+        .header {
+            width: 100%;
+            margin-top: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .linkRoot {
+            margin: 0 auto;
+        }
+
+        .author {
+            display: flex;
+            padding: 0.1em 1em;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: var(--text-color-level-1);
+            font-size: 0.9em;
+            background-color: var(--bg-color-level-1);
+            border-radius: 1em;
+
+        }
+
+        .author > img {
+            margin-top: 0.2em;
+            margin-right: 0.5em;
+            width: 1.4em;
+            height: 1.4em;
+            border-radius: 50%;
+            vertical-align: middle;
+        }
+
         .container {
             position: absolute;
             top: 0;
@@ -173,6 +208,10 @@ const doodleDark = `
         <div class="fadeLayer" aria-hidden="true"></div>
     </div>
     <div class="container">
+        <header class="header">
+            <a class="linkRoot" href="/"><p class="author"><img src={icon}>yaakai.to</p></a>
+            <!-- <p>☀</p> -->
+        </header>
         <slot />
     </div>
 </body>
