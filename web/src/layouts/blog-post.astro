@@ -17,6 +17,13 @@ const dateString = new Date(frontmatter.date).toLocaleDateString("en-US", {
             background-color: var(--bg-color-level-1);
         }
 
+        @media screen and (max-width: 800px) {
+            .container {
+                border-radius: 0px;
+                margin: 16px auto 0;
+            }
+         }
+
         .header {
             margin-bottom: 2em;
         }
@@ -61,6 +68,9 @@ const dateString = new Date(frontmatter.date).toLocaleDateString("en-US", {
         }
     </style>
     <style is:global>
+        .markdown {
+            word-break: break-all;
+        }
         .markdown p{
             margin:1em 0;
         }
