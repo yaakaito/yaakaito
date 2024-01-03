@@ -69,7 +69,8 @@ const dateString = new Date(frontmatter.date).toLocaleDateString("en-US", {
     </style>
     <style is:global>
         .markdown {
-            word-break: break-all;
+            word-break: auto-phrase;
+            text-wrap: pretty;
         }
         .markdown p{
             margin:1em 0;
