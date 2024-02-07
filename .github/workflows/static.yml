@@ -33,14 +33,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
+      - uses: oven-sh/setup-bun@v1
         with:
-          node-version: 19
-      - uses: pnpm/action-setup@v2
-        with:
-          version: 8.2.0
-      - run: pnpm install
-      - run: pnpm build
+          bun-version: latest
+      - run: bun install
+      - run: bun run build
       - name: Setup Pages
         uses: actions/configure-pages@v3
       - name: Upload artifact
