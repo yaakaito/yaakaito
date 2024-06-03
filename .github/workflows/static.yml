@@ -37,6 +37,9 @@ jobs:
         with:
           bun-version: latest
       - run: bun install
+      - run: bun ./scripts/notes-from-issue.ts
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - run: bun run build
       - name: Setup Pages
         uses: actions/configure-pages@v3

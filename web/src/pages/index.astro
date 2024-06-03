@@ -1,8 +1,23 @@
 ---
 import GlobalLayout from "../layouts/global-layout.astro";
 import * as README from "../../../README.md";
-import icon from "../../../icon/yaakaito.png";
+import icon from "../../../icon/icon-512.png";
+import type { MarkdownInstance } from "astro";
 
+// ディレクトリ内の全ての .md ファイルを取得
+const blogPosts = await Astro.glob<{ title: string; date: string }>('./blog/**/*.md');
+const notePosts = await Astro.glob<{ title: string; date: string }>('./note/**/*.md');
+
+// ファイルを読み込む非同期関数
+function loadPosts(posts: MarkdownInstance<{ title: string; date: string }>[]) {
+  return posts.map(post => ({
+    frontmatter: post.frontmatter,
+    url: post.url,
+  })).sort((a, b) => new Date(b.frontmatter.date).getTime() - new Date(a.frontmatter.date).getTime());
+}
+
+const blogs = loadPosts(blogPosts);
+const notes = loadPosts(notePosts);
 ---
 <GlobalLayout>
     <style>
@@ -24,5 +39,27 @@ import icon from "../../../icon/yaakaito.png";
     <div class="container">
         <img class="icon" src={icon} />
         <README.Content />
+
+        <h1>Blog Posts</h1>
+  <ul>
+    {blogs.map(post => (
+      <li>
+        <a href={post.url}>
+          {post.frontmatter.title} - {new Date(post.frontmatter.date).toLocaleDateString()}
+        </a>
+      </li>
+    ))}
+  </ul>
+
+  <h1>Notes</h1>
+  <ul>
+    {notes.map(post => (
+      <li>
+        <a href={post.url}>
+          {post.frontmatter.title} - {new Date(post.frontmatter.date).toLocaleDateString()}
+        </a>
+      </li>
+    ))}
+  </ul>
     </div>
 </GlobalLayout>
