@@ -23,7 +23,7 @@ const doodleDark = `
 <html lang="en">
 <head>
     <meta charset="utf-8" />
-    <link rel="icon" type="image/svg+xml" href={icon} />
+    <link rel="icon" type="image/svg+xml" href={icon.src} />
     <meta name="viewport" content="width=device-width" />
     <meta name="generator" content={Astro.generator} />
     <title>{title ? `${title} - yaakai.to` : 'yaakai.to'}</title>
@@ -208,7 +208,7 @@ const doodleDark = `
     </div>
     <div class="container">
         <header class="header">
-            <a class="linkRoot" href="/"><p class="author"><img src={icon}>yaakai.to</p></a>
+            <a class="linkRoot" href="/"><p class="author"><img src={icon.src} width={icon.width} height={icon.height}>yaakai.to</p></a>
             <!-- <p>☀</p> -->
         </header>
         <slot />
