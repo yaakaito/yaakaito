@@ -10,6 +10,8 @@
     "astro": "astro"
   },
   "dependencies": {
-    "astro": "5.0.5"
+    "@astrojs/rss": "^4.0.10",
+    "astro": "5.0.5",
+    "sanitize-html": "^2.13.1"
   }
 }
