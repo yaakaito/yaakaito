@@ -1,12 +1,9 @@
 ---
-import GlobalLayout from "../layouts/global-layout.astro";
-import * as README from "../../../README.md";
-import icon from "../../../icon/icon-512.png";
+import GlobalLayout from "../../layouts/global-layout.astro";
 import type { MarkdownInstance } from "astro";
 
 // ディレクトリ内の全ての .md ファイルを取得
-const blogPosts = await Astro.glob<{ title: string; date: string; emoji: string }>('./blog/**/*.md');
-const notePosts = await Astro.glob<{ title: string; date: string; emoji: string }>('./note/**/*.md');
+const notePosts = await Astro.glob<{ title: string; date: string; emoji: string }>('./**/*.md');
 
 // ファイルを読み込む非同期関数
 function loadPosts(posts: MarkdownInstance<{ title: string; date: string; emoji: string }>[]) {
@@ -16,8 +13,7 @@ function loadPosts(posts: MarkdownInstance<{ title: string; date: string; emoji:
   })).sort((a, b) => new Date(b.frontmatter.date).getTime() - new Date(a.frontmatter.date).getTime());
 }
 
-const blogs = loadPosts(blogPosts).slice(0, 3);
-const notes = loadPosts(notePosts).slice(0, 3);
+const notes = loadPosts(notePosts);
 ---
 <GlobalLayout>
     <style>
@@ -27,13 +23,6 @@ const notes = loadPosts(notePosts).slice(0, 3);
             padding: 32px;
             border-radius: 16px;
             background-color: var(--bg-color-level-1);
-        }
-
-        .icon {
-            margin: 32px auto;
-            width: 120px;
-            height: 120px;
-            border-radius: 60px;
         }
 
         .posts-grid {
@@ -64,22 +53,7 @@ const notes = loadPosts(notePosts).slice(0, 3);
         }
     </style>
     <div class="container">
-        <img class="icon" src={icon.src} width={icon.width} height={icon.height} />
-        <README.Content />
-
-        <h1>Latest Blog Posts</h1>
-        <div class="posts-grid">
-            {blogs.map(post => (
-                <div class="post-tile">
-                    <div class="post-emoji">{post.frontmatter.emoji}</div>
-                    <div class="post-title"><a href={post.url}>{post.frontmatter.title}</a></div>
-                    <div class="post-date">{new Date(post.frontmatter.date).toLocaleDateString()}</div>
-                </div>
-            ))}
-        </div>
-        <a href="/blog">View all blog posts</a>
-
-        <h1>Latest Notes</h1>
+        <h1>All Notes</h1>
         <div class="posts-grid">
             {notes.map(post => (
                 <div class="post-tile">
@@ -89,6 +63,5 @@ const notes = loadPosts(notePosts).slice(0, 3);
                 </div>
             ))}
         </div>
-        <a href="/note">View all notes</a>
     </div>
 </GlobalLayout>
