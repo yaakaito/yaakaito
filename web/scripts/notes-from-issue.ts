@@ -18,16 +18,14 @@ async function fetchIssues() {
 
         issues.forEach(issue => {
             const hasNoteLabel = issue.labels.some(label => label.name === 'Note');
-            const hasWorkspaceLabel = issue.labels.some(label => label.name === 'Workspace');
 
-            if (hasWorkspaceLabel) {
-                console.log(`Ignoring issue #${issue.number} with Workspace label`);
+            if (!hasNoteLabel) {
+                console.log(`Ignoring issue #${issue.number} without Note label`);
                 return;
             }
 
-            if (hasNoteLabel) {
-                const filePath = path.join(__dirname, '../src/pages/note', `${issue.number}.md`);
-                const content = `---
+            const filePath = path.join(__dirname, '../src/pages/note', `${issue.number}.md`);
+            const content = `---
 layout: ../../layouts/blog-post.astro
 title: "${issue.title}"
 emoji: 🖊
@@ -37,8 +35,7 @@ tags:
 ---
 
 ${issue.body}`;
-                fs.writeFileSync(filePath, content);
-            }
+            fs.writeFileSync(filePath, content);
         });
 
         console.log('Issues have been saved as Markdown files.');
