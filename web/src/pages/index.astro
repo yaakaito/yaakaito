@@ -5,11 +5,11 @@ import icon from "../../../icon/icon-512.png";
 import type { MarkdownInstance } from "astro";
 
 // ディレクトリ内の全ての .md ファイルを取得
-const blogPosts = await Astro.glob<{ title: string; date: string }>('./blog/**/*.md');
-const notePosts = await Astro.glob<{ title: string; date: string }>('./note/**/*.md');
+const blogPosts = await Astro.glob<{ title: string; date: string; emoji: string }>('./blog/**/*.md');
+const notePosts = await Astro.glob<{ title: string; date: string; emoji: string }>('./note/**/*.md');
 
 // ファイルを読み込む非同期関数
-function loadPosts(posts: MarkdownInstance<{ title: string; date: string }>[]) {
+function loadPosts(posts: MarkdownInstance<{ title: string; date: string; emoji: string }>[]) {
   return posts.map(post => ({
     frontmatter: post.frontmatter,
     url: post.url,
@@ -35,31 +35,58 @@ const notes = loadPosts(notePosts);
             height: 120px;
             border-radius: 60px;
         }
+
+        .posts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 16px;
+        }
+
+        .post-tile {
+            padding: 16px;
+            border-radius: 8px;
+            background-color: var(--bg-color-level-2);
+            text-align: center;
+        }
+
+        .post-emoji {
+            font-size: 2em;
+        }
+
+        .post-title {
+            font-size: 1.2em;
+            margin: 8px 0;
+        }
+
+        .post-date {
+            font-size: 0.9em;
+            color: var(--text-color-level-2);
+        }
     </style>
     <div class="container">
         <img class="icon" src={icon.src} width={icon.width} height={icon.height} />
         <README.Content />
 
         <h1>Blog Posts</h1>
-  <ul>
-    {blogs.map(post => (
-      <li>
-        <a href={post.url}>
-          {post.frontmatter.title} - {new Date(post.frontmatter.date).toLocaleDateString()}
-        </a>
-      </li>
-    ))}
-  </ul>
+        <div class="posts-grid">
+            {blogs.map(post => (
+                <div class="post-tile">
+                    <div class="post-emoji">{post.frontmatter.emoji}</div>
+                    <div class="post-title"><a href={post.url}>{post.frontmatter.title}</a></div>
+                    <div class="post-date">{new Date(post.frontmatter.date).toLocaleDateString()}</div>
+                </div>
+            ))}
+        </div>
 
-  <h1>Notes</h1>
-  <ul>
-    {notes.map(post => (
-      <li>
-        <a href={post.url}>
-          {post.frontmatter.title} - {new Date(post.frontmatter.date).toLocaleDateString()}
-        </a>
-      </li>
-    ))}
-  </ul>
+        <h1>Notes</h1>
+        <div class="posts-grid">
+            {notes.map(post => (
+                <div class="post-tile">
+                    <div class="post-emoji">{post.frontmatter.emoji}</div>
+                    <div class="post-title"><a href={post.url}>{post.frontmatter.title}</a></div>
+                    <div class="post-date">{new Date(post.frontmatter.date).toLocaleDateString()}</div>
+                </div>
+            ))}
+        </div>
     </div>
 </GlobalLayout>
