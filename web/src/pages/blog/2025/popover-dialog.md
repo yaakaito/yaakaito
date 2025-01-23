@@ -2,7 +2,7 @@
 layout: ../../../layouts/blog-post.astro
 title: Popover API と Dialog に関する備忘録
 emoji: 🎈
-date: 2023-05-06
+date: 2025-01-23
 tags:
   - Web
   - HTML
