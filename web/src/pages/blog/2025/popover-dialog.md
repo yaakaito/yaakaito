@@ -65,7 +65,7 @@ popover.hidePopover()
 
 [<dialog>: ダイアログ要素 - HTML: ハイパーテキストマークアップ言語 | MDN](https://developer.mozilla.org/ja/docs/Web/HTML/Element/dialog)
 
-`<dialog>` はユーザーに操作を求めるための役割（`role=dialog`）を持つ。モーダル/非モーダルの2つのモードがあり、特にモーダルモードではTop layerへの表示と背景操作のロックを行う。JS での制御が想定されていて、`showModal()` を利用することでモーダルダイアログが、`show()` を利用することで非モーダルダイアログが表示される。
+Dialog はユーザーに操作を求めるための役割（`role=dialog`）を持つ。モーダル/非モーダルの2つのモードがあり、特にモーダルモードではTop layerへの表示と背景操作のロックを行う。JS での制御が想定されていて、`showModal()` を利用することでモーダルダイアログが、`show()` を利用することで非モーダルダイアログが表示される。
 
 ```html
 <dialog id="dialog">
