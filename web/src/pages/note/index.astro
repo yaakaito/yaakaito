@@ -3,7 +3,7 @@ import GlobalLayout from "../../layouts/global-layout.astro";
 import type { MarkdownInstance } from "astro";
 
 // ディレクトリ内の全ての .md ファイルを取得
-const notePosts = await Astro.glob<{ title: string; date: string; emoji: string }>('./**/*.md');
+const notePosts = await Astro.glob<{ title: string; date: string; emoji: string }>('../../content/note/**/*.md');
 
 // ファイルを読み込む非同期関数
 function loadPosts(posts: MarkdownInstance<{ title: string; date: string; emoji: string }>[]) {

@@ -3,8 +3,8 @@ import sanitizeHtml from 'sanitize-html';
 
 export async function GET(context) {
     // ディレクトリ内の全ての .md ファイルを取得
-    const blogPosts = Object.values(import.meta.glob('./blog/**/*.md', { eager: true }));
-    const notePosts = Object.values(import.meta.glob('./note/**/*.md', { eager: true }));
+    const blogPosts = Object.values(import.meta.glob('../content/blog/**/*.md', { eager: true }));
+    const notePosts = Object.values(import.meta.glob('../content/note/**/*.md', { eager: true }));
 
     const items = [];
     for (const post of [...blogPosts, ...notePosts]) {
