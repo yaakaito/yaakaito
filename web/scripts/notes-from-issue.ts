@@ -26,7 +26,7 @@ async function fetchIssues() {
             }
 
             if (hasNoteLabel) {
-                const filePath = path.join(__dirname, '../src/pages/note', `${issue.number}.md`);
+                const filePath = path.join(__dirname, '../content/note', `${issue.number}.md`);
                 const content = `---
 layout: ../../layouts/blog-post.astro
 title: "${issue.title}"
