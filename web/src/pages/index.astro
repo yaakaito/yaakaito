@@ -5,8 +5,8 @@ import icon from "../../../icon/icon-512.png";
 import type { MarkdownInstance } from "astro";
 
 // ディレクトリ内の全ての .md ファイルを取得
-const blogPosts = await Astro.glob<{ title: string; date: string; emoji: string }>('../content/blog/**/*.md');
-const notePosts = await Astro.glob<{ title: string; date: string; emoji: string }>('../content/note/**/*.md');
+const blogPosts = await Astro.glob<{ title: string; date: string; emoji: string }>('./blog/**/*.md');
+const notePosts = await Astro.glob<{ title: string; date: string; emoji: string }>('./note/**/*.md');
 
 // ファイルを読み込む非同期関数
 function loadPosts(posts: MarkdownInstance<{ title: string; date: string; emoji: string }>[]) {
