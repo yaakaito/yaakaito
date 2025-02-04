@@ -7,11 +7,15 @@
     "start": "astro dev --host",
     "build": "astro build",
     "preview": "astro preview",
-    "astro": "astro"
+    "astro": "astro",
+    "remark-ogp-card": "node scripts/remark-ogp-card.js"
   },
   "dependencies": {
     "@astrojs/rss": "^4.0.10",
     "astro": "5.0.5",
-    "sanitize-html": "^2.13.1"
+    "sanitize-html": "^2.13.1",
+    "remark": "^14.0.2",
+    "remark-html": "^15.0.0",
+    "node-fetch": "^3.2.0"
   }
 }
