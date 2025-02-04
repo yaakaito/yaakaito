@@ -1,5 +1,6 @@
 ---
 import GlobalLayout from "../../layouts/global-layout.astro";
+import OGPBlock from "../../components/OGPBlock.astro";
 import type { MarkdownInstance } from "astro";
 
 // ディレクトリ内の全ての .md ファイルを取得
@@ -64,4 +65,16 @@ const blogs = loadPosts(blogPosts);
             ))}
         </div>
     </div>
+    <script>
+        document.addEventListener("DOMContentLoaded", function(event) {
+            // Replace URLs with OGPBlock components
+            const markdownContent = document.querySelector(".markdown");
+            if (markdownContent) {
+                const urlRegex = /https?:\/\/[^\s]+/g;
+                markdownContent.innerHTML = markdownContent.innerHTML.replace(urlRegex, (url) => {
+                    return `<OGPBlock url="${url}" />`;
+                });
+            }
+        });
+    </script>
 </GlobalLayout>

@@ -1,5 +1,6 @@
 ---
 import GlobalLayout from "../layouts/global-layout.astro";
+import OGPBlock from "../components/OGPBlock.astro";
 const { frontmatter } = Astro.props;
 const dateString = new Date(frontmatter.date).toLocaleDateString("en-US", {
     year: "numeric",
@@ -177,7 +178,9 @@ const dateString = new Date(frontmatter.date).toLocaleDateString("en-US", {
             <time datetime={frontmatter.date}>{dateString}</time>
             <h1 class="title">{frontmatter.title}</h1>
         </hgroup>
-        <div class="markdown"><slot /></div>
+        <div class="markdown">
+            <slot />
+        </div>
     </div>
     <script>
         document.addEventListener("DOMContentLoaded", function(event) {
@@ -191,6 +194,15 @@ const dateString = new Date(frontmatter.date).toLocaleDateString("en-US", {
                 // norefferer
                 link.setAttribute("rel", "noopener noreferrer");
             });
+
+            // Replace URLs with OGPBlock components
+            const markdownContent = document.querySelector(".markdown");
+            if (markdownContent) {
+                const urlRegex = /https?:\/\/[^\s]+/g;
+                markdownContent.innerHTML = markdownContent.innerHTML.replace(urlRegex, (url) => {
+                    return `<OGPBlock url="${url}" />`;
+                });
+            }
         });
     </script>
 </GlobalLayout>

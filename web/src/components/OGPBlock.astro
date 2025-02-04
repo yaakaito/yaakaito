@@ -1,0 +1,66 @@
+---
+import { fetchOGPData } from '../utils/fetchOGPData';
+
+interface Props {
+  url: string;
+}
+
+const { url } = Astro.props;
+const ogpData = await fetchOGPData(url);
+---
+
+{ogpData ? (
+  <div class="ogp-block">
+    <img src={ogpData.image} alt={ogpData.title} class="ogp-image" />
+    <div class="ogp-content">
+      <h3 class="ogp-title">{ogpData.title}</h3>
+      <p class="ogp-description">{ogpData.description.slice(0, 50)}...</p>
+    </div>
+  </div>
+) : (
+  <a href={url}>{url}</a>
+)}
+
+<style>
+  .ogp-block {
+    display: flex;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    overflow: hidden;
+    margin: 16px 0;
+    text-decoration: none;
+    color: inherit;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+
+  .ogp-block:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+  }
+
+  .ogp-image {
+    width: 120px;
+    height: 120px;
+    object-fit: cover;
+  }
+
+  .ogp-content {
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  .ogp-title {
+    font-size: 1.2em;
+    margin: 0 0 8px;
+    font-weight: bold;
+    color: #333;
+  }
+
+  .ogp-description {
+    font-size: 0.9em;
+    color: #666;
+  }
+</style>
