@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>関連記事API テスト</title>
+    <style>
+        body {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            font-family: sans-serif;
+        }
+        .form-group {
+            margin-bottom: 1rem;
+        }
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+        }
+        input, textarea {
+            width: 100%;
+            padding: 0.5rem;
+            margin-bottom: 1rem;
+        }
+        button {
+            padding: 0.5rem 1rem;
+            background: #0066cc;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #0052a3;
+        }
+        .result {
+            margin-top: 1rem;
+            padding: 1rem;
+            background: #f5f5f5;
+            border-radius: 4px;
+            white-space: pre-wrap;
+        }
+        .error {
+            color: #dc2626;
+        }
+    </style>
+</head>
+<body>
+    <h1>関連記事API テスト</h1>
+
+    <section>
+        <h2>記事の登録</h2>
+        <form id="registerForm">
+            <div class="form-group">
+                <label for="apiKey">API Key:</label>
+                <input type="password" id="apiKey" required>
+            </div>
+            <div class="form-group">
+                <label for="articleId">記事ID:</label>
+                <input type="text" id="articleId" required>
+            </div>
+            <div class="form-group">
+                <label for="url">URL:</label>
+                <input type="url" id="url" required>
+            </div>
+            <div class="form-group">
+                <label for="content">記事の内容:</label>
+                <textarea id="content" rows="4" required></textarea>
+            </div>
+            <button type="submit">登録</button>
+        </form>
+        <div id="registerResult" class="result"></div>
+    </section>
+
+    <section>
+        <h2>関連記事の取得</h2>
+        <form id="searchForm">
+            <div class="form-group">
+                <label for="searchId">記事ID:</label>
+                <input type="text" id="searchId" required>
+            </div>
+            <button type="submit">検索</button>
+        </form>
+        <div id="searchResult" class="result"></div>
+    </section>
+
+    <script>
+        // 記事登録フォームの処理
+        document.getElementById('registerForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const resultDiv = document.getElementById('registerResult');
+
+            try {
+                const response = await fetch('/register', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-API-Key': document.getElementById('apiKey').value
+                    },
+                    body: JSON.stringify({
+                        id: document.getElementById('articleId').value,
+                        url: document.getElementById('url').value,
+                        content: document.getElementById('content').value
+                    })
+                });
+
+                const result = await response.json();
+                if (!response.ok) {
+                    throw new Error(result.error || '登録に失敗しました');
+                }
+
+                resultDiv.textContent = '登録成功！';
+                resultDiv.classList.remove('error');
+            } catch (error) {
+                resultDiv.textContent = `エラー: ${error.message}`;
+                resultDiv.classList.add('error');
+            }
+        });
+
+        // 関連記事検索フォームの処理
+        document.getElementById('searchForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const resultDiv = document.getElementById('searchResult');
+
+            try {
+                const id = document.getElementById('searchId').value;
+                const response = await fetch(`/related_articles?id=${encodeURIComponent(id)}`);
+                const result = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(result.error || '検索に失敗しました');
+                }
+
+                resultDiv.textContent = JSON.stringify(result, null, 2);
+                resultDiv.classList.remove('error');
+            } catch (error) {
+                resultDiv.textContent = `エラー: ${error.message}`;
+                resultDiv.classList.add('error');
+            }
+        });
+    </script>
+</body>
+</html>

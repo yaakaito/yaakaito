@@ -42,6 +42,9 @@ jobs:
       - run: bun ./scripts/notes-from-issue.ts
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - run: bun ./scripts/register-articles.ts
+        env:
+          ARTICLES_API_KEY: ${{ secrets.ARTICLES_API_KEY }}
       - run: bun run build
       - name: Upload static files as artifact
         id: deployment
