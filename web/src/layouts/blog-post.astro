@@ -341,9 +341,24 @@ const dateString = new Date(frontmatter.date).toLocaleDateString("en-US", {
 
             // 関連記事を取得して表示
             const pathname = window.location.pathname;
-            const match = pathname.match(/\/blog\/(.+?)(?:\/|$)/);
-            if (match) {
-                const articleId = `blog-${match[1]}`;
+            let articleId = '';
+
+            // blogの場合は末尾のslugを、noteの場合は末尾の番号を使用
+            if (pathname.startsWith('/blog/')) {
+                // /blog/2023/example や /blog/example から末尾のslugを取得
+                const slug = pathname.split('/').pop()?.replace(/\/$/, '');
+                if (slug) {
+                    articleId = `blog-${slug}`;
+                }
+            } else if (pathname.startsWith('/note/')) {
+                // /note/1 から末尾の番号を取得
+                const number = pathname.split('/').pop()?.replace(/\/$/, '');
+                if (number) {
+                    articleId = `note-${number}`;
+                }
+            }
+
+            if (articleId) {
                 try {
                     const response = await fetch(`https://articles.yaakai.to/related_articles?id=${articleId}`);
                     if (!response.ok) throw new Error('関連記事の取得に失敗しました');
