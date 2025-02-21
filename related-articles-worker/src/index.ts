@@ -38,6 +38,9 @@ export default {
 			return apiKey === env.API_KEY;
 		};
 
+		// キャッシュインスタンスの取得
+		const cache = caches.default;
+
 		// 記事登録エンドポイント
 		if (path === "/register" && request.method === "POST") {
 			// API認証
@@ -91,6 +94,15 @@ export default {
 			}
 
 			try {
+				// キャッシュキーの生成
+				const cacheKey = new Request(`${url.origin}/related_articles/${id}`);
+
+				// キャッシュの確認
+				const cachedResponse = await cache.match(cacheKey);
+				if (cachedResponse) {
+					return cachedResponse;
+				}
+
 				// 指定されたIDの記事のベクトルを取得
 				const sourceVectors = await env.VECTORIZE.getByIds([id]);
 				if (sourceVectors.length === 0) {
@@ -102,7 +114,7 @@ export default {
 
 				// 類似記事を検索
 				const matches = await env.VECTORIZE.query(sourceVectors[0].values, {
-					topK: 4, // 自分自身も含まれるため4件取得
+					topK: 4,
 					returnValues: false,
 					returnMetadata: true,
 				});
@@ -120,9 +132,17 @@ export default {
 						similarity: match.score
 					}));
 
-				return new Response(JSON.stringify({ articles: relatedArticles }), {
-					headers: { "Content-Type": "application/json" }
+				const response = new Response(JSON.stringify({ articles: relatedArticles }), {
+					headers: {
+						"Content-Type": "application/json",
+						"Cache-Control": "public, max-age=86400" // 24時間のキャッシュ
+					}
 				});
+
+				// レスポンスをキャッシュに保存
+				ctx.waitUntil(cache.put(cacheKey, response.clone()));
+
+				return response;
 			} catch (error) {
 				return new Response(JSON.stringify({ error: "Internal server error" }), {
 					status: 500,
