@@ -5,17 +5,21 @@ interface Article {
     id: string;
     url: string;
     title: string;
+    emoji: string;
     content: string;
 }
 
 interface ArticleMetadata {
     title: string;
+    emoji: string;
     content: string;
 }
 
 function extractMetadataFromMarkdown(content: string): ArticleMetadata {
     const titleMatch = content.match(/title:\s*"([^"]+)"/);
+    const emojiMatch = content.match(/emoji:\s*([^\n]+)/);
     const title = titleMatch ? titleMatch[1] : '';
+    const emoji = emojiMatch ? emojiMatch[1].trim() : '';
 
     // フロントマターを除去（---で囲まれた部分を削除）
     const bodyContent = content.replace(/---\n[\s\S]*?\n---/, '').trim();
@@ -27,6 +31,7 @@ function extractMetadataFromMarkdown(content: string): ArticleMetadata {
 
     return {
         title,
+        emoji,
         content: truncatedContent
     };
 }
@@ -82,6 +87,7 @@ async function main() {
             id,
             url,
             title: metadata.title,
+            emoji: metadata.emoji,
             content: metadata.content
         }, apiKey);
         console.log(`Registered blog article: ${id}`);
@@ -102,6 +108,7 @@ async function main() {
             id,
             url,
             title: metadata.title,
+            emoji: metadata.emoji,
             content: metadata.content
         }, apiKey);
         console.log(`Registered note article: ${id}`);

@@ -14,6 +14,7 @@ interface Article {
 	id: string;
 	url: string;
 	title: string;
+	emoji: string;
 	content: string;
 }
 
@@ -21,6 +22,7 @@ interface RelatedArticle {
 	id: string;
 	url: string;
 	title: string;
+	emoji: string;
 	content: string;
 	similarity: number;
 }
@@ -62,6 +64,7 @@ export default {
 					metadata: {
 						url: article.url,
 						title: article.title,
+						emoji: article.emoji,
 						content: article.content
 					},
 				}]);
@@ -112,6 +115,7 @@ export default {
 						id: match.id,
 						url: match.metadata?.url as string || "",
 						title: match.metadata?.title as string || "",
+						emoji: match.metadata?.emoji as string || "",
 						content: match.metadata?.content as string || "",
 						similarity: match.score
 					}));
