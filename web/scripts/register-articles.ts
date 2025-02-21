@@ -80,7 +80,7 @@ async function main() {
         const relativePath = path.relative('src/pages/blog', file);
         const fileName = path.basename(relativePath, '.md');
         const id = `blog-${fileName}`;
-        const url = `https://yaakaito.github.io/blog/${fileName}`;
+        const url = `https://yaakai.to/blog/${fileName}`;
         const metadata = extractMetadataFromMarkdown(content);
 
         await registerArticle({
@@ -101,7 +101,7 @@ async function main() {
         const content = await fs.readFile(file, 'utf-8');
         const fileName = path.basename(file, '.md');
         const id = `note-${fileName}`;
-        const url = `https://yaakaito.github.io/note/${fileName}`;
+        const url = `https://yaakai.to/note/${fileName}`;
         const metadata = extractMetadataFromMarkdown(content);
 
         await registerArticle({
