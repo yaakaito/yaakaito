@@ -122,7 +122,6 @@ export default {
 						status: cachedResponse.status,
 						headers: {
 							...Object.fromEntries(cachedResponse.headers),
-							...corsHeaders
 						}
 					});
 					return newResponse;
