@@ -32,6 +32,20 @@ export default {
 		const url = new URL(request.url);
 		const path = url.pathname;
 
+		// CORSヘッダーの設定
+		const corsHeaders = {
+			"Access-Control-Allow-Origin": "https://yaakai.to",
+			"Access-Control-Allow-Methods": "GET",
+			"Access-Control-Allow-Headers": "Content-Type",
+		};
+
+		// プリフライトリクエストの処理
+		if (request.method === "OPTIONS") {
+			return new Response(null, {
+				headers: corsHeaders
+			});
+		}
+
 		// APIキーの検証関数
 		const validateApiKey = (request: Request): boolean => {
 			const apiKey = request.headers.get('X-API-Key');
@@ -89,7 +103,10 @@ export default {
 			if (!id) {
 				return new Response(JSON.stringify({ error: "ID parameter is required" }), {
 					status: 400,
-					headers: { "Content-Type": "application/json" }
+					headers: {
+						"Content-Type": "application/json",
+						...corsHeaders
+					}
 				});
 			}
 
@@ -100,7 +117,15 @@ export default {
 				// キャッシュの確認
 				const cachedResponse = await cache.match(cacheKey);
 				if (cachedResponse) {
-					return cachedResponse;
+					// キャッシュされたレスポンスにCORSヘッダーを追加
+					const newResponse = new Response(cachedResponse.body, {
+						status: cachedResponse.status,
+						headers: {
+							...Object.fromEntries(cachedResponse.headers),
+							...corsHeaders
+						}
+					});
+					return newResponse;
 				}
 
 				// 指定されたIDの記事のベクトルを取得
@@ -108,7 +133,10 @@ export default {
 				if (sourceVectors.length === 0) {
 					return new Response(JSON.stringify({ error: "Article not found" }), {
 						status: 404,
-						headers: { "Content-Type": "application/json" }
+						headers: {
+							"Content-Type": "application/json",
+							...corsHeaders
+						}
 					});
 				}
 
@@ -135,7 +163,8 @@ export default {
 				const response = new Response(JSON.stringify({ articles: relatedArticles }), {
 					headers: {
 						"Content-Type": "application/json",
-						"Cache-Control": "public, max-age=86400" // 24時間のキャッシュ
+						"Cache-Control": "public, max-age=86400", // 24時間のキャッシュ
+						...corsHeaders
 					}
 				});
 
@@ -146,7 +175,10 @@ export default {
 			} catch (error) {
 				return new Response(JSON.stringify({ error: "Internal server error" }), {
 					status: 500,
-					headers: { "Content-Type": "application/json" }
+					headers: {
+						"Content-Type": "application/json",
+						...corsHeaders
+					}
 				});
 			}
 		}
@@ -154,7 +186,10 @@ export default {
 		// 存在しないエンドポイントへのアクセス
 		return new Response(JSON.stringify({ error: "Not found" }), {
 			status: 404,
-			headers: { "Content-Type": "application/json" }
+			headers: {
+				"Content-Type": "application/json",
+				...corsHeaders
+			}
 		});
 	},
 } satisfies ExportedHandler<Env>;

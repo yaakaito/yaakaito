@@ -67,6 +67,75 @@ const dateString = new Date(frontmatter.date).toLocaleDateString("en-US", {
             vertical-align: middle;
         }
 
+        /* 関連記事のスタイル */
+        .related-articles {
+            margin-top: 48px;
+            padding-top: 32px;
+            border-top: 1px solid var(--bg-color-level-3);
+        }
+
+        .related-articles h2 {
+            font-size: 1.4em;
+            margin-bottom: 24px;
+            color: var(--text-color-level-1);
+        }
+
+        .related-articles-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 24px;
+        }
+
+        .related-article-card {
+            background: var(--bg-color-level-2);
+            border-radius: 12px;
+            padding: 20px;
+            transition: all 0.2s ease-in-out;
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .related-article-card:hover {
+            transform: translateY(-2px);
+            background: var(--bg-color-level-3);
+        }
+
+        .related-article-emoji {
+            font-size: 2.4em;
+            margin-bottom: 12px;
+            display: block;
+            text-align: center;
+        }
+
+        .related-article-title {
+            font-size: 1.1em;
+            font-weight: bold;
+            margin: 0 0 8px 0;
+            color: var(--text-color-level-0);
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .related-article-content {
+            font-size: 0.9em;
+            color: var(--text-color-level-2);
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            margin: 0;
+            line-height: 1.5;
+        }
+
+        @media screen and (max-width: 800px) {
+            .related-articles-grid {
+                grid-template-columns: 1fr;
+                gap: 16px;
+            }
+        }
+
     </style>
     <style is:global>
         .markdown {
@@ -237,7 +306,7 @@ const dateString = new Date(frontmatter.date).toLocaleDateString("en-US", {
   .ogp-card:hover {
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
   }
-  
+
   .ogp-card img {
     opacity: 0.9;
   }
@@ -250,9 +319,15 @@ const dateString = new Date(frontmatter.date).toLocaleDateString("en-US", {
             <h1 class="title">{frontmatter.title}</h1>
         </hgroup>
         <div class="markdown"><slot /></div>
+        <div class="related-articles">
+            <h2>関連記事</h2>
+            <div class="related-articles-grid" id="related-articles-container">
+                <!-- 関連記事がここに動的に挿入されます -->
+            </div>
+        </div>
     </div>
     <script>
-        document.addEventListener("DOMContentLoaded", function(event) {
+        document.addEventListener("DOMContentLoaded", async function(event) {
             // a を target=_blank にする
             const links = document.querySelectorAll(".markdown a");
             links.forEach((link) => {
@@ -263,6 +338,50 @@ const dateString = new Date(frontmatter.date).toLocaleDateString("en-US", {
                 // norefferer
                 link.setAttribute("rel", "noopener noreferrer");
             });
+
+            // 関連記事を取得して表示
+            const pathname = window.location.pathname;
+            const match = pathname.match(/\/blog\/(.+?)(?:\/|$)/);
+            if (match) {
+                const articleId = `blog-${match[1]}`;
+                try {
+                    const response = await fetch(`https://articles.yaakai.to/related_articles?id=${articleId}`);
+                    if (!response.ok) throw new Error('関連記事の取得に失敗しました');
+
+                    const data = await response.json();
+                    const container = document.getElementById('related-articles-container');
+                    if (!container) return;
+
+                    interface RelatedArticle {
+                        url: string;
+                        title: string;
+                        emoji: string;
+                        content: string;
+                    }
+
+                    (data.articles as RelatedArticle[]).forEach(article => {
+                        const card = document.createElement('a');
+                        card.href = article.url;
+                        card.className = 'related-article-card';
+                        card.target = '_blank';
+                        card.rel = 'noopener noreferrer';
+
+                        card.innerHTML = `
+                            <span class="related-article-emoji">${article.emoji}</span>
+                            <h3 class="related-article-title">${article.title}</h3>
+                            <p class="related-article-content">${article.content}</p>
+                        `;
+
+                        container.appendChild(card);
+                    });
+                } catch (error) {
+                    console.error('関連記事の取得に失敗しました:', error);
+                    const container = document.getElementById('related-articles-container');
+                    if (container?.parentElement) {
+                        container.parentElement.style.display = 'none';
+                    }
+                }
+            }
         });
     </script>
 </GlobalLayout>
