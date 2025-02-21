@@ -4,7 +4,31 @@ import path from 'path';
 interface Article {
     id: string;
     url: string;
+    title: string;
     content: string;
+}
+
+interface ArticleMetadata {
+    title: string;
+    content: string;
+}
+
+function extractMetadataFromMarkdown(content: string): ArticleMetadata {
+    const titleMatch = content.match(/title:\s*"([^"]+)"/);
+    const title = titleMatch ? titleMatch[1] : '';
+
+    // フロントマターを除去（---で囲まれた部分を削除）
+    const bodyContent = content.replace(/---\n[\s\S]*?\n---/, '').trim();
+
+    // 本文を400文字程度に制限
+    const truncatedContent = bodyContent.length > 400
+        ? bodyContent.slice(0, 400) + '...'
+        : bodyContent;
+
+    return {
+        title,
+        content: truncatedContent
+    };
 }
 
 async function registerArticle(article: Article, apiKey: string) {
@@ -52,11 +76,13 @@ async function main() {
         const fileName = path.basename(relativePath, '.md');
         const id = `blog-${fileName}`;
         const url = `https://yaakaito.github.io/blog/${fileName}`;
+        const metadata = extractMetadataFromMarkdown(content);
 
         await registerArticle({
             id,
             url,
-            content
+            title: metadata.title,
+            content: metadata.content
         }, apiKey);
         console.log(`Registered blog article: ${id}`);
     }
@@ -70,11 +96,13 @@ async function main() {
         const fileName = path.basename(file, '.md');
         const id = `note-${fileName}`;
         const url = `https://yaakaito.github.io/note/${fileName}`;
+        const metadata = extractMetadataFromMarkdown(content);
 
         await registerArticle({
             id,
             url,
-            content
+            title: metadata.title,
+            content: metadata.content
         }, apiKey);
         console.log(`Registered note article: ${id}`);
     }

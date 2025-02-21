@@ -13,12 +13,14 @@ interface EmbeddingResponse {
 interface Article {
 	id: string;
 	url: string;
+	title: string;
 	content: string;
 }
 
 interface RelatedArticle {
 	id: string;
 	url: string;
+	title: string;
 	content: string;
 	similarity: number;
 }
@@ -53,13 +55,14 @@ export default {
 				});
 				const embedding = (response as EmbeddingResponse).data[0];
 
-				// ベクトルDBに保存
-				await env.VECTORIZE.insert([{
+				// ベクトルDBに保存（upsertを使用して既存の記事を上書き）
+				await env.VECTORIZE.upsert([{
 					id: article.id,
 					values: embedding,
 					metadata: {
 						url: article.url,
-						text: article.content
+						title: article.title,
+						content: article.content
 					},
 				}]);
 
@@ -108,7 +111,8 @@ export default {
 					.map(match => ({
 						id: match.id,
 						url: match.metadata?.url as string || "",
-						content: match.metadata?.text as string || "",
+						title: match.metadata?.title as string || "",
+						content: match.metadata?.content as string || "",
 						similarity: match.score
 					}));
 
