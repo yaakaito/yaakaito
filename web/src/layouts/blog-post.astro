@@ -346,13 +346,15 @@ const dateString = new Date(frontmatter.date).toLocaleDateString("en-US", {
             // blogの場合は末尾のslugを、noteの場合は末尾の番号を使用
             if (pathname.startsWith('/blog/')) {
                 // /blog/2023/example や /blog/example から末尾のslugを取得
-                const slug = pathname.split('/').pop()?.replace(/\/$/, '');
+                const parts = pathname.split('/').filter(Boolean); // 空の要素を除去
+                const slug = parts[parts.length - 1];
                 if (slug) {
                     articleId = `blog-${slug}`;
                 }
             } else if (pathname.startsWith('/note/')) {
                 // /note/1 から末尾の番号を取得
-                const number = pathname.split('/').pop()?.replace(/\/$/, '');
+                const parts = pathname.split('/').filter(Boolean);
+                const number = parts[parts.length - 1];
                 if (number) {
                     articleId = `note-${number}`;
                 }
