@@ -23,7 +23,7 @@ async function getLatestPosts(directory, count = 3) {
 }
 
 async function generateReadme() {
-  const humans = await readFile('public/humans.txt', 'utf-8');
+  const humans = await readFile('humans.md', 'utf-8');
   const blogs = await getLatestPosts('blog');
   const notes = await getLatestPosts('note');
 
