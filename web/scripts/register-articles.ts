@@ -110,8 +110,9 @@ async function main() {
         const content = await fs.readFile(file, 'utf-8');
         const relativePath = path.relative('src/pages/blog', file);
         const fileName = path.basename(relativePath, '.md');
+        const parentDir = path.dirname(relativePath);
         const id = `blog-${fileName}`;
-        const url = `https://yaakai.to/blog/${fileName}`;
+        const url = `https://yaakai.to/blog/${parentDir}/${fileName}`;
         const metadata = extractMetadataFromMarkdown(content);
 
         await registerArticle({

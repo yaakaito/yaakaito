@@ -37,7 +37,7 @@ export default {
 
 		// CORSヘッダーの設定
 		const corsHeaders = {
-			"Access-Control-Allow-Origin": "https://yaakai.to",
+			"Access-Control-Allow-Origin": "*",
 			"Access-Control-Allow-Methods": "GET, POST",
 			"Access-Control-Allow-Headers": "Content-Type, X-API-Key",
 		};
@@ -148,8 +148,7 @@ export default {
 					const newResponse = new Response(cachedResponse.body, {
 						status: cachedResponse.status,
 						headers: {
-							...Object.fromEntries(cachedResponse.headers),
-							...corsHeaders
+							...Object.fromEntries(cachedResponse.headers)
 						}
 					});
 					return newResponse;
