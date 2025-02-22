@@ -27,6 +27,9 @@ interface RelatedArticle {
 	similarity: number;
 }
 
+// デプロイ時に評価される一意の値を削除
+// const DEPLOY_ID = Date.now().toString(36) + Math.random().toString(36).slice(2);
+
 export default {
 	async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
 		const url = new URL(request.url);
@@ -35,8 +38,8 @@ export default {
 		// CORSヘッダーの設定
 		const corsHeaders = {
 			"Access-Control-Allow-Origin": "https://yaakai.to",
-			"Access-Control-Allow-Methods": "GET",
-			"Access-Control-Allow-Headers": "Content-Type",
+			"Access-Control-Allow-Methods": "GET, POST",
+			"Access-Control-Allow-Headers": "Content-Type, X-API-Key",
 		};
 
 		// プリフライトリクエストの処理
@@ -97,6 +100,31 @@ export default {
 			}
 		}
 
+		// キャッシュパージエンドポイント
+		if (path === "/purge_cache" && request.method === "POST") {
+			// API認証
+			if (!validateApiKey(request)) {
+				return new Response(JSON.stringify({ error: "Invalid API key" }), {
+					status: 401,
+					headers: { "Content-Type": "application/json" }
+				});
+			}
+
+			try {
+				// キャッシュを削除
+				await cache.delete(new Request(`${url.origin}/related_articles`));
+
+				return new Response(JSON.stringify({ success: true }), {
+					headers: { "Content-Type": "application/json" }
+				});
+			} catch (error) {
+				return new Response(JSON.stringify({ error: "Failed to purge cache" }), {
+					status: 500,
+					headers: { "Content-Type": "application/json" }
+				});
+			}
+		}
+
 		// 関連記事取得エンドポイント
 		if (path === "/related_articles" && request.method === "GET") {
 			const id = url.searchParams.get("id");
@@ -105,13 +133,12 @@ export default {
 					status: 400,
 					headers: {
 						"Content-Type": "application/json",
-						...corsHeaders
 					}
 				});
 			}
 
 			try {
-				// キャッシュキーの生成
+				// キャッシュキーの生成（デプロイIDを削除）
 				const cacheKey = new Request(`${url.origin}/related_articles/${id}`);
 
 				// キャッシュの確認
@@ -122,6 +149,7 @@ export default {
 						status: cachedResponse.status,
 						headers: {
 							...Object.fromEntries(cachedResponse.headers),
+							...corsHeaders
 						}
 					});
 					return newResponse;

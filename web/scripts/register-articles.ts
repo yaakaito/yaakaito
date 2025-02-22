@@ -15,6 +15,34 @@ interface ArticleMetadata {
     content: string;
 }
 
+function convertMarkdownToPlainText(markdown: string): string {
+    return markdown
+        // コードブロックを削除
+        .replace(/```[\s\S]*?```/g, '')
+        // インラインコードを削除
+        .replace(/`[^`]*`/g, '')
+        // リンクを削除 [text](url) -> text
+        .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
+        // 画像を削除 ![alt](url)
+        .replace(/!\[[^\]]*\]\([^)]+\)/g, '')
+        // 見出しの # を削除
+        .replace(/^#{1,6}\s+/gm, '')
+        // 太字と斜体を削除
+        .replace(/[*_]{1,3}([^*_]+)[*_]{1,3}/g, '$1')
+        // リストの * - + を削除
+        .replace(/^[*\-+]\s+/gm, '')
+        // 番号付きリストの数字を削除
+        .replace(/^\d+\.\s+/gm, '')
+        // 水平線を削除
+        .replace(/^[\-*_]{3,}\s*$/gm, '')
+        // 余分な空行を削除して整形
+        .split('\n')
+        .map(line => line.trim())
+        .filter(line => line)
+        .join(' ')
+        .trim();
+}
+
 function extractMetadataFromMarkdown(content: string): ArticleMetadata {
     const titleMatch = content.match(/title:\s*"([^"]+)"/);
     const emojiMatch = content.match(/emoji:\s*([^\n]+)/);
@@ -24,10 +52,13 @@ function extractMetadataFromMarkdown(content: string): ArticleMetadata {
     // フロントマターを除去（---で囲まれた部分を削除）
     const bodyContent = content.replace(/---\n[\s\S]*?\n---/, '').trim();
 
+    // Markdownをプレーンテキストに変換
+    const plainText = convertMarkdownToPlainText(bodyContent);
+
     // 本文を400文字程度に制限
-    const truncatedContent = bodyContent.length > 400
-        ? bodyContent.slice(0, 400) + '...'
-        : bodyContent;
+    const truncatedContent = plainText.length > 400
+        ? plainText.slice(0, 400) + '...'
+        : plainText;
 
     return {
         title,

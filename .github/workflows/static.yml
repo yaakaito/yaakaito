@@ -65,3 +65,9 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
+      - name: Purge related articles cache
+        env:
+          ARTICLES_API_KEY: ${{ secrets.ARTICLES_API_KEY }}
+        run: |
+          curl -X POST https://articles.yaakai.to/purge_cache \
+            -H "X-API-Key: $ARTICLES_API_KEY"
