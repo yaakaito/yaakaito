@@ -11,9 +11,9 @@
 
 ## Latest Notes
 
-- 🖊 [:has() でリストが空のときにセクションごと消す](https://yaakai.to/note/6) - 6/2/2024
-- 🖊 [CLI から VSCode の拡張を入れる](https://yaakai.to/note/5) - 6/2/2024
-- 🖊 [Node 組み込みテストランナーと swc で TypeScript をテストする](https://yaakai.to/note/4) - 6/2/2024
+- 🖊 [Dev Container での wrangler dev で dev-server に繋がらない場合の対処](https://yaakai.to/note/28) - 2/2/2025
+- 🖊 [TypeScript 5.8 の --erasableSyntaxOnly](https://yaakai.to/note/26) - 1/28/2025
+- 🖊 [Temporal が Firefox Nightly で一部利用可能に](https://yaakai.to/note/25) - 1/27/2025
 
 <!--
 **yaakaito/yaakaito** is a ✨ _special_ ✨ repository because its `README.md` (this file) appears on your GitHub profile.
