@@ -33,5 +33,7 @@ jobs:
           git config --local user.email "${GITHUB_ACTOR}@users.noreply.github.com"
           git config --local user.name "${GITHUB_ACTOR}"
           git add ../README.md
-          git diff --quiet && git diff --staged --quiet || git commit -m "chore: update README with latest posts"
-          git push
+          if git commit --dry-run > /dev/null; then
+            git commit -m "chore: update README with latest posts"
+            git push
+          fi
