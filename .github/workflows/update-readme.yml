@@ -16,12 +16,11 @@ jobs:
         working-directory: web
     steps:
       - uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
         with:
-          node-version: '20'
-
+          ref: ${{github.event.pull_request.head.ref}}
+      - uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: latest
       - name: Install dependencies
         run: bun install
 
