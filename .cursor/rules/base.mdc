@@ -1,0 +1,15 @@
+---
+description: 
+globs: 
+---
+
+# 技術スタック
+
+- Bun を使用しています、 Node ではありません
+- パッケージマネージャは Bun です、 npm ではありません
+    ```
+    $ bun install
+    $ bun run dev
+    $ bun wrangler
+    ```
+    

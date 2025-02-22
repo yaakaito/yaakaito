@@ -1,8 +1,8 @@
 ---
 import GlobalLayout from "../layouts/global-layout.astro";
-import * as README from "../../../README.md";
 import icon from "../../../icon/icon-512.png";
 import type { MarkdownInstance } from "astro";
+import * as humans from "../../humans.md";
 
 // ディレクトリ内の全ての .md ファイルを取得
 const blogPosts = await Astro.glob<{ title: string; date: string; emoji: string }>('./blog/**/*.md');
@@ -64,6 +64,7 @@ const notes = loadPosts(notePosts).slice(0, 3);
         }
 
         h1 {
+            font-size: 1.4em;
             margin-top: 0.4em;
         }
 
@@ -75,9 +76,10 @@ const notes = loadPosts(notePosts).slice(0, 3);
     </style>
     <div class="container">
         <img class="icon" src={icon.src} width={icon.width} height={icon.height} />
-        <README.Content />
+        <h1># humans.txt</h1>
+        <humans.Content />
 
-        <h1>Latest Blog Posts</h1>
+        <h1># Latest Blog Posts</h1>
         <div class="posts-grid">
             {blogs.map(post => (
                 <div class="post-tile">
@@ -89,7 +91,7 @@ const notes = loadPosts(notePosts).slice(0, 3);
         </div>
         <a href="/blog">View all blog posts</a>
 
-        <h1>Latest Notes</h1>
+        <h1># Latest Notes</h1>
         <div class="posts-grid">
             {notes.map(post => (
                 <div class="post-tile">
