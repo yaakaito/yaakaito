@@ -4,11 +4,6 @@ export interface Env {
 	API_KEY: string;
 }
 
-interface EmbeddingResponse {
-	shape: number[];
-	data: number[][];
-}
-
 // 記事登録用のインターフェース
 interface Article {
 	id: string;
@@ -75,7 +70,7 @@ export default {
 				const response = await env.AI.run("@cf/baai/bge-base-en-v1.5", {
 					text: article.content,
 				});
-				const embedding = (response as EmbeddingResponse).data[0];
+				const embedding = response.data[0];
 
 				// ベクトルDBに保存（upsertを使用して既存の記事を上書き）
 				await env.VECTORIZE.upsert([{
