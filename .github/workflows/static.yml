@@ -66,6 +66,7 @@ jobs:
         id: deployment
         uses: actions/deploy-pages@v4
       - name: Purge related articles cache
+        shell: bash
         env:
           ARTICLES_API_KEY: ${{ secrets.ARTICLES_API_KEY }}
         run: |
