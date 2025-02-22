@@ -23,10 +23,11 @@ jobs:
           bun-version: latest
       - name: Install dependencies
         run: bun install
-
+      - run: bun ./scripts/notes-from-issue.ts
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Create README
         run: bun ./scripts/generate-readme.js
-
       - name: Commit changes
         run: |
           git config --local user.email "${GITHUB_ACTOR}@users.noreply.github.com"
