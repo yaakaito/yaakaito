@@ -23,10 +23,10 @@ jobs:
           node-version: '20'
 
       - name: Install dependencies
-        run: npm install
+        run: bun install
 
       - name: Create README
-        run: node scripts/generate-readme.js
+        run: bun ./scripts/generate-readme.js
 
       - name: Commit changes
         run: |
