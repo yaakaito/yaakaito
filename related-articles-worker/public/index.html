@@ -44,6 +44,86 @@
         .error {
             color: #dc2626;
         }
+        /* 画像編集関連のスタイル */
+        .image-editor {
+            margin-top: 1rem;
+            display: none;
+        }
+        .crop-container {
+            position: relative;
+            margin: 0 auto;
+            border: 1px solid #ddd;
+            overflow: hidden;
+            max-width: 100%;
+        }
+        .crop-area {
+            position: absolute;
+            border: 2px dashed #0066cc;
+            background-color: rgba(0, 102, 204, 0.2);
+            cursor: move;
+        }
+        .resize-handle {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background-color: #0066cc;
+            border-radius: 50%;
+        }
+        .preview-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+        .preview-box {
+            border: 1px solid #ddd;
+            padding: 0.5rem;
+            border-radius: 4px;
+            text-align: center;
+        }
+        .preview-box h4 {
+            margin-top: 0;
+            margin-bottom: 0.5rem;
+        }
+        .preview-selectable {
+            cursor: pointer;
+            transition: transform 0.2s, border-color 0.2s;
+        }
+        .preview-selectable:hover {
+            transform: scale(1.02);
+        }
+        .preview-selected {
+            border: 2px solid #0066cc;
+            transform: scale(1.02);
+        }
+        .color-picker-container {
+            margin-top: 1rem;
+        }
+        .final-preview {
+            margin-top: 1rem;
+            text-align: center;
+        }
+        .step-buttons {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 1rem;
+            justify-content: center;
+        }
+        .step-buttons button {
+            min-width: 100px;
+        }
+        .cancel-button {
+            background-color: #dc2626;
+        }
+        .back-button {
+            background-color: #6b7280;
+        }
+        .next-button {
+            background-color: #0066cc;
+        }
+        .finish-button {
+            background-color: #22c55e;
+        }
     </style>
 </head>
 <body>
@@ -83,6 +163,102 @@
             <button type="submit">検索</button>
         </form>
         <div id="searchResult" class="result"></div>
+    </section>
+
+    <section>
+        <h2>アイキャッチ画像の生成</h2>
+        <form id="eyecatchForm">
+            <div class="form-group">
+                <label for="eyecatchContent">記事の本文:</label>
+                <textarea id="eyecatchContent" rows="4" required placeholder="画像を生成するための記事本文を入力してください"></textarea>
+            </div>
+            <button type="submit">画像生成</button>
+        </form>
+        <div id="eyecatchResult" class="result">
+            <div id="eyecatchLoading" style="display: none;">画像生成中...</div>
+            <div id="eyecatchError" class="error" style="display: none;"></div>
+            <div id="eyecatchImageContainer" style="margin-top: 1rem; text-align: center; display: none;">
+                <h3>生成された画像（クリックして選択）</h3>
+                <div id="imagesGrid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1rem; margin-bottom: 1rem;"></div>
+                <div id="selectedImageContainer" style="margin-top: 1rem; display: none;">
+                    <h3>選択された画像</h3>
+                    <img id="selectedImage" style="max-width: 100%; border: 2px solid #0066cc; border-radius: 4px;" />
+                    <div style="margin-top: 0.5rem;">
+                        <button id="downloadButton" style="background-color: #22c55e;">ダウンロード</button>
+                        <button id="editButton" style="background-color: #0066cc; margin-left: 0.5rem;">画像を加工する</button>
+                    </div>
+                </div>
+
+                <!-- 画像編集UI -->
+                <div id="imageEditor" class="image-editor">
+                    <h3>画像の加工</h3>
+
+                    <!-- ステップ1: ピクセル化処理 -->
+                    <div id="step1Container" class="edit-step">
+                        <h4>ステップ1: ピクセル化設定</h4>
+                        <p>画像をピクセル化して3つの異なる解像度のドット絵にします。区画の大きさを選択してください。</p>
+
+                        <div class="form-group">
+                            <label for="pixelSizeSlider">基準区画の大きさ: <span id="pixelSizeValue">64x64</span></label>
+                            <input type="range" id="pixelSizeSlider" min="16" max="128" step="8" value="64" style="width: 100%;">
+                            <small>小さいほど詳細に、大きいほど抽象的になります</small>
+                        </div>
+                        <button id="updatePreviewButton" class="next-button" style="margin-bottom: 1rem;">プレビュー更新</button>
+
+                        <div class="preview-container">
+                            <div class="preview-box preview-selectable" data-size="64">
+                                <h4>64x64 ピクセル</h4>
+                                <canvas id="preview64" width="64" height="64" style="image-rendering: pixelated; max-width: 200px;"></canvas>
+                            </div>
+                            <div class="preview-box preview-selectable" data-size="56">
+                                <h4>56x56 ピクセル</h4>
+                                <canvas id="preview56" width="56" height="56" style="image-rendering: pixelated; max-width: 200px;"></canvas>
+                            </div>
+                            <div class="preview-box preview-selectable" data-size="48">
+                                <h4>48x48 ピクセル</h4>
+                                <canvas id="preview48" width="48" height="48" style="image-rendering: pixelated; max-width: 200px;"></canvas>
+                            </div>
+                        </div>
+
+                        <p style="margin-top: 1rem;">いずれかの画像をクリックして選択してください。</p>
+
+                        <div class="step-buttons">
+                            <button id="cancelPixelateButton" class="cancel-button">キャンセル</button>
+                            <button id="nextToCropButton" class="next-button" disabled>次へ</button>
+                        </div>
+                    </div>
+
+                    <!-- ステップ2: 範囲選択 -->
+                    <div id="step2Container" class="edit-step" style="display: none;">
+                        <h4>ステップ2: 切り抜く範囲を選択</h4>
+                        <p>ピクセル化された画像から切り抜く範囲を選択してください。選択範囲は移動やリサイズが可能です。</p>
+
+                        <div id="cropContainer" class="crop-container">
+                            <canvas id="cropImage" style="display: block; max-width: 100%; image-rendering: pixelated;"></canvas>
+                            <div id="cropArea" class="crop-area"></div>
+                            <!-- リサイズハンドルは動的に追加 -->
+                        </div>
+
+                        <div class="color-picker-container" style="margin-top: 1rem;">
+                            <h4>背景色を選択</h4>
+                            <input type="color" id="bgColorPicker" value="#ffffff">
+                            <span id="colorHexValue">#ffffff</span>
+                        </div>
+
+                        <div class="final-preview">
+                            <h4>最終プレビュー (1200x630)</h4>
+                            <canvas id="finalPreview" width="600" height="315" style="max-width: 100%; border: 1px solid #ddd;"></canvas>
+                        </div>
+
+                        <div class="step-buttons">
+                            <button id="backToStep1Button" class="back-button">戻る</button>
+                            <button id="cancelCropButton" class="cancel-button">キャンセル</button>
+                            <button id="finishButton" class="finish-button">完了</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </section>
 
     <script>
@@ -139,6 +315,596 @@
                 resultDiv.classList.add('error');
             }
         });
+
+        // アイキャッチ画像生成フォームの処理
+        document.getElementById('eyecatchForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const resultDiv = document.getElementById('eyecatchResult');
+            const loadingDiv = document.getElementById('eyecatchLoading');
+            const errorDiv = document.getElementById('eyecatchError');
+            const imageContainer = document.getElementById('eyecatchImageContainer');
+            const imagesGrid = document.getElementById('imagesGrid');
+            const selectedImageContainer = document.getElementById('selectedImageContainer');
+            const selectedImage = document.getElementById('selectedImage');
+            const downloadButton = document.getElementById('downloadButton');
+
+            // 表示状態をリセット
+            loadingDiv.style.display = 'block';
+            errorDiv.style.display = 'none';
+            errorDiv.textContent = '';
+            imageContainer.style.display = 'none';
+            imagesGrid.innerHTML = '';
+            selectedImageContainer.style.display = 'none';
+
+            try {
+                const content = document.getElementById('eyecatchContent').value;
+
+                const response = await fetch('/create_eyecatch', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ content })
+                });
+
+                const result = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(result.error || '画像生成に失敗しました');
+                }
+
+                if (result.success && result.images && result.images.length > 0) {
+                    // 技術キーワードと動物の情報を表示
+                    const infoElement = document.createElement('div');
+                    infoElement.style.marginBottom = '1rem';
+                    infoElement.innerHTML = `
+                        <p><strong>検出されたキーワード:</strong> ${result.keywords}</p>
+                        <p><strong>選択された技術:</strong> ${result.selectedTechKeyword}</p>
+                        <p><strong>動物キャラクター:</strong> ${result.animal}</p>
+                        <p><strong>背景色:</strong> <span style="display: inline-block; width: 20px; height: 20px; background-color: ${result.backgroundColor}; vertical-align: middle; margin-right: 5px;"></span> ${result.backgroundColor}</p>
+                    `;
+                    imagesGrid.appendChild(infoElement);
+
+                    // 各画像をグリッドに表示
+                    result.images.forEach((imageData, index) => {
+                        const imageCard = document.createElement('div');
+                        imageCard.style.border = '1px solid #ddd';
+                        imageCard.style.borderRadius = '4px';
+                        imageCard.style.padding = '0.5rem';
+                        imageCard.style.cursor = 'pointer';
+                        imageCard.style.transition = 'transform 0.2s';
+
+                        const img = document.createElement('img');
+                        img.src = `data:image/png;base64,${imageData}`;
+                        img.style.width = '100%';
+                        img.style.borderRadius = '4px';
+                        img.alt = `生成画像 ${index + 1}`;
+
+                        const caption = document.createElement('p');
+                        caption.textContent = `バリエーション ${index + 1}`;
+                        caption.style.textAlign = 'center';
+                        caption.style.marginTop = '0.5rem';
+
+                        imageCard.appendChild(img);
+                        imageCard.appendChild(caption);
+
+                        // 画像クリック時の処理
+                        imageCard.addEventListener('click', () => {
+                            // すべてのカードの選択状態をリセット
+                            document.querySelectorAll('#imagesGrid > div').forEach(card => {
+                                card.style.border = '1px solid #ddd';
+                                card.style.transform = 'scale(1)';
+                            });
+
+                            // 選択したカードをハイライト
+                            imageCard.style.border = '2px solid #0066cc';
+                            imageCard.style.transform = 'scale(1.02)';
+
+                            // 選択した画像を表示
+                            selectedImage.src = img.src;
+                            selectedImageContainer.style.display = 'block';
+
+                            // ダウンロードボタンの設定
+                            downloadButton.onclick = () => {
+                                const link = document.createElement('a');
+                                link.href = img.src;
+                                link.download = `eyecatch-${result.selectedTechKeyword}-${result.animal}-${index + 1}.png`;
+                                link.click();
+                            };
+                        });
+
+                        imagesGrid.appendChild(imageCard);
+                    });
+
+                    imageContainer.style.display = 'block';
+                } else {
+                    throw new Error('画像データが見つかりません');
+                }
+            } catch (error) {
+                errorDiv.textContent = `エラー: ${error.message}`;
+                errorDiv.style.display = 'block';
+            } finally {
+                loadingDiv.style.display = 'none';
+            }
+        });
+
+        // 画像編集機能の実装
+        document.addEventListener('DOMContentLoaded', () => {
+            // 編集ボタンのクリックイベント
+            if (document.getElementById('editButton')) {
+                document.getElementById('editButton').addEventListener('click', initImageEditor);
+            }
+
+            // キャンセルボタンのイベント
+            document.getElementById('cancelPixelateButton').addEventListener('click', () => {
+                document.getElementById('imageEditor').style.display = 'none';
+            });
+
+            document.getElementById('cancelCropButton').addEventListener('click', () => {
+                document.getElementById('imageEditor').style.display = 'none';
+            });
+
+            // ステップ間の移動
+            document.getElementById('nextToCropButton').addEventListener('click', () => {
+                // 選択された画像を取得
+                const selectedPreview = document.querySelector('.preview-selected');
+                if (!selectedPreview) return;
+
+                // 選択された画像サイズを取得
+                const selectedSize = selectedPreview.dataset.size;
+                const selectedCanvas = document.getElementById(`preview${selectedSize}`);
+
+                // 切り抜き用のキャンバスを準備
+                const cropCanvas = document.getElementById('cropImage');
+                cropCanvas.width = selectedCanvas.width;
+                cropCanvas.height = selectedCanvas.height;
+
+                // 選択された画像を切り抜き用キャンバスにコピー
+                const cropCtx = cropCanvas.getContext('2d');
+                cropCtx.drawImage(selectedCanvas, 0, 0);
+
+                // 切り抜き領域を初期化
+                initCropArea(cropCanvas);
+
+                // ステップ2に移動
+                document.getElementById('step1Container').style.display = 'none';
+                document.getElementById('step2Container').style.display = 'block';
+
+                // 最終プレビューを更新
+                updateFinalPreview();
+            });
+
+            document.getElementById('backToStep1Button').addEventListener('click', () => {
+                document.getElementById('step2Container').style.display = 'none';
+                document.getElementById('step1Container').style.display = 'block';
+            });
+
+            // 区画サイズスライダーの変更イベント
+            document.getElementById('pixelSizeSlider').addEventListener('input', (e) => {
+                const size = e.target.value;
+                document.getElementById('pixelSizeValue').textContent = `${size}x${size}`;
+            });
+
+            // プレビュー更新ボタンのクリックイベント
+            document.getElementById('updatePreviewButton').addEventListener('click', () => {
+                generatePixelatedPreviews();
+            });
+
+            // 背景色の変更イベント
+            document.getElementById('bgColorPicker').addEventListener('input', (e) => {
+                const color = e.target.value;
+                document.getElementById('colorHexValue').textContent = color;
+                updateFinalPreview();
+            });
+
+            // プレビュー画像の選択イベント
+            document.querySelectorAll('.preview-selectable').forEach(preview => {
+                preview.addEventListener('click', () => {
+                    // 他のプレビューの選択状態をリセット
+                    document.querySelectorAll('.preview-selectable').forEach(p => {
+                        p.classList.remove('preview-selected');
+                    });
+
+                    // クリックされたプレビューを選択状態に
+                    preview.classList.add('preview-selected');
+
+                    // 次へボタンを有効化
+                    document.getElementById('nextToCropButton').disabled = false;
+                });
+            });
+
+            // 完了ボタンのイベント
+            document.getElementById('finishButton').addEventListener('click', finishImageProcessing);
+        });
+
+        // 画像エディタの初期化
+        function initImageEditor() {
+            const selectedImage = document.getElementById('selectedImage');
+            if (!selectedImage.src) return;
+
+            // 元の画像データを保存
+            window.originalImage = new Image();
+            window.originalImage.src = selectedImage.src;
+            window.originalImage.onload = () => {
+                // 画像が読み込まれたらピクセル化プレビューを生成
+                generatePixelatedPreviews();
+            };
+
+            // エディタを表示
+            document.getElementById('imageEditor').style.display = 'block';
+            document.getElementById('step1Container').style.display = 'block';
+            document.getElementById('step2Container').style.display = 'none';
+
+            // 次へボタンを無効化（画像が選択されるまで）
+            document.getElementById('nextToCropButton').disabled = true;
+        }
+
+        // 3つのサイズでピクセル化プレビューを生成
+        function generatePixelatedPreviews() {
+            if (!window.originalImage) return;
+
+            // 基準サイズを取得
+            const baseSize = parseInt(document.getElementById('pixelSizeSlider').value);
+
+            // 3つのサイズでプレビューを生成
+            generatePixelatedPreview(64, baseSize);
+            generatePixelatedPreview(56, baseSize - 8);
+            generatePixelatedPreview(48, baseSize - 16);
+
+            // 選択状態をリセット
+            document.querySelectorAll('.preview-selectable').forEach(p => {
+                p.classList.remove('preview-selected');
+            });
+
+            // 次へボタンを無効化
+            document.getElementById('nextToCropButton').disabled = true;
+        }
+
+        // 指定サイズでピクセル化プレビューを生成
+        function generatePixelatedPreview(canvasSize, pixelSize) {
+            // キャンバスを準備
+            const canvas = document.getElementById(`preview${canvasSize}`);
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // 元画像のサイズを取得
+            const imgWidth = window.originalImage.width;
+            const imgHeight = window.originalImage.height;
+
+            // 正方形に収まるように計算
+            const size = Math.min(imgWidth, imgHeight);
+            const offsetX = (imgWidth - size) / 2;
+            const offsetY = (imgHeight - size) / 2;
+
+            // 一時キャンバスを作成（正方形に切り抜いた画像用）
+            const tempCanvas = document.createElement('canvas');
+            tempCanvas.width = size;
+            tempCanvas.height = size;
+            const tempCtx = tempCanvas.getContext('2d');
+            tempCtx.drawImage(window.originalImage, offsetX, offsetY, size, size, 0, 0, size, size);
+
+            // 各区画のサイズを計算
+            const blockSize = size / pixelSize;
+
+            // ピクセル化処理
+            for (let y = 0; y < pixelSize; y++) {
+                for (let x = 0; x < pixelSize; x++) {
+                    // 元画像の対応する区画の範囲
+                    const srcX = Math.floor(x * blockSize);
+                    const srcY = Math.floor(y * blockSize);
+                    const srcWidth = Math.ceil(blockSize);
+                    const srcHeight = Math.ceil(blockSize);
+
+                    // 区画内のピクセルデータを取得
+                    const blockData = tempCtx.getImageData(srcX, srcY, srcWidth, srcHeight);
+
+                    // 色の出現回数をカウント
+                    const colorCount = new Map();
+
+                    for (let i = 0; i < blockData.data.length; i += 4) {
+                        const r = blockData.data[i];
+                        const g = blockData.data[i + 1];
+                        const b = blockData.data[i + 2];
+                        const a = blockData.data[i + 3];
+
+                        // 透明度が低いピクセルは無視
+                        if (a < 128) continue;
+
+                        const colorKey = `${r},${g},${b}`;
+                        colorCount.set(colorKey, (colorCount.get(colorKey) || 0) + 1);
+                    }
+
+                    // 最も多い色を特定
+                    let mostFrequentColor = null;
+                    let maxCount = 0;
+
+                    for (const [colorKey, count] of colorCount.entries()) {
+                        if (count > maxCount) {
+                            maxCount = count;
+                            mostFrequentColor = colorKey;
+                        }
+                    }
+
+                    // 色が見つかった場合、その色で区画を塗りつぶす
+                    if (mostFrequentColor) {
+                        const [r, g, b] = mostFrequentColor.split(',').map(Number);
+                        const color = `rgb(${r}, ${g}, ${b})`;
+
+                        // キャンバスに描画
+                        ctx.fillStyle = color;
+                        ctx.fillRect(x * (canvasSize / pixelSize), y * (canvasSize / pixelSize),
+                                    canvasSize / pixelSize, canvasSize / pixelSize);
+                    }
+                }
+            }
+        }
+
+        // 切り抜き領域の初期化
+        function initCropArea(canvas) {
+            const cropContainer = document.getElementById('cropContainer');
+            const cropArea = document.getElementById('cropArea');
+
+            // コンテナのサイズを画像に合わせる
+            const containerWidth = cropContainer.clientWidth;
+            const scale = containerWidth / canvas.width;
+            const displayHeight = canvas.height * scale;
+
+            // 切り抜き領域の初期サイズ（画像の中央に正方形）
+            const size = Math.min(containerWidth, displayHeight) / 2;
+            const left = (containerWidth - size) / 2;
+            const top = (displayHeight - size) / 2;
+
+            cropArea.style.width = `${size}px`;
+            cropArea.style.height = `${size}px`;
+            cropArea.style.left = `${left}px`;
+            cropArea.style.top = `${top}px`;
+
+            // リサイズハンドルを追加
+            addResizeHandles(cropArea);
+
+            // ドラッグ機能を追加
+            makeDraggable(cropArea, cropContainer);
+        }
+
+        // リサイズハンドルの追加
+        function addResizeHandles(cropArea) {
+            // 既存のハンドルを削除
+            document.querySelectorAll('.resize-handle').forEach(handle => handle.remove());
+
+            // 8つの方向にハンドルを追加
+            const positions = [
+                { top: '-5px', left: '-5px', cursor: 'nwse-resize' },
+                { top: '-5px', left: '50%', cursor: 'ns-resize', transform: 'translateX(-50%)' },
+                { top: '-5px', right: '-5px', cursor: 'nesw-resize' },
+                { top: '50%', left: '-5px', cursor: 'ew-resize', transform: 'translateY(-50%)' },
+                { top: '50%', right: '-5px', cursor: 'ew-resize', transform: 'translateY(-50%)' },
+                { bottom: '-5px', left: '-5px', cursor: 'nesw-resize' },
+                { bottom: '-5px', left: '50%', cursor: 'ns-resize', transform: 'translateX(-50%)' },
+                { bottom: '-5px', right: '-5px', cursor: 'nwse-resize' }
+            ];
+
+            positions.forEach((pos, index) => {
+                const handle = document.createElement('div');
+                handle.className = 'resize-handle';
+                handle.dataset.position = index;
+
+                // スタイルを適用
+                Object.keys(pos).forEach(key => {
+                    handle.style[key] = pos[key];
+                });
+
+                cropArea.appendChild(handle);
+
+                // リサイズイベントを追加
+                makeResizable(handle, cropArea);
+            });
+        }
+
+        // ドラッグ機能の実装
+        function makeDraggable(element, container) {
+            let isDragging = false;
+            let startX, startY;
+            let startLeft, startTop;
+
+            element.addEventListener('mousedown', (e) => {
+                // リサイズハンドル上でのクリックは無視
+                if (e.target.classList.contains('resize-handle')) return;
+
+                isDragging = true;
+                startX = e.clientX;
+                startY = e.clientY;
+                startLeft = parseInt(element.style.left) || 0;
+                startTop = parseInt(element.style.top) || 0;
+
+                e.preventDefault();
+            });
+
+            document.addEventListener('mousemove', (e) => {
+                if (!isDragging) return;
+
+                const dx = e.clientX - startX;
+                const dy = e.clientY - startY;
+
+                let newLeft = startLeft + dx;
+                let newTop = startTop + dy;
+
+                // 境界チェック
+                const maxLeft = container.clientWidth - element.clientWidth;
+                const maxTop = container.clientHeight - element.clientHeight;
+
+                newLeft = Math.max(0, Math.min(newLeft, maxLeft));
+                newTop = Math.max(0, Math.min(newTop, maxTop));
+
+                element.style.left = `${newLeft}px`;
+                element.style.top = `${newTop}px`;
+
+                // 切り抜き領域が変更されたら最終プレビューを更新
+                updateFinalPreview();
+            });
+
+            document.addEventListener('mouseup', () => {
+                isDragging = false;
+            });
+        }
+
+        // リサイズ機能の実装
+        function makeResizable(handle, element) {
+            let isResizing = false;
+            let startX, startY;
+            let startWidth, startHeight, startLeft, startTop;
+
+            handle.addEventListener('mousedown', (e) => {
+                isResizing = true;
+                startX = e.clientX;
+                startY = e.clientY;
+                startWidth = parseInt(element.style.width);
+                startHeight = parseInt(element.style.height);
+                startLeft = parseInt(element.style.left) || 0;
+                startTop = parseInt(element.style.top) || 0;
+
+                e.preventDefault();
+                e.stopPropagation();
+            });
+
+            document.addEventListener('mousemove', (e) => {
+                if (!isResizing) return;
+
+                const dx = e.clientX - startX;
+                const dy = e.clientY - startY;
+                const position = parseInt(handle.dataset.position);
+
+                // ハンドルの位置に応じてリサイズ
+                switch (position) {
+                    case 0: // 左上
+                        element.style.width = `${startWidth - dx}px`;
+                        element.style.height = `${startHeight - dy}px`;
+                        element.style.left = `${startLeft + dx}px`;
+                        element.style.top = `${startTop + dy}px`;
+                        break;
+                    case 1: // 上
+                        element.style.height = `${startHeight - dy}px`;
+                        element.style.top = `${startTop + dy}px`;
+                        break;
+                    case 2: // 右上
+                        element.style.width = `${startWidth + dx}px`;
+                        element.style.height = `${startHeight - dy}px`;
+                        element.style.top = `${startTop + dy}px`;
+                        break;
+                    case 3: // 左
+                        element.style.width = `${startWidth - dx}px`;
+                        element.style.left = `${startLeft + dx}px`;
+                        break;
+                    case 4: // 右
+                        element.style.width = `${startWidth + dx}px`;
+                        break;
+                    case 5: // 左下
+                        element.style.width = `${startWidth - dx}px`;
+                        element.style.height = `${startHeight + dy}px`;
+                        element.style.left = `${startLeft + dx}px`;
+                        break;
+                    case 6: // 下
+                        element.style.height = `${startHeight + dy}px`;
+                        break;
+                    case 7: // 右下
+                        element.style.width = `${startWidth + dx}px`;
+                        element.style.height = `${startHeight + dy}px`;
+                        break;
+                }
+
+                // 正方形を維持
+                const size = Math.max(parseInt(element.style.width), parseInt(element.style.height));
+                element.style.width = `${size}px`;
+                element.style.height = `${size}px`;
+
+                // 境界チェック
+                const container = element.parentElement;
+                const maxLeft = container.clientWidth - parseInt(element.style.width);
+                const maxTop = container.clientHeight - parseInt(element.style.height);
+
+                const currentLeft = parseInt(element.style.left) || 0;
+                const currentTop = parseInt(element.style.top) || 0;
+
+                if (currentLeft < 0) element.style.left = '0px';
+                if (currentTop < 0) element.style.top = '0px';
+                if (currentLeft > maxLeft) element.style.left = `${maxLeft}px`;
+                if (currentTop > maxTop) element.style.top = `${maxTop}px`;
+
+                // リサイズが変更されたら最終プレビューを更新
+                updateFinalPreview();
+            });
+
+            document.addEventListener('mouseup', () => {
+                isResizing = false;
+            });
+        }
+
+        // 最終プレビューの更新
+        function updateFinalPreview() {
+            const finalPreview = document.getElementById('finalPreview');
+            const finalCtx = finalPreview.getContext('2d');
+            const cropCanvas = document.getElementById('cropImage');
+            const cropArea = document.getElementById('cropArea');
+            const backgroundColor = document.getElementById('bgColorPicker').value;
+
+            // キャンバスをクリア
+            finalCtx.clearRect(0, 0, finalPreview.width, finalPreview.height);
+
+            // 背景色を塗りつぶし
+            finalCtx.fillStyle = backgroundColor;
+            finalCtx.fillRect(0, 0, finalPreview.width, finalPreview.height);
+
+            // 切り抜き領域の座標とサイズを取得
+            const cropContainer = document.getElementById('cropContainer');
+            const containerWidth = cropContainer.clientWidth;
+            const scale = containerWidth / cropCanvas.width;
+
+            const displayCropX = parseInt(cropArea.style.left) || 0;
+            const displayCropY = parseInt(cropArea.style.top) || 0;
+            const displayCropWidth = parseInt(cropArea.style.width) || 0;
+            const displayCropHeight = parseInt(cropArea.style.height) || 0;
+
+            // 実際のキャンバス上の座標に変換
+            const cropX = Math.round(displayCropX / scale);
+            const cropY = Math.round(displayCropY / scale);
+            const cropWidth = Math.round(displayCropWidth / scale);
+            const cropHeight = Math.round(displayCropHeight / scale);
+
+            // 一時キャンバスを作成（切り抜いた画像を512x512に拡大）
+            const tempCanvas = document.createElement('canvas');
+            tempCanvas.width = 512;
+            tempCanvas.height = 512;
+            const tempCtx = tempCanvas.getContext('2d');
+            tempCtx.imageSmoothingEnabled = false; // ピクセル化を維持
+
+            // 切り抜いた領域を512x512に拡大
+            tempCtx.drawImage(
+                cropCanvas,
+                cropX, cropY, cropWidth, cropHeight,
+                0, 0, 512, 512
+            );
+
+            // 拡大した画像を中央に配置
+            const x = (finalPreview.width - 512) / 2;
+            const y = (finalPreview.height - 512) / 2;
+
+            finalCtx.drawImage(tempCanvas, x, y);
+        }
+
+        // 画像処理の完了
+        function finishImageProcessing() {
+            // 最終プレビューからデータURLを取得
+            const finalPreview = document.getElementById('finalPreview');
+            const dataURL = finalPreview.toDataURL('image/png');
+
+            // ダウンロードリンクを作成
+            const link = document.createElement('a');
+            link.href = dataURL;
+            link.download = 'eyecatch-processed.png';
+            link.click();
+
+            // エディタを閉じる
+            document.getElementById('imageEditor').style.display = 'none';
+        }
     </script>
 </body>
 </html>
