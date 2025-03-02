@@ -337,7 +337,8 @@ export default {
 				const keywordsString = extractedKeywords.join(', ');
 
 				// 5つの画像生成リクエストを並列に実行
-				const generateImagePromises = Array(5).fill(null).map(async (_, index) => {
+				// frontend のデバッグでコストが掛かるので一旦 1
+				const generateImagePromises = Array(1).fill(null).map(async (_, index) => {
 					console.log(`画像生成リクエスト ${index + 1}/5 を開始`);
 
 					// わずかにプロンプトを変えて多様性を確保

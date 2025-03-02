@@ -45,84 +45,66 @@
             color: #dc2626;
         }
         /* 画像編集関連のスタイル */
-        .image-editor {
+        .editor-container {
             margin-top: 1rem;
             display: none;
         }
-        .crop-container {
-            position: relative;
-            margin: 0 auto;
-            border: 1px solid #ddd;
-            overflow: hidden;
-            max-width: 100%;
+        .grid-controls {
+            margin-bottom: 1rem;
         }
-        .crop-area {
-            position: absolute;
-            border: 2px dashed #0066cc;
-            background-color: rgba(0, 102, 204, 0.2);
-            cursor: move;
-        }
-        .resize-handle {
-            position: absolute;
-            width: 10px;
-            height: 10px;
-            background-color: #0066cc;
-            border-radius: 50%;
-        }
-        .preview-container {
+        .slider-container {
             display: flex;
-            flex-wrap: wrap;
-            gap: 1rem;
-            margin-top: 1rem;
+            align-items: center;
+            margin-bottom: 1rem;
         }
-        .preview-box {
+        .slider-container label {
+            margin-right: 1rem;
+            margin-bottom: 0;
+            min-width: 120px;
+        }
+        .slider-container input {
+            flex-grow: 1;
+            margin-bottom: 0;
+        }
+        .slider-value {
+            margin-left: 1rem;
+            min-width: 60px;
+            text-align: right;
+        }
+        .canvas-container {
+            position: relative;
+            margin: 1rem 0;
+            overflow: auto;
+            max-height: 600px;
             border: 1px solid #ddd;
-            padding: 0.5rem;
             border-radius: 4px;
-            text-align: center;
         }
-        .preview-box h4 {
-            margin-top: 0;
-            margin-bottom: 0.5rem;
+        #gridCanvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            pointer-events: none;
         }
-        .preview-selectable {
-            cursor: pointer;
-            transition: transform 0.2s, border-color 0.2s;
-        }
-        .preview-selectable:hover {
-            transform: scale(1.02);
-        }
-        .preview-selected {
-            border: 2px solid #0066cc;
-            transform: scale(1.02);
-        }
-        .color-picker-container {
+        .editor-buttons {
             margin-top: 1rem;
-        }
-        .final-preview {
-            margin-top: 1rem;
-            text-align: center;
-        }
-        .step-buttons {
             display: flex;
             gap: 0.5rem;
+        }
+        .color-palette {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
             margin-top: 1rem;
-            justify-content: center;
+            padding: 0.5rem;
+            background: #f5f5f5;
+            border-radius: 4px;
         }
-        .step-buttons button {
-            min-width: 100px;
-        }
-        .cancel-button {
-            background-color: #dc2626;
-        }
-        .back-button {
-            background-color: #6b7280;
-        }
-        .next-button {
-            background-color: #0066cc;
-        }
-        .finish-button {
-            background-color: #22c55e;
+        .color-swatch {
+            width: 24px;
+            height: 24px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            cursor: pointer;
         }
     </style>
 </head>
@@ -172,6 +154,11 @@
                 <label for="eyecatchContent">記事の本文:</label>
                 <textarea id="eyecatchContent" rows="4" required placeholder="画像を生成するための記事本文を入力してください"></textarea>
             </div>
+            <div class="form-group">
+                <label>
+                    <input type="checkbox" id="useTestImages"> テスト画像を使用する（APIを呼び出さない）
+                </label>
+            </div>
             <button type="submit">画像生成</button>
         </form>
         <div id="eyecatchResult" class="result">
@@ -190,71 +177,46 @@
                 </div>
 
                 <!-- 画像編集UI -->
-                <div id="imageEditor" class="image-editor">
-                    <h3>画像の加工</h3>
-
-                    <!-- ステップ1: ピクセル化処理 -->
-                    <div id="step1Container" class="edit-step">
-                        <h4>ステップ1: ピクセル化設定</h4>
-                        <p>画像をピクセル化して3つの異なる解像度のドット絵にします。区画の大きさを選択してください。</p>
-
-                        <div class="form-group">
-                            <label for="pixelSizeSlider">基準区画の大きさ: <span id="pixelSizeValue">64x64</span></label>
-                            <input type="range" id="pixelSizeSlider" min="16" max="128" step="8" value="64" style="width: 100%;">
-                            <small>小さいほど詳細に、大きいほど抽象的になります</small>
+                <div id="imageEditor" class="editor-container">
+                    <h3>ドット絵加工</h3>
+                    <div class="grid-controls">
+                        <div class="slider-container">
+                            <label for="gridSizeSlider">グリッドサイズ:</label>
+                            <input type="range" id="gridSizeSlider" min="4" max="32" value="8" step="1">
+                            <span id="gridSizeValue" class="slider-value">8px</span>
                         </div>
-                        <button id="updatePreviewButton" class="next-button" style="margin-bottom: 1rem;">プレビュー更新</button>
-
-                        <div class="preview-container">
-                            <div class="preview-box preview-selectable" data-size="64">
-                                <h4>64x64 ピクセル</h4>
-                                <canvas id="preview64" width="64" height="64" style="image-rendering: pixelated; max-width: 200px;"></canvas>
-                            </div>
-                            <div class="preview-box preview-selectable" data-size="56">
-                                <h4>56x56 ピクセル</h4>
-                                <canvas id="preview56" width="56" height="56" style="image-rendering: pixelated; max-width: 200px;"></canvas>
-                            </div>
-                            <div class="preview-box preview-selectable" data-size="48">
-                                <h4>48x48 ピクセル</h4>
-                                <canvas id="preview48" width="48" height="48" style="image-rendering: pixelated; max-width: 200px;"></canvas>
-                            </div>
+                        <div class="slider-container">
+                            <label for="offsetXSlider">X方向オフセット:</label>
+                            <input type="range" id="offsetXSlider" min="0" max="16" value="0" step="1">
+                            <span id="offsetXValue" class="slider-value">0px</span>
                         </div>
-
-                        <p style="margin-top: 1rem;">いずれかの画像をクリックして選択してください。</p>
-
-                        <div class="step-buttons">
-                            <button id="cancelPixelateButton" class="cancel-button">キャンセル</button>
-                            <button id="nextToCropButton" class="next-button" disabled>次へ</button>
+                        <div class="slider-container">
+                            <label for="offsetYSlider">Y方向オフセット:</label>
+                            <input type="range" id="offsetYSlider" min="0" max="16" value="0" step="1">
+                            <span id="offsetYValue" class="slider-value">0px</span>
                         </div>
+                        <p>グリッドサイズは1ドットの大きさを表します。小さいほど細かいドット絵になります。オフセットはグリッドの開始位置をずらします。</p>
                     </div>
 
-                    <!-- ステップ2: 範囲選択 -->
-                    <div id="step2Container" class="edit-step" style="display: none;">
-                        <h4>ステップ2: 切り抜く範囲を選択</h4>
-                        <p>ピクセル化された画像から切り抜く範囲を選択してください。選択範囲は移動やリサイズが可能です。</p>
+                    <div class="canvas-container">
+                        <canvas id="imageCanvas"></canvas>
+                        <canvas id="gridCanvas"></canvas>
+                    </div>
 
-                        <div id="cropContainer" class="crop-container">
-                            <canvas id="cropImage" style="display: block; max-width: 100%; image-rendering: pixelated;"></canvas>
-                            <div id="cropArea" class="crop-area"></div>
-                            <!-- リサイズハンドルは動的に追加 -->
-                        </div>
+                    <div class="editor-buttons">
+                        <button id="processButton" style="background-color: #22c55e;">ドット絵に変換</button>
+                        <button id="resetButton" style="background-color: #6b7280;">リセット</button>
+                        <button id="downloadProcessedButton" style="background-color: #0066cc; display: none;">加工画像をダウンロード</button>
+                    </div>
 
-                        <div class="color-picker-container" style="margin-top: 1rem;">
-                            <h4>背景色を選択</h4>
-                            <input type="color" id="bgColorPicker" value="#ffffff">
-                            <span id="colorHexValue">#ffffff</span>
-                        </div>
+                    <div id="processedImageContainer" style="margin-top: 1rem; display: none;">
+                        <h3>加工後の画像</h3>
+                        <canvas id="processedCanvas"></canvas>
+                    </div>
 
-                        <div class="final-preview">
-                            <h4>最終プレビュー (1200x630)</h4>
-                            <canvas id="finalPreview" width="600" height="315" style="max-width: 100%; border: 1px solid #ddd;"></canvas>
-                        </div>
-
-                        <div class="step-buttons">
-                            <button id="backToStep1Button" class="back-button">戻る</button>
-                            <button id="cancelCropButton" class="cancel-button">キャンセル</button>
-                            <button id="finishButton" class="finish-button">完了</button>
-                        </div>
+                    <div id="colorPaletteContainer" style="margin-top: 1rem; display: none;">
+                        <h3>使用色パレット (<span id="colorCount">0</span>色)</h3>
+                        <div id="colorPalette" class="color-palette"></div>
                     </div>
                 </div>
             </div>
@@ -338,19 +300,67 @@
 
             try {
                 const content = document.getElementById('eyecatchContent').value;
+                const useTestImages = document.getElementById('useTestImages').checked;
 
-                const response = await fetch('/create_eyecatch', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ content })
-                });
+                let result;
 
-                const result = await response.json();
+                if (useTestImages) {
+                    // テスト画像を使用する場合
+                    // Base64エンコードされた画像データを取得する関数
+                    const getBase64Image = async (imagePath) => {
+                        return new Promise((resolve, reject) => {
+                            const img = new Image();
+                            img.crossOrigin = 'Anonymous';
+                            img.onload = () => {
+                                const canvas = document.createElement('canvas');
+                                canvas.width = img.width;
+                                canvas.height = img.height;
+                                const ctx = canvas.getContext('2d');
+                                ctx.drawImage(img, 0, 0);
+                                const dataURL = canvas.toDataURL('image/png');
+                                resolve(dataURL.replace(/^data:image\/(png|jpg);base64,/, ''));
+                            };
+                            img.onerror = () => reject(new Error('画像の読み込みに失敗しました'));
+                            img.src = imagePath;
+                        });
+                    };
 
-                if (!response.ok) {
-                    throw new Error(result.error || '画像生成に失敗しました');
+                    try {
+                        // テスト用の5つの画像を読み込む
+                        const imagePromises = [];
+                        for (let i = 1; i <= 5; i++) {
+                            imagePromises.push(getBase64Image(`/image${i}.png`));
+                        }
+
+                        const imageDataArray = await Promise.all(imagePromises);
+
+                        // テスト用のレスポンスを作成
+                        result = {
+                            success: true,
+                            images: imageDataArray,
+                            keywords: 'テスト, JavaScript, React, Node.js',
+                            selectedTechKeyword: 'JavaScript',
+                            animal: 'Fox',
+                            backgroundColor: '#f0f0f0'
+                        };
+                    } catch (error) {
+                        throw new Error('テスト画像の読み込みに失敗しました: ' + error.message);
+                    }
+                } else {
+                    // 通常のAPI呼び出し
+                    const response = await fetch('/create_eyecatch', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ content })
+                    });
+
+                    result = await response.json();
+
+                    if (!response.ok) {
+                        throw new Error(result.error || '画像生成に失敗しました');
+                    }
                 }
 
                 if (result.success && result.images && result.images.length > 0) {
@@ -432,478 +442,495 @@
         document.addEventListener('DOMContentLoaded', () => {
             // 編集ボタンのクリックイベント
             if (document.getElementById('editButton')) {
-                document.getElementById('editButton').addEventListener('click', initImageEditor);
+                document.getElementById('editButton').addEventListener('click', () => {
+                    const selectedImage = document.getElementById('selectedImage');
+                    const imageEditor = document.getElementById('imageEditor');
+
+                    if (selectedImage && selectedImage.src && imageEditor) {
+                        // 画像編集UIを表示
+                        imageEditor.style.display = 'block';
+
+                        // キャンバスの初期化
+                        initializeCanvas(selectedImage.src);
+                    } else {
+                        alert('画像が選択されていません。');
+                    }
+                });
             }
 
-            // キャンセルボタンのイベント
-            document.getElementById('cancelPixelateButton').addEventListener('click', () => {
-                document.getElementById('imageEditor').style.display = 'none';
-            });
+            // スライダーの処理
+            const gridSizeSlider = document.getElementById('gridSizeSlider');
+            const gridSizeValue = document.getElementById('gridSizeValue');
+            const offsetXSlider = document.getElementById('offsetXSlider');
+            const offsetXValue = document.getElementById('offsetXValue');
+            const offsetYSlider = document.getElementById('offsetYSlider');
+            const offsetYValue = document.getElementById('offsetYValue');
 
-            document.getElementById('cancelCropButton').addEventListener('click', () => {
-                document.getElementById('imageEditor').style.display = 'none';
-            });
+            // グリッドサイズスライダーの処理
+            if (gridSizeSlider && gridSizeValue) {
+                gridSizeSlider.addEventListener('input', () => {
+                    const value = gridSizeSlider.value;
+                    gridSizeValue.textContent = `${value}px`;
 
-            // ステップ間の移動
-            document.getElementById('nextToCropButton').addEventListener('click', () => {
-                // 選択された画像を取得
-                const selectedPreview = document.querySelector('.preview-selected');
-                if (!selectedPreview) return;
+                    // オフセットの最大値をグリッドサイズに合わせて調整
+                    const maxOffset = parseInt(value) - 1;
+                    offsetXSlider.max = maxOffset;
+                    offsetYSlider.max = maxOffset;
 
-                // 選択された画像サイズを取得
-                const selectedSize = selectedPreview.dataset.size;
-                const selectedCanvas = document.getElementById(`preview${selectedSize}`);
-
-                // 切り抜き用のキャンバスを準備
-                const cropCanvas = document.getElementById('cropImage');
-                cropCanvas.width = selectedCanvas.width;
-                cropCanvas.height = selectedCanvas.height;
-
-                // 選択された画像を切り抜き用キャンバスにコピー
-                const cropCtx = cropCanvas.getContext('2d');
-                cropCtx.drawImage(selectedCanvas, 0, 0);
-
-                // 切り抜き領域を初期化
-                initCropArea(cropCanvas);
-
-                // ステップ2に移動
-                document.getElementById('step1Container').style.display = 'none';
-                document.getElementById('step2Container').style.display = 'block';
-
-                // 最終プレビューを更新
-                updateFinalPreview();
-            });
-
-            document.getElementById('backToStep1Button').addEventListener('click', () => {
-                document.getElementById('step2Container').style.display = 'none';
-                document.getElementById('step1Container').style.display = 'block';
-            });
-
-            // 区画サイズスライダーの変更イベント
-            document.getElementById('pixelSizeSlider').addEventListener('input', (e) => {
-                const size = e.target.value;
-                document.getElementById('pixelSizeValue').textContent = `${size}x${size}`;
-            });
-
-            // プレビュー更新ボタンのクリックイベント
-            document.getElementById('updatePreviewButton').addEventListener('click', () => {
-                generatePixelatedPreviews();
-            });
-
-            // 背景色の変更イベント
-            document.getElementById('bgColorPicker').addEventListener('input', (e) => {
-                const color = e.target.value;
-                document.getElementById('colorHexValue').textContent = color;
-                updateFinalPreview();
-            });
-
-            // プレビュー画像の選択イベント
-            document.querySelectorAll('.preview-selectable').forEach(preview => {
-                preview.addEventListener('click', () => {
-                    // 他のプレビューの選択状態をリセット
-                    document.querySelectorAll('.preview-selectable').forEach(p => {
-                        p.classList.remove('preview-selected');
-                    });
-
-                    // クリックされたプレビューを選択状態に
-                    preview.classList.add('preview-selected');
-
-                    // 次へボタンを有効化
-                    document.getElementById('nextToCropButton').disabled = false;
-                });
-            });
-
-            // 完了ボタンのイベント
-            document.getElementById('finishButton').addEventListener('click', finishImageProcessing);
-        });
-
-        // 画像エディタの初期化
-        function initImageEditor() {
-            const selectedImage = document.getElementById('selectedImage');
-            if (!selectedImage.src) return;
-
-            // 元の画像データを保存
-            window.originalImage = new Image();
-            window.originalImage.src = selectedImage.src;
-            window.originalImage.onload = () => {
-                // 画像が読み込まれたらピクセル化プレビューを生成
-                generatePixelatedPreviews();
-            };
-
-            // エディタを表示
-            document.getElementById('imageEditor').style.display = 'block';
-            document.getElementById('step1Container').style.display = 'block';
-            document.getElementById('step2Container').style.display = 'none';
-
-            // 次へボタンを無効化（画像が選択されるまで）
-            document.getElementById('nextToCropButton').disabled = true;
-        }
-
-        // 3つのサイズでピクセル化プレビューを生成
-        function generatePixelatedPreviews() {
-            if (!window.originalImage) return;
-
-            // 基準サイズを取得
-            const baseSize = parseInt(document.getElementById('pixelSizeSlider').value);
-
-            // 3つのサイズでプレビューを生成
-            generatePixelatedPreview(64, baseSize);
-            generatePixelatedPreview(56, baseSize - 8);
-            generatePixelatedPreview(48, baseSize - 16);
-
-            // 選択状態をリセット
-            document.querySelectorAll('.preview-selectable').forEach(p => {
-                p.classList.remove('preview-selected');
-            });
-
-            // 次へボタンを無効化
-            document.getElementById('nextToCropButton').disabled = true;
-        }
-
-        // 指定サイズでピクセル化プレビューを生成
-        function generatePixelatedPreview(canvasSize, pixelSize) {
-            // キャンバスを準備
-            const canvas = document.getElementById(`preview${canvasSize}`);
-            const ctx = canvas.getContext('2d');
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-            // 元画像のサイズを取得
-            const imgWidth = window.originalImage.width;
-            const imgHeight = window.originalImage.height;
-
-            // 正方形に収まるように計算
-            const size = Math.min(imgWidth, imgHeight);
-            const offsetX = (imgWidth - size) / 2;
-            const offsetY = (imgHeight - size) / 2;
-
-            // 一時キャンバスを作成（正方形に切り抜いた画像用）
-            const tempCanvas = document.createElement('canvas');
-            tempCanvas.width = size;
-            tempCanvas.height = size;
-            const tempCtx = tempCanvas.getContext('2d');
-            tempCtx.drawImage(window.originalImage, offsetX, offsetY, size, size, 0, 0, size, size);
-
-            // 各区画のサイズを計算
-            const blockSize = size / pixelSize;
-
-            // ピクセル化処理
-            for (let y = 0; y < pixelSize; y++) {
-                for (let x = 0; x < pixelSize; x++) {
-                    // 元画像の対応する区画の範囲
-                    const srcX = Math.floor(x * blockSize);
-                    const srcY = Math.floor(y * blockSize);
-                    const srcWidth = Math.ceil(blockSize);
-                    const srcHeight = Math.ceil(blockSize);
-
-                    // 区画内のピクセルデータを取得
-                    const blockData = tempCtx.getImageData(srcX, srcY, srcWidth, srcHeight);
-
-                    // 色の出現回数をカウント
-                    const colorCount = new Map();
-
-                    for (let i = 0; i < blockData.data.length; i += 4) {
-                        const r = blockData.data[i];
-                        const g = blockData.data[i + 1];
-                        const b = blockData.data[i + 2];
-                        const a = blockData.data[i + 3];
-
-                        // 透明度が低いピクセルは無視
-                        if (a < 128) continue;
-
-                        const colorKey = `${r},${g},${b}`;
-                        colorCount.set(colorKey, (colorCount.get(colorKey) || 0) + 1);
+                    // 現在の値が新しい最大値を超えている場合は調整
+                    if (parseInt(offsetXSlider.value) > maxOffset) {
+                        offsetXSlider.value = maxOffset;
+                        offsetXValue.textContent = `${maxOffset}px`;
                     }
 
-                    // 最も多い色を特定
-                    let mostFrequentColor = null;
-                    let maxCount = 0;
+                    if (parseInt(offsetYSlider.value) > maxOffset) {
+                        offsetYSlider.value = maxOffset;
+                        offsetYValue.textContent = `${maxOffset}px`;
+                    }
 
-                    for (const [colorKey, count] of colorCount.entries()) {
-                        if (count > maxCount) {
-                            maxCount = count;
-                            mostFrequentColor = colorKey;
+                    drawGrid();
+                });
+            }
+
+            // X方向オフセットスライダーの処理
+            if (offsetXSlider && offsetXValue) {
+                offsetXSlider.addEventListener('input', () => {
+                    const value = offsetXSlider.value;
+                    offsetXValue.textContent = `${value}px`;
+                    drawGrid();
+                });
+            }
+
+            // Y方向オフセットスライダーの処理
+            if (offsetYSlider && offsetYValue) {
+                offsetYSlider.addEventListener('input', () => {
+                    const value = offsetYSlider.value;
+                    offsetYValue.textContent = `${value}px`;
+                    drawGrid();
+                });
+            }
+
+            // 処理ボタンのクリックイベント
+            const processButton = document.getElementById('processButton');
+            if (processButton) {
+                processButton.addEventListener('click', processImage);
+            }
+
+            // リセットボタンのクリックイベント
+            const resetButton = document.getElementById('resetButton');
+            if (resetButton) {
+                resetButton.addEventListener('click', () => {
+                    const selectedImage = document.getElementById('selectedImage');
+                    if (selectedImage && selectedImage.src) {
+                        initializeCanvas(selectedImage.src);
+
+                        // 処理後の画像を非表示
+                        const processedImageContainer = document.getElementById('processedImageContainer');
+                        const colorPaletteContainer = document.getElementById('colorPaletteContainer');
+                        const downloadProcessedButton = document.getElementById('downloadProcessedButton');
+
+                        if (processedImageContainer) processedImageContainer.style.display = 'none';
+                        if (colorPaletteContainer) colorPaletteContainer.style.display = 'none';
+                        if (downloadProcessedButton) downloadProcessedButton.style.display = 'none';
+                    }
+                });
+            }
+
+            // 処理済み画像ダウンロードボタンのクリックイベント
+            const downloadProcessedButton = document.getElementById('downloadProcessedButton');
+            if (downloadProcessedButton) {
+                downloadProcessedButton.addEventListener('click', () => {
+                    const processedCanvas = document.getElementById('processedCanvas');
+                    if (processedCanvas) {
+                        const link = document.createElement('a');
+                        link.href = processedCanvas.toDataURL('image/png');
+                        link.download = 'processed-pixel-art.png';
+                        link.click();
+                    }
+                });
+            }
+        });
+
+        // グローバル変数
+        let originalImageData = null;
+        let imageCanvas = null;
+        let imageCtx = null;
+        let gridCanvas = null;
+        let gridCtx = null;
+
+        // キャンバスの初期化
+        function initializeCanvas(imageSrc) {
+            imageCanvas = document.getElementById('imageCanvas');
+            gridCanvas = document.getElementById('gridCanvas');
+
+            if (!imageCanvas || !gridCanvas) return;
+
+            imageCtx = imageCanvas.getContext('2d');
+            gridCtx = gridCanvas.getContext('2d');
+
+            const img = new Image();
+            img.onload = function() {
+                // キャンバスのサイズを画像に合わせる
+                imageCanvas.width = img.width;
+                imageCanvas.height = img.height;
+                gridCanvas.width = img.width;
+                gridCanvas.height = img.height;
+
+                // 画像を描画
+                imageCtx.drawImage(img, 0, 0);
+
+                // 元の画像データを保存
+                originalImageData = imageCtx.getImageData(0, 0, imageCanvas.width, imageCanvas.height);
+
+                // グリッドを描画
+                drawGrid();
+            };
+            img.src = imageSrc;
+        }
+
+        // グリッドの描画
+        function drawGrid() {
+            if (!gridCanvas || !gridCtx || !imageCanvas) return;
+
+            // グリッドをクリア
+            gridCtx.clearRect(0, 0, gridCanvas.width, gridCanvas.height);
+
+            const gridSize = parseInt(document.getElementById('gridSizeSlider').value);
+            const offsetX = parseInt(document.getElementById('offsetXSlider').value);
+            const offsetY = parseInt(document.getElementById('offsetYSlider').value);
+            const width = imageCanvas.width;
+            const height = imageCanvas.height;
+
+            gridCtx.strokeStyle = 'rgba(255, 0, 0, 0.5)';
+            gridCtx.lineWidth = 1;
+
+            // 縦線を描画（オフセットを考慮）
+            for (let x = offsetX; x <= width; x += gridSize) {
+                gridCtx.beginPath();
+                gridCtx.moveTo(x, 0);
+                gridCtx.lineTo(x, height);
+                gridCtx.stroke();
+            }
+
+            // 横線を描画（オフセットを考慮）
+            for (let y = offsetY; y <= height; y += gridSize) {
+                gridCtx.beginPath();
+                gridCtx.moveTo(0, y);
+                gridCtx.lineTo(width, y);
+                gridCtx.stroke();
+            }
+        }
+
+        // 画像処理
+        function processImage() {
+            if (!imageCanvas || !imageCtx || !originalImageData) return;
+
+            const gridSize = parseInt(document.getElementById('gridSizeSlider').value);
+            const offsetX = parseInt(document.getElementById('offsetXSlider').value);
+            const offsetY = parseInt(document.getElementById('offsetYSlider').value);
+            const width = imageCanvas.width;
+            const height = imageCanvas.height;
+
+            // 元の画像データを復元
+            imageCtx.putImageData(originalImageData, 0, 0);
+
+            // 処理用のキャンバスを作成
+            const processedCanvas = document.getElementById('processedCanvas');
+            if (!processedCanvas) return;
+
+            const processedCtx = processedCanvas.getContext('2d');
+            processedCanvas.width = width;
+            processedCanvas.height = height;
+
+            // 元の画像を処理用キャンバスにコピー
+            processedCtx.drawImage(imageCanvas, 0, 0);
+
+            // 使用した色を記録するオブジェクト（色 -> 使用回数）
+            const colorUsage = {};
+
+            // 四隅の色を記録する配列
+            const cornerColors = [];
+
+            // グリッドごとに処理（オフセットを考慮）
+            for (let y = offsetY; y < height; y += gridSize) {
+                for (let x = offsetX; x < width; x += gridSize) {
+                    // グリッド内の画素を取得
+                    const gridWidth = Math.min(gridSize, width - x);
+                    const gridHeight = Math.min(gridSize, height - y);
+
+                    const imageData = processedCtx.getImageData(x, y, gridWidth, gridHeight);
+                    const data = imageData.data;
+
+                    // 色の出現回数をカウント
+                    const colorCount = {};
+
+                    for (let i = 0; i < data.length; i += 4) {
+                        // 完全な透明ピクセルはスキップ
+                        if (data[i + 3] === 0) continue;
+
+                        const r = data[i];
+                        const g = data[i + 1];
+                        const b = data[i + 2];
+                        const colorKey = `${r},${g},${b}`;
+
+                        colorCount[colorKey] = (colorCount[colorKey] || 0) + 1;
+                    }
+
+                    // 最も多く使われている色を見つける
+                    let maxCount = 0;
+                    let dominantColorKey = '0,0,0'; // デフォルトは黒
+
+                    for (const colorKey in colorCount) {
+                        if (colorCount[colorKey] > maxCount) {
+                            maxCount = colorCount[colorKey];
+                            dominantColorKey = colorKey;
                         }
                     }
 
-                    // 色が見つかった場合、その色で区画を塗りつぶす
-                    if (mostFrequentColor) {
-                        const [r, g, b] = mostFrequentColor.split(',').map(Number);
-                        const color = `rgb(${r}, ${g}, ${b})`;
+                    // 色をRGB配列に変換
+                    const [r, g, b] = dominantColorKey.split(',').map(Number);
 
-                        // キャンバスに描画
-                        ctx.fillStyle = color;
-                        ctx.fillRect(x * (canvasSize / pixelSize), y * (canvasSize / pixelSize),
-                                    canvasSize / pixelSize, canvasSize / pixelSize);
+                    // グリッド全体を支配的な色で塗りつぶす
+                    processedCtx.fillStyle = `rgb(${r}, ${g}, ${b})`;
+                    processedCtx.fillRect(x, y, gridWidth, gridHeight);
+
+                    // 使用した色を記録
+                    const colorHex = rgbToHex(r, g, b);
+                    colorUsage[colorHex] = (colorUsage[colorHex] || 0) + 1;
+
+                    // 四隅の色を記録
+                    const isCorner = (
+                        (x === offsetX && y === offsetY) || // 左上
+                        (x === offsetX && y >= height - gridSize) || // 左下
+                        (x >= width - gridSize && y === offsetY) || // 右上
+                        (x >= width - gridSize && y >= height - gridSize) // 右下
+                    );
+
+                    if (isCorner && !cornerColors.includes(colorHex)) {
+                        cornerColors.push(colorHex);
                     }
                 }
             }
-        }
 
-        // 切り抜き領域の初期化
-        function initCropArea(canvas) {
-            const cropContainer = document.getElementById('cropContainer');
-            const cropArea = document.getElementById('cropArea');
+            // 使用した色の配列を作成
+            const usedColors = Object.keys(colorUsage);
 
-            // コンテナのサイズを画像に合わせる
-            const containerWidth = cropContainer.clientWidth;
-            const scale = containerWidth / canvas.width;
-            const displayHeight = canvas.height * scale;
+            // 色の数を減らす処理
+            let finalColors = usedColors;
+            if (usedColors.length > 16) {
+                finalColors = reduceColors(usedColors, cornerColors);
 
-            // 切り抜き領域の初期サイズ（画像の中央に正方形）
-            const size = Math.min(containerWidth, displayHeight) / 2;
-            const left = (containerWidth - size) / 2;
-            const top = (displayHeight - size) / 2;
+                // 画像の色を置き換える
+                const fullImageData = processedCtx.getImageData(0, 0, width, height);
+                const fullData = fullImageData.data;
 
-            cropArea.style.width = `${size}px`;
-            cropArea.style.height = `${size}px`;
-            cropArea.style.left = `${left}px`;
-            cropArea.style.top = `${top}px`;
+                for (let i = 0; i < fullData.length; i += 4) {
+                    const r = fullData[i];
+                    const g = fullData[i + 1];
+                    const b = fullData[i + 2];
+                    const originalHex = rgbToHex(r, g, b);
 
-            // リサイズハンドルを追加
-            addResizeHandles(cropArea);
+                    // 最も近い色を見つける
+                    const closestColor = findClosestColor(originalHex, finalColors);
+                    const [newR, newG, newB] = hexToRgb(closestColor);
 
-            // ドラッグ機能を追加
-            makeDraggable(cropArea, cropContainer);
-        }
-
-        // リサイズハンドルの追加
-        function addResizeHandles(cropArea) {
-            // 既存のハンドルを削除
-            document.querySelectorAll('.resize-handle').forEach(handle => handle.remove());
-
-            // 8つの方向にハンドルを追加
-            const positions = [
-                { top: '-5px', left: '-5px', cursor: 'nwse-resize' },
-                { top: '-5px', left: '50%', cursor: 'ns-resize', transform: 'translateX(-50%)' },
-                { top: '-5px', right: '-5px', cursor: 'nesw-resize' },
-                { top: '50%', left: '-5px', cursor: 'ew-resize', transform: 'translateY(-50%)' },
-                { top: '50%', right: '-5px', cursor: 'ew-resize', transform: 'translateY(-50%)' },
-                { bottom: '-5px', left: '-5px', cursor: 'nesw-resize' },
-                { bottom: '-5px', left: '50%', cursor: 'ns-resize', transform: 'translateX(-50%)' },
-                { bottom: '-5px', right: '-5px', cursor: 'nwse-resize' }
-            ];
-
-            positions.forEach((pos, index) => {
-                const handle = document.createElement('div');
-                handle.className = 'resize-handle';
-                handle.dataset.position = index;
-
-                // スタイルを適用
-                Object.keys(pos).forEach(key => {
-                    handle.style[key] = pos[key];
-                });
-
-                cropArea.appendChild(handle);
-
-                // リサイズイベントを追加
-                makeResizable(handle, cropArea);
-            });
-        }
-
-        // ドラッグ機能の実装
-        function makeDraggable(element, container) {
-            let isDragging = false;
-            let startX, startY;
-            let startLeft, startTop;
-
-            element.addEventListener('mousedown', (e) => {
-                // リサイズハンドル上でのクリックは無視
-                if (e.target.classList.contains('resize-handle')) return;
-
-                isDragging = true;
-                startX = e.clientX;
-                startY = e.clientY;
-                startLeft = parseInt(element.style.left) || 0;
-                startTop = parseInt(element.style.top) || 0;
-
-                e.preventDefault();
-            });
-
-            document.addEventListener('mousemove', (e) => {
-                if (!isDragging) return;
-
-                const dx = e.clientX - startX;
-                const dy = e.clientY - startY;
-
-                let newLeft = startLeft + dx;
-                let newTop = startTop + dy;
-
-                // 境界チェック
-                const maxLeft = container.clientWidth - element.clientWidth;
-                const maxTop = container.clientHeight - element.clientHeight;
-
-                newLeft = Math.max(0, Math.min(newLeft, maxLeft));
-                newTop = Math.max(0, Math.min(newTop, maxTop));
-
-                element.style.left = `${newLeft}px`;
-                element.style.top = `${newTop}px`;
-
-                // 切り抜き領域が変更されたら最終プレビューを更新
-                updateFinalPreview();
-            });
-
-            document.addEventListener('mouseup', () => {
-                isDragging = false;
-            });
-        }
-
-        // リサイズ機能の実装
-        function makeResizable(handle, element) {
-            let isResizing = false;
-            let startX, startY;
-            let startWidth, startHeight, startLeft, startTop;
-
-            handle.addEventListener('mousedown', (e) => {
-                isResizing = true;
-                startX = e.clientX;
-                startY = e.clientY;
-                startWidth = parseInt(element.style.width);
-                startHeight = parseInt(element.style.height);
-                startLeft = parseInt(element.style.left) || 0;
-                startTop = parseInt(element.style.top) || 0;
-
-                e.preventDefault();
-                e.stopPropagation();
-            });
-
-            document.addEventListener('mousemove', (e) => {
-                if (!isResizing) return;
-
-                const dx = e.clientX - startX;
-                const dy = e.clientY - startY;
-                const position = parseInt(handle.dataset.position);
-
-                // ハンドルの位置に応じてリサイズ
-                switch (position) {
-                    case 0: // 左上
-                        element.style.width = `${startWidth - dx}px`;
-                        element.style.height = `${startHeight - dy}px`;
-                        element.style.left = `${startLeft + dx}px`;
-                        element.style.top = `${startTop + dy}px`;
-                        break;
-                    case 1: // 上
-                        element.style.height = `${startHeight - dy}px`;
-                        element.style.top = `${startTop + dy}px`;
-                        break;
-                    case 2: // 右上
-                        element.style.width = `${startWidth + dx}px`;
-                        element.style.height = `${startHeight - dy}px`;
-                        element.style.top = `${startTop + dy}px`;
-                        break;
-                    case 3: // 左
-                        element.style.width = `${startWidth - dx}px`;
-                        element.style.left = `${startLeft + dx}px`;
-                        break;
-                    case 4: // 右
-                        element.style.width = `${startWidth + dx}px`;
-                        break;
-                    case 5: // 左下
-                        element.style.width = `${startWidth - dx}px`;
-                        element.style.height = `${startHeight + dy}px`;
-                        element.style.left = `${startLeft + dx}px`;
-                        break;
-                    case 6: // 下
-                        element.style.height = `${startHeight + dy}px`;
-                        break;
-                    case 7: // 右下
-                        element.style.width = `${startWidth + dx}px`;
-                        element.style.height = `${startHeight + dy}px`;
-                        break;
+                    fullData[i] = newR;
+                    fullData[i + 1] = newG;
+                    fullData[i + 2] = newB;
                 }
 
-                // 正方形を維持
-                const size = Math.max(parseInt(element.style.width), parseInt(element.style.height));
-                element.style.width = `${size}px`;
-                element.style.height = `${size}px`;
+                processedCtx.putImageData(fullImageData, 0, 0);
+            }
 
-                // 境界チェック
-                const container = element.parentElement;
-                const maxLeft = container.clientWidth - parseInt(element.style.width);
-                const maxTop = container.clientHeight - parseInt(element.style.height);
+            // 色パレットを表示
+            displayColorPalette(finalColors);
 
-                const currentLeft = parseInt(element.style.left) || 0;
-                const currentTop = parseInt(element.style.top) || 0;
+            // 処理後の画像を表示
+            document.getElementById('processedImageContainer').style.display = 'block';
+            document.getElementById('colorPaletteContainer').style.display = 'block';
+            document.getElementById('downloadProcessedButton').style.display = 'inline-block';
 
-                if (currentLeft < 0) element.style.left = '0px';
-                if (currentTop < 0) element.style.top = '0px';
-                if (currentLeft > maxLeft) element.style.left = `${maxLeft}px`;
-                if (currentTop > maxTop) element.style.top = `${maxTop}px`;
+            // 色の数を表示
+            document.getElementById('colorCount').textContent = finalColors.length;
+        }
 
-                // リサイズが変更されたら最終プレビューを更新
-                updateFinalPreview();
-            });
+        // 色パレットの表示
+        function displayColorPalette(colors) {
+            const paletteContainer = document.getElementById('colorPalette');
+            if (!paletteContainer) return;
 
-            document.addEventListener('mouseup', () => {
-                isResizing = false;
+            paletteContainer.innerHTML = '';
+
+            colors.forEach(color => {
+                const swatch = document.createElement('div');
+                swatch.className = 'color-swatch';
+                swatch.style.backgroundColor = color;
+                swatch.title = color;
+                paletteContainer.appendChild(swatch);
             });
         }
 
-        // 最終プレビューの更新
-        function updateFinalPreview() {
-            const finalPreview = document.getElementById('finalPreview');
-            const finalCtx = finalPreview.getContext('2d');
-            const cropCanvas = document.getElementById('cropImage');
-            const cropArea = document.getElementById('cropArea');
-            const backgroundColor = document.getElementById('bgColorPicker').value;
+        // 色の数を減らす処理
+        function reduceColors(colors, cornerColors) {
+            // 黒色は必ず残す
+            const blackColor = '#000000';
+            let reducedColors = colors.includes(blackColor) ? [blackColor] : [];
 
-            // キャンバスをクリア
-            finalCtx.clearRect(0, 0, finalPreview.width, finalPreview.height);
+            // 色の使用頻度を取得
+            const colorUsage = {};
+            for (const color of colors) {
+                colorUsage[color] = colorUsage[color] || 0;
+            }
 
-            // 背景色を塗りつぶし
-            finalCtx.fillStyle = backgroundColor;
-            finalCtx.fillRect(0, 0, finalPreview.width, finalPreview.height);
+            // 四隅の色とその近似色を特定
+            const cornerColorGroups = {};
+            for (const cornerColor of cornerColors) {
+                cornerColorGroups[cornerColor] = [cornerColor];
 
-            // 切り抜き領域の座標とサイズを取得
-            const cropContainer = document.getElementById('cropContainer');
-            const containerWidth = cropContainer.clientWidth;
-            const scale = containerWidth / cropCanvas.width;
+                // 四隅の色と極めて近い色を見つける（色の距離が閾値以下）
+                const similarityThreshold = 30; // 色の距離の閾値
+                for (const color of colors) {
+                    if (color === cornerColor) continue;
 
-            const displayCropX = parseInt(cropArea.style.left) || 0;
-            const displayCropY = parseInt(cropArea.style.top) || 0;
-            const displayCropWidth = parseInt(cropArea.style.width) || 0;
-            const displayCropHeight = parseInt(cropArea.style.height) || 0;
+                    const distance = colorDistance(color, cornerColor);
+                    if (distance < similarityThreshold) {
+                        cornerColorGroups[cornerColor].push(color);
+                    }
+                }
+            }
 
-            // 実際のキャンバス上の座標に変換
-            const cropX = Math.round(displayCropX / scale);
-            const cropY = Math.round(displayCropY / scale);
-            const cropWidth = Math.round(displayCropWidth / scale);
-            const cropHeight = Math.round(displayCropHeight / scale);
+            // 四隅の色とその近似色を除外した残りの色
+            const remainingColors = colors.filter(color => {
+                for (const cornerColor in cornerColorGroups) {
+                    if (cornerColorGroups[cornerColor].includes(color)) {
+                        return false;
+                    }
+                }
+                return color !== blackColor;
+            });
 
-            // 一時キャンバスを作成（切り抜いた画像を512x512に拡大）
-            const tempCanvas = document.createElement('canvas');
-            tempCanvas.width = 512;
-            tempCanvas.height = 512;
-            const tempCtx = tempCanvas.getContext('2d');
-            tempCtx.imageSmoothingEnabled = false; // ピクセル化を維持
+            // 人間が識別できない濃淡の差がある色をまとめる
+            const colorClusters = [];
+            const processedColors = new Set();
 
-            // 切り抜いた領域を512x512に拡大
-            tempCtx.drawImage(
-                cropCanvas,
-                cropX, cropY, cropWidth, cropHeight,
-                0, 0, 512, 512
+            for (const color of remainingColors) {
+                if (processedColors.has(color)) continue;
+
+                const cluster = [color];
+                processedColors.add(color);
+
+                // 非常に近い色をクラスタリング
+                const similarityThreshold = 15; // 色の距離の閾値
+                for (const otherColor of remainingColors) {
+                    if (color === otherColor || processedColors.has(otherColor)) continue;
+
+                    const distance = colorDistance(color, otherColor);
+                    if (distance < similarityThreshold) {
+                        cluster.push(otherColor);
+                        processedColors.add(otherColor);
+                    }
+                }
+
+                // クラスタ内で最も使用頻度が高い色を代表色として選択
+                let representativeColor = cluster[0];
+                let maxUsage = colorUsage[representativeColor] || 0;
+
+                for (const clusterColor of cluster) {
+                    const usage = colorUsage[clusterColor] || 0;
+                    if (usage > maxUsage) {
+                        maxUsage = usage;
+                        representativeColor = clusterColor;
+                    }
+                }
+
+                colorClusters.push({
+                    color: representativeColor,
+                    usage: maxUsage
+                });
+            }
+
+            // 使用頻度に基づいてクラスタをソート
+            colorClusters.sort((a, b) => b.usage - a.usage);
+
+            // 最大16色になるまで色を追加（黒を含む）
+            for (const cluster of colorClusters) {
+                if (reducedColors.length >= 16) break;
+                reducedColors.push(cluster.color);
+            }
+
+            return reducedColors;
+        }
+
+        // 最も近い色を見つける
+        function findClosestColor(targetColor, colorPalette) {
+            let minDistance = Infinity;
+            let closestColor = colorPalette[0];
+
+            for (const color of colorPalette) {
+                const distance = colorDistance(targetColor, color);
+                if (distance < minDistance) {
+                    minDistance = distance;
+                    closestColor = color;
+                }
+            }
+
+            return closestColor;
+        }
+
+        // 色の距離を計算（ユークリッド距離）
+        function colorDistance(color1, color2) {
+            const [r1, g1, b1] = hexToRgb(color1);
+            const [r2, g2, b2] = hexToRgb(color2);
+
+            return Math.sqrt(
+                Math.pow(r1 - r2, 2) +
+                Math.pow(g1 - g2, 2) +
+                Math.pow(b1 - b2, 2)
             );
-
-            // 拡大した画像を中央に配置
-            const x = (finalPreview.width - 512) / 2;
-            const y = (finalPreview.height - 512) / 2;
-
-            finalCtx.drawImage(tempCanvas, x, y);
         }
 
-        // 画像処理の完了
-        function finishImageProcessing() {
-            // 最終プレビューからデータURLを取得
-            const finalPreview = document.getElementById('finalPreview');
-            const dataURL = finalPreview.toDataURL('image/png');
+        // RGB値を16進数カラーコードに変換
+        function rgbToHex(r, g, b) {
+            return '#' + [r, g, b].map(x => {
+                const hex = x.toString(16);
+                return hex.length === 1 ? '0' + hex : hex;
+            }).join('');
+        }
 
-            // ダウンロードリンクを作成
-            const link = document.createElement('a');
-            link.href = dataURL;
-            link.download = 'eyecatch-processed.png';
-            link.click();
+        // 16進数カラーコードをRGB値に変換
+        function hexToRgb(hex) {
+            const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+            return result ? [
+                parseInt(result[1], 16),
+                parseInt(result[2], 16),
+                parseInt(result[3], 16)
+            ] : [0, 0, 0];
+        }
 
-            // エディタを閉じる
-            document.getElementById('imageEditor').style.display = 'none';
+        // 16進数カラーコードをHSL値に変換
+        function hexToHsl(hex) {
+            const [r, g, b] = hexToRgb(hex).map(x => x / 255);
+
+            const max = Math.max(r, g, b);
+            const min = Math.min(r, g, b);
+            let h, s, l = (max + min) / 2;
+
+            if (max === min) {
+                h = s = 0; // 無彩色
+            } else {
+                const d = max - min;
+                s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+
+                switch (max) {
+                    case r: h = (g - b) / d + (g < b ? 6 : 0); break;
+                    case g: h = (b - r) / d + 2; break;
+                    case b: h = (r - g) / d + 4; break;
+                }
+
+                h = h * 60;
+            }
+
+            return [h, s, l];
         }
     </script>
 </body>
