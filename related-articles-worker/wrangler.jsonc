@@ -25,7 +25,14 @@
   ],
   "ai": {
     "binding": "AI"
-  }
+  },
+  "kv_namespaces": [
+    {
+      "binding": "EYECATCH_STORE",
+      "id": "dbb3eef7798f4ece9e170a9b09c0b077",
+      "preview_id": "fb44463e67bb40c9b1ca95a5b542e6de"
+    }
+  ]
   /**
    * Smart Placement
    * Docs: https://developers.cloudflare.com/workers/configuration/smart-placement/#smart-placement

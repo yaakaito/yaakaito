@@ -79,6 +79,39 @@
         button:hover {
             background: #0052a3;
         }
+
+        .secondary-button {
+            background: #6c757d;
+            color: white;
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .secondary-button:hover {
+            background: #5a6268;
+        }
+
+        .article-item {
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin-bottom: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .article-item:hover {
+            background-color: #f5f5f5;
+            border-color: #0066cc;
+        }
+
+        .article-item.selected {
+            background-color: #e6f2ff;
+            border-color: #0066cc;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
         .result {
             margin-top: 1rem;
             padding: 1rem;
@@ -252,6 +285,8 @@
         <div class="menu-item active" data-target="register">記事登録</div>
         <div class="menu-item" data-target="search">関連記事</div>
         <div class="menu-item" data-target="eyecatch">画像生成</div>
+        <div class="menu-item" data-target="upload">アイキャッチアップロード</div>
+        <div class="menu-item" data-target="direct-upload">ID指定アップロード</div>
     </div>
 
     <div class="main-content">
@@ -299,8 +334,26 @@
                     <input type="password" id="eyecatchApiKey" required>
                 </div>
                 <div class="form-group">
+                    <label>記事の選択方法:</label>
+                    <div style="margin-bottom: 10px;">
+                        <label style="display: inline-block; margin-right: 15px;">
+                            <input type="radio" name="contentSource" value="text" checked> 本文を直接入力
+                        </label>
+                        <label style="display: inline-block;">
+                            <input type="radio" name="contentSource" value="id"> 未作成の記事から選択
+                        </label>
+                    </div>
+                </div>
+
+                <div id="directInputSection" class="form-group">
                     <label for="eyecatchContent">記事の本文:</label>
-                    <textarea id="eyecatchContent" rows="4" required placeholder="画像を生成するための記事本文を入力してください"></textarea>
+                    <textarea id="eyecatchContent" rows="4" placeholder="画像を生成するための記事本文を入力してください"></textarea>
+                </div>
+
+                <div id="articleSelectSection" class="form-group" style="display: none;">
+                    <button type="button" id="loadPendingArticles" class="secondary-button">未作成の記事を読み込む</button>
+                    <div id="pendingArticlesList" style="margin-top: 10px; max-height: 300px; overflow-y: auto;"></div>
+                    <input type="hidden" id="selectedArticleId" value="">
                 </div>
                 <div class="form-group">
                     <label>
@@ -458,6 +511,8 @@
                                                 </div>
 
                                                 <button id="downloadFinalButton" style="background-color: #22c55e;">最終画像をダウンロード</button>
+                                                <button id="uploadEyecatchButton" style="background-color: #0066cc; margin-left: 10px;">アイキャッチとして保存</button>
+                                                <div id="uploadStatus" style="margin-top: 10px; display: none; padding: 10px; border-radius: 4px;"></div>
                                             </div>
                                         </div>
                                     </div>
@@ -478,6 +533,55 @@
                     </div>
             </div>
         </div>
+    </section>
+
+    <section id="upload" class="content-section">
+        <h2>アイキャッチ画像のアップロード</h2>
+        <form id="uploadForm">
+            <div class="form-group">
+                <label for="uploadApiKey">API Key:</label>
+                <input type="password" id="uploadApiKey" required>
+            </div>
+            <div class="form-group">
+                <label for="uploadArticleId">記事ID:</label>
+                <input type="text" id="uploadArticleId" required>
+            </div>
+            <div class="form-group">
+                <label for="uploadImage">アイキャッチ画像:</label>
+                <input type="file" id="uploadImage" accept="image/*" required>
+            </div>
+            <div class="form-group">
+                <img id="uploadPreview" style="max-width: 300px; max-height: 200px; display: none; margin-top: 10px; border: 1px solid #ddd; border-radius: 4px;" />
+            </div>
+            <button type="submit">アップロード</button>
+        </form>
+        <div id="uploadResult" class="result"></div>
+    </section>
+
+    <section id="direct-upload" class="content-section">
+        <h2>ID指定アイキャッチアップロード</h2>
+        <form id="directUploadForm">
+            <div class="form-group">
+                <label for="directUploadApiKey">API Key:</label>
+                <input type="password" id="directUploadApiKey" required>
+            </div>
+            <div class="form-group">
+                <label for="sourceArticleId">元の記事ID（コピー元）:</label>
+                <input type="text" id="sourceArticleId" required>
+            </div>
+            <div class="form-group">
+                <label for="targetArticleId">新しい記事ID（コピー先）:</label>
+                <input type="text" id="targetArticleId" required>
+            </div>
+            <div class="form-group">
+                <button type="button" id="previewSourceImage" class="secondary-button">元の画像をプレビュー</button>
+                <div id="sourceImagePreviewContainer" style="margin-top: 10px; display: none;">
+                    <img id="sourceImagePreview" style="max-width: 300px; max-height: 200px; border: 1px solid #ddd; border-radius: 4px;" />
+                </div>
+            </div>
+            <button type="submit">アップロード</button>
+        </form>
+        <div id="directUploadResult" class="result"></div>
     </section>
 
     <script>
@@ -558,6 +662,391 @@
             }
         });
 
+        // ラジオボタンの切り替え処理
+        document.addEventListener('DOMContentLoaded', () => {
+            const radioButtons = document.querySelectorAll('input[name="contentSource"]');
+            const directInputSection = document.getElementById('directInputSection');
+            const articleSelectSection = document.getElementById('articleSelectSection');
+
+            radioButtons.forEach(radio => {
+                radio.addEventListener('change', (e) => {
+                    if (e.target.value === 'text') {
+                        directInputSection.style.display = 'block';
+                        articleSelectSection.style.display = 'none';
+                        document.getElementById('eyecatchContent').setAttribute('required', '');
+                    } else {
+                        directInputSection.style.display = 'none';
+                        articleSelectSection.style.display = 'block';
+                        document.getElementById('eyecatchContent').removeAttribute('required');
+                    }
+                });
+            });
+
+            // 未作成の記事を読み込むボタンのイベント
+            const loadPendingArticlesButton = document.getElementById('loadPendingArticles');
+            if (loadPendingArticlesButton) {
+                loadPendingArticlesButton.addEventListener('click', loadPendingArticles);
+            }
+
+            // アイキャッチとして保存ボタンのイベントリスナーを設定
+            const uploadEyecatchButton = document.getElementById('uploadEyecatchButton');
+            const uploadStatus = document.getElementById('uploadStatus');
+            if (uploadEyecatchButton && uploadStatus) {
+                uploadEyecatchButton.addEventListener('click', async () => {
+                    const finalCanvas = document.getElementById('finalCanvas');
+                    if (!finalCanvas) {
+                        alert('最終キャンバスが初期化されていません。ドット絵の生成を完了してください。');
+                        return;
+                    }
+
+                    // ボタンを無効化
+                    uploadEyecatchButton.disabled = true;
+                    uploadEyecatchButton.textContent = 'アップロード中...';
+
+                    // ステータス表示を初期化
+                    uploadStatus.style.display = 'block';
+                    uploadStatus.style.backgroundColor = '#f0f9ff';
+                    uploadStatus.style.color = '#0066cc';
+                    uploadStatus.style.border = '1px solid #d0e3ff';
+                    uploadStatus.textContent = 'アイキャッチ画像をアップロード中...';
+
+                    try {
+                        // 画像データを取得
+                        const imageData = finalCanvas.toDataURL('image/png').split(',')[1];
+
+                        // 記事IDを取得
+                        let articleId = window.generatedForArticleId;
+
+                        // APIキーを取得
+                        const apiKey = document.getElementById('eyecatchApiKey').value;
+
+                        if (!articleId) {
+                            // 記事IDがない場合は警告
+                            uploadStatus.style.backgroundColor = '#fff9e6';
+                            uploadStatus.style.color = '#b45309';
+                            uploadStatus.style.border = '1px solid #fde68a';
+                            uploadStatus.textContent = '警告: 記事IDが見つかりません。直接入力した内容から生成された画像です。';
+
+                            // 3秒後に確認ダイアログを表示
+                            await new Promise(resolve => setTimeout(resolve, 3000));
+
+                            // 確認ダイアログ
+                            const userInput = prompt('アップロード先の記事IDを入力してください:');
+                            if (!userInput) {
+                                throw new Error('アップロードがキャンセルされました');
+                            }
+                            articleId = userInput.trim();
+                        }
+
+                        // アップロードリクエスト
+                        const response = await fetch('/upload_eyecatch', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-API-Key': apiKey
+                            },
+                            body: JSON.stringify({
+                                id: articleId,
+                                imageData: imageData
+                            })
+                        });
+
+                        const result = await response.json();
+
+                        if (!response.ok) {
+                            throw new Error(result.error || 'アップロードに失敗しました');
+                        }
+
+                        // 成功メッセージ
+                        uploadStatus.style.backgroundColor = '#f0fdf4';
+                        uploadStatus.style.color = '#166534';
+                        uploadStatus.style.border = '1px solid #bbf7d0';
+                        uploadStatus.textContent = `アイキャッチ画像が記事ID: ${articleId} に正常にアップロードされました！`;
+
+                        // プレビューリンクを追加
+                        const previewLink = document.createElement('a');
+                        previewLink.href = `/eyecatch?id=${articleId}`;
+                        previewLink.target = '_blank';
+                        previewLink.textContent = 'アイキャッチ画像を表示';
+                        previewLink.style.display = 'block';
+                        previewLink.style.marginTop = '10px';
+                        previewLink.style.textDecoration = 'underline';
+                        uploadStatus.appendChild(previewLink);
+
+                    } catch (error) {
+                        // エラーメッセージ
+                        uploadStatus.style.backgroundColor = '#fef2f2';
+                        uploadStatus.style.color = '#b91c1c';
+                        uploadStatus.style.border = '1px solid #fecaca';
+                        uploadStatus.textContent = `エラー: ${error.message}`;
+                    } finally {
+                        // ボタンを再有効化
+                        uploadEyecatchButton.disabled = false;
+                        uploadEyecatchButton.textContent = 'アイキャッチとして保存';
+                    }
+                });
+            }
+
+            // ファイルアップロードのプレビュー
+            const uploadImageInput = document.getElementById('uploadImage');
+            if (uploadImageInput) {
+                uploadImageInput.addEventListener('change', function(e) {
+                    const file = e.target.files[0];
+                    if (file) {
+                        const reader = new FileReader();
+                        reader.onload = function(e) {
+                            const preview = document.getElementById('uploadPreview');
+                            preview.src = e.target.result;
+                            preview.style.display = 'block';
+                        }
+                        reader.readAsDataURL(file);
+                    }
+                });
+            }
+
+            // 通常のアップロードフォームの処理
+            const uploadForm = document.getElementById('uploadForm');
+            if (uploadForm) {
+                uploadForm.addEventListener('submit', async function(e) {
+                    e.preventDefault(); // フォームのデフォルト送信を防止
+                    const resultDiv = document.getElementById('uploadResult');
+                    resultDiv.textContent = 'アップロード中...';
+                    resultDiv.classList.remove('error');
+
+                    try {
+                        const apiKey = document.getElementById('uploadApiKey').value;
+                        const articleId = document.getElementById('uploadArticleId').value;
+                        const fileInput = document.getElementById('uploadImage');
+
+                        if (!fileInput.files || fileInput.files.length === 0) {
+                            throw new Error('ファイルが選択されていません');
+                        }
+
+                        const file = fileInput.files[0];
+                        const reader = new FileReader();
+
+                        reader.onload = async function(e) {
+                            try {
+                                // Base64エンコードされた画像データを取得
+                                const imageData = e.target.result.split(',')[1];
+
+                                // アップロードリクエスト
+                                const response = await fetch('/upload_eyecatch', {
+                                    method: 'POST',
+                                    headers: {
+                                        'Content-Type': 'application/json',
+                                        'X-API-Key': apiKey
+                                    },
+                                    body: JSON.stringify({
+                                        id: articleId,
+                                        imageData: imageData
+                                    })
+                                });
+
+                                const result = await response.json();
+
+                                if (!response.ok) {
+                                    throw new Error(result.error || 'アップロードに失敗しました');
+                                }
+
+                                resultDiv.innerHTML = `アイキャッチ画像が記事ID: ${articleId} に正常にアップロードされました！<br>
+                                    <a href="/eyecatch?id=${articleId}" target="_blank" style="display: block; margin-top: 10px; text-decoration: underline;">アイキャッチ画像を表示</a>`;
+                            } catch (error) {
+                                resultDiv.textContent = `エラー: ${error.message}`;
+                                resultDiv.classList.add('error');
+                            }
+                        };
+
+                        reader.onerror = function() {
+                            resultDiv.textContent = 'ファイルの読み込みに失敗しました';
+                            resultDiv.classList.add('error');
+                        };
+
+                        reader.readAsDataURL(file);
+                    } catch (error) {
+                        resultDiv.textContent = `エラー: ${error.message}`;
+                        resultDiv.classList.add('error');
+                    }
+                });
+            }
+
+            // ID指定アップロード - 元の画像プレビュー
+            const previewSourceImageButton = document.getElementById('previewSourceImage');
+            if (previewSourceImageButton) {
+                previewSourceImageButton.addEventListener('click', async function() {
+                    const sourceId = document.getElementById('sourceArticleId').value;
+                    const previewContainer = document.getElementById('sourceImagePreviewContainer');
+                    const preview = document.getElementById('sourceImagePreview');
+
+                    if (!sourceId) {
+                        alert('元の記事IDを入力してください');
+                        return;
+                    }
+
+                    try {
+                        // プレビュー表示を初期化
+                        previewContainer.style.display = 'none';
+
+                        // 画像を取得
+                        const response = await fetch(`/eyecatch?id=${sourceId}`);
+
+                        if (!response.ok) {
+                            throw new Error('画像の取得に失敗しました');
+                        }
+
+                        // レスポンスがJSONの場合（エラーメッセージなど）
+                        const contentType = response.headers.get('content-type');
+                        if (contentType && contentType.includes('application/json')) {
+                            const errorData = await response.json();
+                            throw new Error(errorData.error || '画像が見つかりません');
+                        }
+
+                        // 画像データをBlobとして取得
+                        const blob = await response.blob();
+                        const imageUrl = URL.createObjectURL(blob);
+
+                        // プレビュー表示
+                        preview.src = imageUrl;
+                        previewContainer.style.display = 'block';
+
+                    } catch (error) {
+                        alert(`エラー: ${error.message}`);
+                    }
+                });
+            }
+
+            // ID指定アップロードフォームの処理
+            const directUploadForm = document.getElementById('directUploadForm');
+            if (directUploadForm) {
+                directUploadForm.addEventListener('submit', async function(e) {
+                    e.preventDefault(); // フォームのデフォルト送信を防止
+                    const resultDiv = document.getElementById('directUploadResult');
+                    resultDiv.textContent = 'アップロード中...';
+                    resultDiv.classList.remove('error');
+
+                    try {
+                        const apiKey = document.getElementById('directUploadApiKey').value;
+                        const sourceId = document.getElementById('sourceArticleId').value;
+                        const targetId = document.getElementById('targetArticleId').value;
+
+                        if (!sourceId || !targetId) {
+                            throw new Error('元の記事IDと新しい記事IDを入力してください');
+                        }
+
+                        // 元の画像を取得
+                        const response = await fetch(`/eyecatch?id=${sourceId}`);
+
+                        if (!response.ok) {
+                            throw new Error('元の画像の取得に失敗しました');
+                        }
+
+                        // レスポンスがJSONの場合（エラーメッセージなど）
+                        const contentType = response.headers.get('content-type');
+                        if (contentType && contentType.includes('application/json')) {
+                            const errorData = await response.json();
+                            throw new Error(errorData.error || '元の画像が見つかりません');
+                        }
+
+                        // 画像データをBlobとして取得
+                        const blob = await response.blob();
+
+                        // Base64エンコードに変換
+                        const reader = new FileReader();
+                        reader.onload = async function(e) {
+                            try {
+                                // Base64エンコードされた画像データを取得
+                                const imageData = e.target.result.split(',')[1];
+
+                                // 新しい記事IDにアップロード
+                                const uploadResponse = await fetch('/upload_eyecatch', {
+                                    method: 'POST',
+                                    headers: {
+                                        'Content-Type': 'application/json',
+                                        'X-API-Key': apiKey
+                                    },
+                                    body: JSON.stringify({
+                                        id: targetId,
+                                        imageData: imageData
+                                    })
+                                });
+
+                                const result = await uploadResponse.json();
+
+                                if (!uploadResponse.ok) {
+                                    throw new Error(result.error || 'アップロードに失敗しました');
+                                }
+
+                                resultDiv.innerHTML = `記事ID: ${sourceId} のアイキャッチ画像が記事ID: ${targetId} に正常にコピーされました！<br>
+                                    <a href="/eyecatch?id=${targetId}" target="_blank" style="display: block; margin-top: 10px; text-decoration: underline;">アップロードされた画像を表示</a>`;
+                            } catch (error) {
+                                resultDiv.textContent = `エラー: ${error.message}`;
+                                resultDiv.classList.add('error');
+                            }
+                        };
+
+                        reader.onerror = function() {
+                            resultDiv.textContent = 'ファイルの読み込みに失敗しました';
+                            resultDiv.classList.add('error');
+                        };
+
+                        reader.readAsDataURL(blob);
+                    } catch (error) {
+                        resultDiv.textContent = `エラー: ${error.message}`;
+                        resultDiv.classList.add('error');
+                    }
+                });
+            }
+        });
+
+        // 未作成の記事を読み込む関数
+        async function loadPendingArticles() {
+            const pendingArticlesList = document.getElementById('pendingArticlesList');
+            pendingArticlesList.innerHTML = '<p>読み込み中...</p>';
+
+            try {
+                const response = await fetch('/pending_eyecatches');
+                const result = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(result.error || '記事の読み込みに失敗しました');
+                }
+
+                if (result.articles && result.articles.length > 0) {
+                    pendingArticlesList.innerHTML = '';
+
+                    result.articles.forEach(article => {
+                        const articleItem = document.createElement('div');
+                        articleItem.className = 'article-item';
+                        articleItem.dataset.id = article.id;
+                        articleItem.innerHTML = `
+                            <strong>ID: ${article.id}</strong>
+                            <p>${article.content}</p>
+                        `;
+
+                        // 記事をクリックしたときの処理
+                        articleItem.addEventListener('click', () => {
+                            // 以前に選択されていた記事の選択状態を解除
+                            document.querySelectorAll('.article-item').forEach(item => {
+                                item.classList.remove('selected');
+                            });
+
+                            // クリックした記事を選択状態にする
+                            articleItem.classList.add('selected');
+
+                            // 選択した記事のIDを保存
+                            document.getElementById('selectedArticleId').value = article.id;
+                        });
+
+                        pendingArticlesList.appendChild(articleItem);
+                    });
+                } else {
+                    pendingArticlesList.innerHTML = '<p>未作成の記事はありません</p>';
+                }
+            } catch (error) {
+                pendingArticlesList.innerHTML = `<p class="error">エラー: ${error.message}</p>`;
+            }
+        }
+
         // アイキャッチ画像生成フォームの処理
         document.getElementById('eyecatchForm').addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -576,8 +1065,24 @@
             imagesGrid.innerHTML = '';
 
             try {
-                const content = document.getElementById('eyecatchContent').value;
+                const contentSource = document.querySelector('input[name="contentSource"]:checked').value;
                 const useTestImages = document.getElementById('useTestImages').checked;
+
+                let content = null;
+                let articleId = null;
+
+                // 入力方法に応じてパラメータを設定
+                if (contentSource === 'text') {
+                    content = document.getElementById('eyecatchContent').value;
+                    if (!content) {
+                        throw new Error('記事の本文を入力してください');
+                    }
+                } else {
+                    articleId = document.getElementById('selectedArticleId').value;
+                    if (!articleId) {
+                        throw new Error('記事を選択してください');
+                    }
+                }
 
                 let result;
 
@@ -626,13 +1131,17 @@
                 } else {
                     // 通常のAPI呼び出し
                     const apiKey = document.getElementById('eyecatchApiKey').value;
+                    const requestBody = articleId
+                        ? { id: articleId }
+                        : { content };
+
                     const response = await fetch('/create_eyecatch', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
                             'X-API-Key': apiKey
                         },
-                        body: JSON.stringify({ content })
+                        body: JSON.stringify(requestBody)
                     });
 
                     result = await response.json();
@@ -640,6 +1149,11 @@
                     if (!response.ok) {
                         throw new Error(result.error || '画像生成に失敗しました');
                     }
+                }
+
+                // 生成に使用した記事IDを保存（アップロード時に使用）
+                if (articleId) {
+                    window.generatedForArticleId = articleId;
                 }
 
                 if (result.success && result.images && result.images.length > 0) {
@@ -1359,6 +1873,8 @@
                     }
                 });
             }
+
+            // 最終キャンバス関連のイベントを設定
         }
 
         // 背景色パレットを更新する関数

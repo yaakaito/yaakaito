@@ -5,6 +5,7 @@ export interface Env {
 	AI: Ai;
 	API_KEY: string;
 	OPENAI_API_KEY: string;
+	EYECATCH_STORE: KVNamespace;
 }
 
 // 画像処理用のインターフェース
@@ -98,6 +99,22 @@ export default {
 						content: article.content
 					},
 				}]);
+
+				// 記事が既に存在するかチェック
+				const existingArticle = await env.EYECATCH_STORE.get(`article:${article.id}`);
+
+				// 記事が存在しない場合のみKVに保存
+				if (!existingArticle) {
+					// KVに記事の内容とアイキャッチ状態を保存
+					await env.EYECATCH_STORE.put(`article:${article.id}`, JSON.stringify({
+						id: article.id,
+						content: article.content,
+						hasEyecatch: false
+					}));
+					console.log(`New article saved: ${article.id}`);
+				} else {
+					console.log(`Article already exists: ${article.id}`);
+				}
 
 				return new Response(JSON.stringify({ success: true }), {
 					headers: { "Content-Type": "application/json" }
@@ -244,8 +261,26 @@ export default {
 			}
 
 			try {
-				const data = await request.json() as { content?: string };
-				const content = data.content;
+				const data = await request.json() as { id?: string, content?: string };
+				let content = data.content;
+				const id = data.id;
+
+				// IDが指定されている場合は、KVから記事の内容を取得
+				if (id && !content) {
+					const articleData = await env.EYECATCH_STORE.get(`article:${id}`);
+					if (!articleData) {
+						return new Response(JSON.stringify({ error: "Article not found" }), {
+							status: 404,
+							headers: {
+								"Content-Type": "application/json",
+								...corsHeaders
+							}
+						});
+					}
+
+					const article = JSON.parse(articleData);
+					content = article.content;
+				}
 
 				if (!content || typeof content !== 'string') {
 					return new Response(JSON.stringify({ error: "Content is required and must be a string" }), {
@@ -457,6 +492,166 @@ export default {
 				console.error('Error processing image:', error);
 				return new Response(JSON.stringify({
 					error: "画像処理に失敗しました",
+					details: error instanceof Error ? error.message : String(error)
+				}), {
+					status: 500,
+					headers: {
+						"Content-Type": "application/json",
+						...corsHeaders
+					}
+				});
+			}
+		}
+
+		// アイキャッチのない記事一覧を取得するエンドポイント
+		if (path === "/pending_eyecatches" && request.method === "GET") {
+			try {
+				// KVからすべてのキーをリスト
+				const keys = await env.EYECATCH_STORE.list({ prefix: "article:" });
+				const pendingArticles = [];
+
+				// 各記事を取得し、アイキャッチがないものをフィルタリング
+				for (const key of keys.keys) {
+					const articleData = await env.EYECATCH_STORE.get(key.name);
+					if (articleData) {
+						const article = JSON.parse(articleData);
+						if (!article.hasEyecatch) {
+							pendingArticles.push({
+								id: article.id,
+								content: article.content.substring(0, 100) + "..." // 内容は一部だけ表示
+							});
+						}
+					}
+				}
+
+				return new Response(JSON.stringify({ articles: pendingArticles }), {
+					headers: {
+						"Content-Type": "application/json",
+						...corsHeaders
+					}
+				});
+			} catch (error) {
+				return new Response(JSON.stringify({
+					error: "Failed to fetch pending eyecatches",
+					details: error instanceof Error ? error.message : String(error)
+				}), {
+					status: 500,
+					headers: {
+						"Content-Type": "application/json",
+						...corsHeaders
+					}
+				});
+			}
+		}
+
+		// アイキャッチ画像をアップロードするエンドポイント
+		if (path === "/upload_eyecatch" && request.method === "POST") {
+			// API認証
+			if (!validateApiKey(request)) {
+				return new Response(JSON.stringify({ error: "Invalid API key" }), {
+					status: 401,
+					headers: {
+						"Content-Type": "application/json",
+						...corsHeaders
+					}
+				});
+			}
+
+			try {
+				const data = await request.json() as { id: string, imageData: string };
+
+				if (!data.id || !data.imageData) {
+					return new Response(JSON.stringify({ error: "ID and image data are required" }), {
+						status: 400,
+						headers: {
+							"Content-Type": "application/json",
+							...corsHeaders
+						}
+					});
+				}
+
+				// 記事データを取得
+				const articleKey = `article:${data.id}`;
+				const articleData = await env.EYECATCH_STORE.get(articleKey);
+
+				if (!articleData) {
+					return new Response(JSON.stringify({ error: "Article not found" }), {
+						status: 404,
+						headers: {
+							"Content-Type": "application/json",
+							...corsHeaders
+						}
+					});
+				}
+
+				// 記事データを更新
+				const article = JSON.parse(articleData);
+				article.hasEyecatch = true;
+				await env.EYECATCH_STORE.put(articleKey, JSON.stringify(article));
+
+				// アイキャッチ画像を保存
+				await env.EYECATCH_STORE.put(`eyecatch:${data.id}`, data.imageData);
+
+				return new Response(JSON.stringify({ success: true }), {
+					headers: {
+						"Content-Type": "application/json",
+						...corsHeaders
+					}
+				});
+			} catch (error) {
+				return new Response(JSON.stringify({
+					error: "Failed to upload eyecatch",
+					details: error instanceof Error ? error.message : String(error)
+				}), {
+					status: 500,
+					headers: {
+						"Content-Type": "application/json",
+						...corsHeaders
+					}
+				});
+			}
+		}
+
+		// アイキャッチ画像を取得するエンドポイント
+		if (path === "/eyecatch" && request.method === "GET") {
+			const id = url.searchParams.get("id");
+			if (!id) {
+				return new Response(JSON.stringify({ error: "ID parameter is required" }), {
+					status: 400,
+					headers: {
+						"Content-Type": "application/json",
+						...corsHeaders
+					}
+				});
+			}
+
+			try {
+				// アイキャッチ画像を取得
+				const imageData = await env.EYECATCH_STORE.get(`eyecatch:${id}`);
+
+				if (!imageData) {
+					return new Response(JSON.stringify({ error: "Eyecatch not found" }), {
+						status: 404,
+						headers: {
+							"Content-Type": "application/json",
+							...corsHeaders
+						}
+					});
+				}
+
+				// Base64データをバイナリに変換
+				const imageBytes = Uint8Array.from(atob(imageData), c => c.charCodeAt(0));
+
+				return new Response(imageBytes, {
+					headers: {
+						"Content-Type": "image/png",
+						"Cache-Control": "public, max-age=86400", // 24時間のキャッシュ
+						...corsHeaders
+					}
+				});
+			} catch (error) {
+				return new Response(JSON.stringify({
+					error: "Failed to fetch eyecatch",
 					details: error instanceof Error ? error.message : String(error)
 				}), {
 					status: 500,
