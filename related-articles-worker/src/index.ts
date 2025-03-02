@@ -232,6 +232,17 @@ export default {
 
 		// アイキャッチ画像生成エンドポイント
 		if (path === "/create_eyecatch" && request.method === "POST") {
+			// API認証
+			if (!validateApiKey(request)) {
+				return new Response(JSON.stringify({ error: "Invalid API key" }), {
+					status: 401,
+					headers: {
+						"Content-Type": "application/json",
+						...corsHeaders
+					}
+				});
+			}
+
 			try {
 				const data = await request.json() as { content?: string };
 				const content = data.content;

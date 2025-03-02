@@ -295,6 +295,10 @@
             <h2>アイキャッチ画像の生成</h2>
             <form id="eyecatchForm">
                 <div class="form-group">
+                    <label for="eyecatchApiKey">API Key:</label>
+                    <input type="password" id="eyecatchApiKey" required>
+                </div>
+                <div class="form-group">
                     <label for="eyecatchContent">記事の本文:</label>
                     <textarea id="eyecatchContent" rows="4" required placeholder="画像を生成するための記事本文を入力してください"></textarea>
                 </div>
@@ -309,16 +313,9 @@
                 <div id="eyecatchLoading" style="display: none;">画像生成中...</div>
                 <div id="eyecatchError" class="error" style="display: none;"></div>
                 <div id="eyecatchImageContainer" style="margin-top: 1rem; display: none;">
-                    <h3>生成された画像（クリックして選択）</h3>
+                    <h3>生成された画像</h3>
                     <div id="imagesGrid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1rem; margin-bottom: 1rem;"></div>
-                    <div id="selectedImageContainer" style="margin-top: 1rem; display: none;">
-                        <h3>選択された画像</h3>
-                        <img id="selectedImage" style="max-width: 100%; border: 2px solid #0066cc; border-radius: 4px;" />
-                        <div style="margin-top: 0.5rem;">
-                            <button id="downloadButton" style="background-color: #22c55e;">ダウンロード</button>
-                            <button id="editButton" style="background-color: #0066cc; margin-left: 0.5rem;">画像を加工する</button>
-                        </div>
-                    </div>
+                    <img id="selectedImage" style="display: none;" />
 
                     <!-- 画像編集UI -->
                     <div id="imageEditor" class="editor-container">
@@ -414,19 +411,50 @@
                                             <canvas id="finalCanvas" width="1200" height="630"></canvas>
 
                                             <div class="final-canvas-controls">
-                                                <div>
-                                                    <label for="bgColorPicker">背景色:</label>
-                                                    <input type="color" id="bgColorPicker" value="#ffffff">
-                                                    <button id="applyBgColorButton">適用</button>
+                                                <div style="margin-bottom: 1rem;">
+                                                    <label for="scaleSelector">倍率:</label>
+                                                    <select id="scaleSelector" style="margin-left: 0.5rem; padding: 0.3rem;">
+                                                        <option value="1">1x</option>
+                                                        <option value="2">2x</option>
+                                                        <option value="4">4x</option>
+                                                        <option value="8" selected>8x</option>
+                                                        <option value="16">16x</option>
+                                                    </select>
+                                                    <button id="applyScaleButton" style="margin-left: 0.5rem;">倍率を適用</button>
                                                 </div>
 
-                                                <div class="position-controls">
+                                                <div style="margin-bottom: 1rem;">
+                                                    <div style="margin-bottom: 0.5rem;">
+                                                        <label style="display: block; margin-bottom: 0.5rem;">背景色:</label>
+                                                        <div id="mainBgColorPalette" style="display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 0.5rem;"></div>
+                                                        <input type="hidden" id="bgColorPicker" value="#ffffff">
+                                                    </div>
+                                                    <div id="bgColorSelection" style="margin-top: 1rem;">
+                                                        <label style="display: block; margin-bottom: 0.5rem;">背景として扱う色:</label>
+                                                        <div id="bgColorPalette" style="display: flex; flex-wrap: wrap; gap: 0.3rem; margin-bottom: 0.5rem;"></div>
+                                                        <button id="applyBgColorSelectionButton">選択した色を背景として適用</button>
+                                                    </div>
+                                                </div>
+
+                                                <div class="position-controls" style="margin-bottom: 1rem;">
                                                     <label>画像位置:</label>
-                                                    <button id="moveLeftButton">←</button>
-                                                    <button id="moveUpButton">↑</button>
-                                                    <button id="moveDownButton">↓</button>
-                                                    <button id="moveRightButton">→</button>
-                                                    <button id="centerImageButton">中央に配置</button>
+                                                    <div style="display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.5rem;">
+                                                        <button id="moveLeftButton">←</button>
+                                                        <button id="moveUpButton">↑</button>
+                                                        <button id="moveDownButton">↓</button>
+                                                        <button id="moveRightButton">→</button>
+                                                        <button id="centerImageButton">中央に配置</button>
+                                                    </div>
+                                                    <div style="margin-top: 0.5rem;">
+                                                        <label for="offsetXInput" style="display: inline-block; width: 120px;">X方向オフセット:</label>
+                                                        <input type="number" id="offsetXInput" value="0" style="width: 60px;">
+                                                        <button id="applyOffsetXButton" style="margin-left: 0.5rem;">適用</button>
+                                                    </div>
+                                                    <div style="margin-top: 0.5rem;">
+                                                        <label for="offsetYInput" style="display: inline-block; width: 120px;">Y方向オフセット:</label>
+                                                        <input type="number" id="offsetYInput" value="0" style="width: 60px;">
+                                                        <button id="applyOffsetYButton" style="margin-left: 0.5rem;">適用</button>
+                                                    </div>
                                                 </div>
 
                                                 <button id="downloadFinalButton" style="background-color: #22c55e;">最終画像をダウンロード</button>
@@ -538,9 +566,7 @@
             const errorDiv = document.getElementById('eyecatchError');
             const imageContainer = document.getElementById('eyecatchImageContainer');
             const imagesGrid = document.getElementById('imagesGrid');
-            const selectedImageContainer = document.getElementById('selectedImageContainer');
             const selectedImage = document.getElementById('selectedImage');
-            const downloadButton = document.getElementById('downloadButton');
 
             // 表示状態をリセット
             loadingDiv.style.display = 'block';
@@ -548,7 +574,6 @@
             errorDiv.textContent = '';
             imageContainer.style.display = 'none';
             imagesGrid.innerHTML = '';
-            selectedImageContainer.style.display = 'none';
 
             try {
                 const content = document.getElementById('eyecatchContent').value;
@@ -600,10 +625,12 @@
                     }
                 } else {
                     // 通常のAPI呼び出し
+                    const apiKey = document.getElementById('eyecatchApiKey').value;
                     const response = await fetch('/create_eyecatch', {
                         method: 'POST',
                         headers: {
-                            'Content-Type': 'application/json'
+                            'Content-Type': 'application/json',
+                            'X-API-Key': apiKey
                         },
                         body: JSON.stringify({ content })
                     });
@@ -654,29 +681,51 @@
                         imageCard.addEventListener('click', () => {
                             // すべてのカードの選択状態をリセット
                             document.querySelectorAll('#imagesGrid > div').forEach(card => {
-                                card.style.border = '1px solid #ddd';
-                                card.style.transform = 'scale(1)';
+                                if (card.tagName === 'DIV' && card.style.border) {
+                                    card.style.border = '1px solid #ddd';
+                                    card.style.transform = 'scale(1)';
+                                }
                             });
 
                             // 選択したカードをハイライト
                             imageCard.style.border = '2px solid #0066cc';
                             imageCard.style.transform = 'scale(1.02)';
 
-                            // 選択した画像を表示
+                            // 選択した画像を設定
                             selectedImage.src = img.src;
-                            selectedImageContainer.style.display = 'block';
 
-                            // ダウンロードボタンの設定
-                            downloadButton.onclick = () => {
-                                const link = document.createElement('a');
-                                link.href = img.src;
-                                link.download = `eyecatch-${result.selectedTechKeyword}-${result.animal}-${index + 1}.png`;
-                                link.click();
-                            };
+                            // 画像編集UIを更新
+                            const previewImage = document.getElementById('previewImage');
+                            if (previewImage) {
+                                previewImage.src = img.src;
+                            }
+
+                            const selectedImagePreview = document.getElementById('selectedImagePreview');
+                            if (selectedImagePreview) {
+                                selectedImagePreview.src = img.src;
+                            }
+
+                            // キャンバスの初期化
+                            initializeCanvas(img.src);
                         });
 
                         imagesGrid.appendChild(imageCard);
                     });
+
+                    // 画像編集UIを表示（ただし初期状態では画像は選択されていない）
+                    const imageEditor = document.getElementById('imageEditor');
+                    if (imageEditor) {
+                        imageEditor.style.display = 'block';
+                    }
+
+                    // 最初の画像を視覚的に選択状態にする（ただし編集は開始しない）
+                    if (result.images.length > 0) {
+                        const firstImageCard = imagesGrid.querySelector('div');
+                        if (firstImageCard && firstImageCard.tagName === 'DIV') {
+                            firstImageCard.style.border = '2px solid #0066cc';
+                            firstImageCard.style.transform = 'scale(1.02)';
+                        }
+                    }
 
                     imageContainer.style.display = 'block';
                 } else {
@@ -692,35 +741,6 @@
 
         // 画像編集機能の実装
         document.addEventListener('DOMContentLoaded', () => {
-            // 編集ボタンのクリックイベント
-            if (document.getElementById('editButton')) {
-                document.getElementById('editButton').addEventListener('click', () => {
-                    const selectedImage = document.getElementById('selectedImage');
-                    const imageEditor = document.getElementById('imageEditor');
-
-                    if (selectedImage && selectedImage.src && imageEditor) {
-                        // 画像編集UIを表示
-                        imageEditor.style.display = 'block';
-
-                        // プレビュー画像を設定
-                        const previewImage = document.getElementById('previewImage');
-                        if (previewImage) {
-                            previewImage.src = selectedImage.src;
-                        }
-
-                        // 選択した画像をプレビュー領域にも表示
-                        const selectedImagePreview = document.getElementById('selectedImagePreview');
-                        if (selectedImagePreview) {
-                            selectedImagePreview.src = selectedImage.src;
-                        }
-
-                        // キャンバスの初期化
-                        initializeCanvas(selectedImage.src);
-                    } else {
-                        alert('画像が選択されていません。');
-                    }
-                });
-            }
 
             // スライダーの処理
             const gridSizeSlider = document.getElementById('gridSizeSlider');
@@ -832,6 +852,17 @@
             }
         });
 
+        // 技術と動物のマッピング
+        const techAnimalMap = {
+            "cloudflare": { animal: "alpaca", backgroundColor: "#F38020" },
+            "ai": { animal: "owl", backgroundColor: "#8A2BE2" },
+            "javascript": { animal: "rhino", backgroundColor: "#F7DF1E" },
+            "typescript": { animal: "guanaco", backgroundColor: "#3178C6" },
+            "html": { animal: "koala", backgroundColor: "#E34F26" },
+            "css": { animal: "fish", backgroundColor: "#1572B6" },
+            "database": { animal: "dumbo-octopus", backgroundColor: "#336791" }
+        };
+
         // グローバル変数
         let originalImageData = null;
         let imageCanvas = null;
@@ -852,6 +883,8 @@
         let editHistory = []; // 編集履歴を保存する配列
         const MAX_HISTORY = 10; // 履歴の最大数（10回までundo可能）
         let showGrid = true; // グリッド表示の状態（デフォルトは表示）
+        let selectedScale = 8; // 画像の倍率（デフォルトは8x）
+        let selectedBgColors = new Set(); // 背景色として選択された色のセット
 
         // キャンバスの初期化
         function initializeCanvas(imageSrc) {
@@ -910,10 +943,9 @@
             // 最終キャンバス関連のイベントを設定
             setupFinalCanvasEvents();
         }
-
         // 処理済み画像を最終キャンバスに描画
         function drawImageOnFinalCanvas() {
-            if (!finalCanvas || !finalCtx || !processedCanvas) return;
+            if (!finalCanvas || !finalCtx || !processedCanvas || !processedImageData) return;
 
             // 一度クリア
             finalCtx.clearRect(0, 0, finalCanvas.width, finalCanvas.height);
@@ -923,8 +955,77 @@
             finalCtx.fillStyle = bgColor;
             finalCtx.fillRect(0, 0, finalCanvas.width, finalCanvas.height);
 
-            // 処理済み画像を描画
-            finalCtx.drawImage(processedCanvas, imagePosition.x, imagePosition.y);
+            // グリッドサイズを取得
+            const gridSize = parseInt(document.getElementById('gridSizeSlider').value);
+
+            // 処理済み画像のデータを取得
+            const data = processedImageData.data;
+            const width = processedCanvas.width;
+            const height = processedCanvas.height;
+
+            // ドットサイズを計算（倍率に基づく）
+            // 1ドットは選択した倍率のサイズになる
+            const dotSize = selectedScale;
+
+            // 使用色を収集するための一時的なセット
+            const colorSet = new Set();
+
+            // 各ドットを個別に描画（補間なし）
+            for (let y = 0; y < height; y += gridSize) {
+                for (let x = 0; x < width; x += gridSize) {
+                    // グリッドの左上のピクセルの色を取得
+                    const pixelIndex = (y * width + x) * 4;
+                    const r = data[pixelIndex];
+                    const g = data[pixelIndex + 1];
+                    const b = data[pixelIndex + 2];
+                    const a = data[pixelIndex + 3];
+
+                    // 完全に透明なピクセルはスキップ
+                    if (a === 0) continue;
+
+                    // 色をHEX形式で記録
+                    const colorHex = rgbToHex(r, g, b);
+                    colorSet.add(colorHex);
+
+                    // グリッドの位置をドットとして描画
+                    // グリッドサイズで割って何ドット目かを計算し、それに倍率をかける
+                    const dotX = imagePosition.x + (x / gridSize) * dotSize;
+                    const dotY = imagePosition.y + (y / gridSize) * dotSize;
+
+                    // 画面外のドットはスキップ
+                    if (dotX < 0 || dotX >= finalCanvas.width || dotY < 0 || dotY >= finalCanvas.height) continue;
+
+                    // ドットを描画
+                    finalCtx.fillStyle = `rgba(${r}, ${g}, ${b}, ${a / 255})`;
+                    finalCtx.fillRect(dotX, dotY, dotSize, dotSize);
+                }
+            }
+
+            // 使用色を更新
+            usedColors = Array.from(colorSet);
+
+            // 背景色パレットを更新
+            updateBgColorPalette();
+
+            // オフセット値を更新（中心からの相対位置）
+            // ドット数を計算
+            const dotCountX = Math.ceil(width / gridSize);
+            const dotCountY = Math.ceil(height / gridSize);
+
+            // 拡大後のサイズを計算
+            const scaledWidth = dotCountX * dotSize;
+            const scaledHeight = dotCountY * dotSize;
+
+            const centerX = (finalCanvas.width - scaledWidth) / 2;
+            const centerY = (finalCanvas.height - scaledHeight) / 2;
+
+            const offsetXInput = document.getElementById('offsetXInput');
+            const offsetYInput = document.getElementById('offsetYInput');
+
+            if (offsetXInput && offsetYInput) {
+                offsetXInput.value = Math.round(imagePosition.x - centerX);
+                offsetYInput.value = Math.round(imagePosition.y - centerY);
+            }
         }
 
         // キャンバスのクリックイベントを設定
@@ -1089,11 +1190,73 @@
 
         // 最終キャンバス関連のイベントを設定
         function setupFinalCanvasEvents() {
-            // 背景色変更ボタン
-            const applyBgColorButton = document.getElementById('applyBgColorButton');
-            if (applyBgColorButton) {
-                applyBgColorButton.addEventListener('click', () => {
-                    drawImageOnFinalCanvas();
+            // 倍率選択の処理
+            const scaleSelector = document.getElementById('scaleSelector');
+            const applyScaleButton = document.getElementById('applyScaleButton');
+
+            if (scaleSelector && applyScaleButton) {
+                // 初期値を設定
+                scaleSelector.value = selectedScale.toString();
+
+                applyScaleButton.addEventListener('click', () => {
+                    selectedScale = parseInt(scaleSelector.value);
+                    applyScaleToFinalCanvas();
+                });
+            }
+
+            // メイン背景色パレットの初期化
+            const mainBgColorPalette = document.getElementById('mainBgColorPalette');
+            const bgColorPicker = document.getElementById('bgColorPicker');
+
+            if (mainBgColorPalette && bgColorPicker) {
+                // techAnimalMapから背景色を抽出
+                const techColors = Object.values(techAnimalMap).map(item => item.backgroundColor);
+
+                // 白色を追加
+                techColors.unshift('#ffffff');
+
+                techColors.forEach(color => {
+                    const swatch = document.createElement('div');
+                    swatch.className = 'color-swatch';
+                    swatch.style.backgroundColor = color;
+                    swatch.title = color;
+
+                    // 現在選択されている色をハイライト
+                    if (color === bgColorPicker.value) {
+                        swatch.classList.add('selected');
+                    }
+
+                    // 色をクリックしたときの処理
+                    swatch.addEventListener('click', () => {
+                        // 以前に選択されていた色の選択状態を解除
+                        document.querySelectorAll('#mainBgColorPalette .color-swatch').forEach(el => {
+                            el.classList.remove('selected');
+                        });
+
+                        // クリックした色を選択状態にする
+                        swatch.classList.add('selected');
+
+                        // 選択した色を設定
+                        bgColorPicker.value = color;
+
+                        // 背景色を適用
+                        drawImageOnFinalCanvas();
+                    });
+
+                    mainBgColorPalette.appendChild(swatch);
+                });
+            }
+
+            // 背景色として選択する色の処理
+            const bgColorPalette = document.getElementById('bgColorPalette');
+            const applyBgColorSelectionButton = document.getElementById('applyBgColorSelectionButton');
+
+            if (bgColorPalette && applyBgColorSelectionButton) {
+                // 使用色パレットから背景色パレットを生成
+                updateBgColorPalette();
+
+                applyBgColorSelectionButton.addEventListener('click', () => {
+                    applySelectedBgColors();
                 });
             }
 
@@ -1142,6 +1305,48 @@
                 });
             }
 
+            // 中心からのオフセット調整
+            const offsetXInput = document.getElementById('offsetXInput');
+            const offsetYInput = document.getElementById('offsetYInput');
+            const applyOffsetXButton = document.getElementById('applyOffsetXButton');
+            const applyOffsetYButton = document.getElementById('applyOffsetYButton');
+
+            if (offsetXInput && applyOffsetXButton) {
+                applyOffsetXButton.addEventListener('click', () => {
+                    const offsetX = parseInt(offsetXInput.value);
+                    if (!isNaN(offsetX)) {
+                        // グリッドサイズを取得
+                        const gridSize = parseInt(document.getElementById('gridSizeSlider').value);
+
+                        // ドット数を計算
+                        const dotCountX = Math.ceil(processedCanvas.width / gridSize);
+
+                        // 中心からのオフセットを計算
+                        const centerX = (finalCanvas.width - dotCountX * selectedScale) / 2;
+                        imagePosition.x = centerX + offsetX;
+                        drawImageOnFinalCanvas();
+                    }
+                });
+            }
+
+            if (offsetYInput && applyOffsetYButton) {
+                applyOffsetYButton.addEventListener('click', () => {
+                    const offsetY = parseInt(offsetYInput.value);
+                    if (!isNaN(offsetY)) {
+                        // グリッドサイズを取得
+                        const gridSize = parseInt(document.getElementById('gridSizeSlider').value);
+
+                        // ドット数を計算
+                        const dotCountY = Math.ceil(processedCanvas.height / gridSize);
+
+                        // 中心からのオフセットを計算
+                        const centerY = (finalCanvas.height - dotCountY * selectedScale) / 2;
+                        imagePosition.y = centerY + offsetY;
+                        drawImageOnFinalCanvas();
+                    }
+                });
+            }
+
             // 最終画像ダウンロードボタン
             const downloadFinalButton = document.getElementById('downloadFinalButton');
             if (downloadFinalButton) {
@@ -1154,6 +1359,149 @@
                     }
                 });
             }
+        }
+
+        // 背景色パレットを更新する関数
+        function updateBgColorPalette() {
+            const bgColorPalette = document.getElementById('bgColorPalette');
+            if (!bgColorPalette) return;
+
+            // 使用色がない場合は説明を表示
+            if (!usedColors.length) {
+                bgColorPalette.innerHTML = '<p style="color: #666; font-style: italic;">ドット絵に変換後、ここに色パレットが表示されます</p>';
+                return;
+            }
+
+            bgColorPalette.innerHTML = '<p style="margin-bottom: 0.5rem; font-size: 0.9rem;">クリックして背景にしたい色を選択（複数選択可）</p>';
+
+            usedColors.forEach(color => {
+                const swatch = document.createElement('div');
+                swatch.className = 'color-swatch';
+                swatch.style.backgroundColor = color;
+                swatch.title = color;
+
+                // 選択状態を反映
+                if (selectedBgColors.has(color)) {
+                    swatch.classList.add('selected');
+                }
+
+                // 色をクリックしたときの処理
+                swatch.addEventListener('click', () => {
+                    if (selectedBgColors.has(color)) {
+                        // すでに選択されている場合は選択解除
+                        selectedBgColors.delete(color);
+                        swatch.classList.remove('selected');
+                    } else {
+                        // 選択されていない場合は選択状態にする
+                        selectedBgColors.add(color);
+                        swatch.classList.add('selected');
+                    }
+                });
+
+                bgColorPalette.appendChild(swatch);
+            });
+
+            // 選択状態の説明を追加
+            const selectionInfo = document.createElement('div');
+            selectionInfo.style.marginTop = '0.5rem';
+            selectionInfo.style.fontSize = '0.9rem';
+            selectionInfo.style.color = '#666';
+            selectionInfo.textContent = `${selectedBgColors.size}色選択中`;
+            bgColorPalette.appendChild(selectionInfo);
+        }
+
+        // 選択した背景色を適用する関数
+        function applySelectedBgColors() {
+            // 選択された色がない場合は警告を表示
+            if (selectedBgColors.size === 0) {
+                alert('背景として扱う色が選択されていません。色パレットから1つ以上の色を選択してください。');
+                return;
+            }
+
+            if (!processedCanvas || !processedCtx || !processedImageData) return;
+
+            // 編集前の状態を履歴に保存
+            saveToHistory();
+
+            // 背景色ピッカーの色を取得
+            const bgColor = document.getElementById('bgColorPicker').value;
+
+            // 処理済み画像のデータを取得
+            const imageData = processedCtx.getImageData(0, 0, processedCanvas.width, processedCanvas.height);
+            const data = imageData.data;
+
+            // 選択した色を背景色に置き換える
+            let replacedPixels = 0;
+            const totalPixels = data.length / 4;
+
+            for (let i = 0; i < data.length; i += 4) {
+                const r = data[i];
+                const g = data[i + 1];
+                const b = data[i + 2];
+                const hexColor = rgbToHex(r, g, b);
+
+                if (selectedBgColors.has(hexColor)) {
+                    const [bgR, bgG, bgB] = hexToRgb(bgColor);
+                    data[i] = bgR;
+                    data[i + 1] = bgG;
+                    data[i + 2] = bgB;
+                    replacedPixels++;
+                }
+            }
+
+            // 画像データを更新
+            processedCtx.putImageData(imageData, 0, 0);
+            processedImageData = imageData;
+
+            // 最終キャンバスも更新
+            drawImageOnFinalCanvas();
+
+            // プレビュー画像を更新
+            const previewImage = document.getElementById('previewImage');
+            if (previewImage) {
+                const dataURL = processedCanvas.toDataURL('image/png');
+                previewImage.src = dataURL;
+            }
+
+            // 選択状態をリセット
+            selectedBgColors.clear();
+            updateBgColorPalette();
+
+            // 操作完了メッセージ
+            const percentage = Math.round((replacedPixels / totalPixels) * 100);
+            alert(`背景色の適用が完了しました。画像の約${percentage}%が背景色に置き換えられました。`);
+        }
+
+        // 倍率を適用する関数
+        function applyScaleToFinalCanvas() {
+            if (!processedCanvas || !finalCanvas) return;
+
+            // 画像の中心位置を計算
+            const centerX = finalCanvas.width / 2;
+            const centerY = finalCanvas.height / 2;
+
+            // グリッドサイズを取得
+            const gridSize = parseInt(document.getElementById('gridSizeSlider').value);
+
+            // ドットサイズを計算 - 1ドットが選択した倍率のサイズになる
+            const dotSize = selectedScale;
+            const width = processedCanvas.width;
+            const height = processedCanvas.height;
+
+            // ドット数を計算
+            const dotCountX = Math.ceil(width / gridSize);
+            const dotCountY = Math.ceil(height / gridSize);
+
+            // スケールを適用した画像サイズを計算
+            const scaledWidth = dotCountX * dotSize;
+            const scaledHeight = dotCountY * dotSize;
+
+            // 中心に配置するための位置を計算
+            imagePosition.x = centerX - scaledWidth / 2;
+            imagePosition.y = centerY - scaledHeight / 2;
+
+            // 画像を描画
+            drawImageOnFinalCanvas();
         }
 
         // グリッドの描画
@@ -1408,7 +1756,7 @@
                 // 色をクリックしたときの処理
                 swatch.addEventListener('click', () => {
                     // 以前に選択されていた色の選択状態を解除
-                    document.querySelectorAll('.color-swatch').forEach(el => {
+                    document.querySelectorAll('#colorPalette .color-swatch').forEach(el => {
                         el.classList.remove('selected');
                     });
 
@@ -1428,6 +1776,9 @@
                     selectedColor = colors[0];
                 }
             }
+
+            // 背景色パレットも同時に更新
+            updateBgColorPalette();
         }
 
         // ツール選択ボタンのイベント設定
