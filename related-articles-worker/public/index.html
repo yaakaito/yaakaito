@@ -79,7 +79,7 @@
             border: 1px solid #ddd;
             border-radius: 4px;
         }
-        #gridCanvas {
+        #gridCanvas, #processedGridCanvas {
             position: absolute;
             top: 0;
             left: 0;
@@ -105,6 +105,52 @@
             border: 1px solid #ddd;
             border-radius: 4px;
             cursor: pointer;
+        }
+        .color-swatch.selected {
+            border: 2px solid #000;
+            transform: scale(1.1);
+        }
+        .tool-buttons {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+        .tool-button {
+            padding: 0.5rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #f5f5f5;
+        }
+        .tool-button.selected {
+            background-color: #0066cc;
+            color: white;
+        }
+        .final-canvas-container {
+            margin-top: 1rem;
+            display: none;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        .final-canvas-controls {
+            margin-top: 1rem;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+        .position-controls {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+        }
+        #finalCanvas {
+            display: block;
+            max-width: 100%;
+            height: auto;
         }
     </style>
 </head>
@@ -206,17 +252,58 @@
                     <div class="editor-buttons">
                         <button id="processButton" style="background-color: #22c55e;">ドット絵に変換</button>
                         <button id="resetButton" style="background-color: #6b7280;">リセット</button>
+                        <button id="undoButton" style="background-color: #f59e0b; display: none;">元に戻す</button>
                         <button id="downloadProcessedButton" style="background-color: #0066cc; display: none;">加工画像をダウンロード</button>
                     </div>
 
                     <div id="processedImageContainer" style="margin-top: 1rem; display: none;">
                         <h3>加工後の画像</h3>
-                        <canvas id="processedCanvas"></canvas>
+                        <div class="canvas-container">
+                            <canvas id="processedCanvas"></canvas>
+                            <canvas id="processedGridCanvas"></canvas>
+                        </div>
                     </div>
 
                     <div id="colorPaletteContainer" style="margin-top: 1rem; display: none;">
                         <h3>使用色パレット (<span id="colorCount">0</span>色)</h3>
+                        <p>色を選択して画像を編集できます</p>
                         <div id="colorPalette" class="color-palette"></div>
+
+                        <div class="tool-buttons">
+                            <div id="dotToolButton" class="tool-button selected" title="ドット編集ツール">
+                                <span>ドット編集</span>
+                            </div>
+                            <div id="fillToolButton" class="tool-button" title="塗りつぶしツール">
+                                <span>塗りつぶし</span>
+                            </div>
+                            <div id="toggleGridButton" class="tool-button" title="グリッド表示切替">
+                                <span>グリッド表示</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="finalCanvasContainer" class="final-canvas-container">
+                        <h3>最終出力 (1200 x 630)</h3>
+                        <canvas id="finalCanvas" width="1200" height="630"></canvas>
+
+                        <div class="final-canvas-controls">
+                            <div>
+                                <label for="bgColorPicker">背景色:</label>
+                                <input type="color" id="bgColorPicker" value="#ffffff">
+                                <button id="applyBgColorButton">適用</button>
+                            </div>
+
+                            <div class="position-controls">
+                                <label>画像位置:</label>
+                                <button id="moveLeftButton">←</button>
+                                <button id="moveUpButton">↑</button>
+                                <button id="moveDownButton">↓</button>
+                                <button id="moveRightButton">→</button>
+                                <button id="centerImageButton">中央に配置</button>
+                            </div>
+
+                            <button id="downloadFinalButton" style="background-color: #22c55e;">最終画像をダウンロード</button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -536,6 +623,25 @@
                 });
             }
 
+            // Undoボタンのクリックイベント
+            const undoButton = document.getElementById('undoButton');
+            if (undoButton) {
+                undoButton.addEventListener('click', undo);
+            }
+
+            // Ctrl+Zのキーボードショートカット
+            window.addEventListener('keydown', (e) => {
+                // Ctrl+Z (Windows/Linux) または Command+Z (Mac)
+                if ((e.ctrlKey || e.metaKey) && e.key === 'z') {
+                    // 処理済み画像が表示されている場合のみundo実行
+                    const processedImageContainer = document.getElementById('processedImageContainer');
+                    if (processedImageContainer && processedImageContainer.style.display !== 'none') {
+                        e.preventDefault(); // デフォルトのブラウザのundo動作を防止
+                        undo();
+                    }
+                }
+            });
+
             // 処理済み画像ダウンロードボタンのクリックイベント
             const downloadProcessedButton = document.getElementById('downloadProcessedButton');
             if (downloadProcessedButton) {
@@ -557,6 +663,20 @@
         let imageCtx = null;
         let gridCanvas = null;
         let gridCtx = null;
+        let processedCanvas = null;
+        let processedCtx = null;
+        let processedGridCanvas = null;
+        let processedGridCtx = null;
+        let finalCanvas = null;
+        let finalCtx = null;
+        let selectedColor = null;
+        let currentTool = 'dot'; // 'dot' または 'fill'
+        let imagePosition = { x: 0, y: 0 };
+        let processedImageData = null;
+        let usedColors = [];
+        let editHistory = []; // 編集履歴を保存する配列
+        const MAX_HISTORY = 10; // 履歴の最大数（10回までundo可能）
+        let showGrid = true; // グリッド表示の状態（デフォルトは表示）
 
         // キャンバスの初期化
         function initializeCanvas(imageSrc) {
@@ -584,41 +704,327 @@
 
                 // グリッドを描画
                 drawGrid();
+
+                // ツールボタンの設定
+                setupToolButtons();
+
+                // キャンバスのクリックイベントを設定
+                setupCanvasClickEvents();
             };
             img.src = imageSrc;
         }
 
+        // 最終出力用キャンバスの初期化
+        function initializeFinalCanvas() {
+            finalCanvas = document.getElementById('finalCanvas');
+            if (!finalCanvas) return;
+
+            finalCtx = finalCanvas.getContext('2d');
+
+            // 背景色を白で塗りつぶす
+            finalCtx.fillStyle = '#ffffff';
+            finalCtx.fillRect(0, 0, finalCanvas.width, finalCanvas.height);
+
+            // 処理済み画像を中央に配置
+            if (processedCanvas) {
+                imagePosition.x = (finalCanvas.width - processedCanvas.width) / 2;
+                imagePosition.y = (finalCanvas.height - processedCanvas.height) / 2;
+                drawImageOnFinalCanvas();
+            }
+
+            // 最終キャンバス関連のイベントを設定
+            setupFinalCanvasEvents();
+        }
+
+        // 処理済み画像を最終キャンバスに描画
+        function drawImageOnFinalCanvas() {
+            if (!finalCanvas || !finalCtx || !processedCanvas) return;
+
+            // 一度クリア
+            finalCtx.clearRect(0, 0, finalCanvas.width, finalCanvas.height);
+
+            // 背景色を適用
+            const bgColor = document.getElementById('bgColorPicker').value;
+            finalCtx.fillStyle = bgColor;
+            finalCtx.fillRect(0, 0, finalCanvas.width, finalCanvas.height);
+
+            // 処理済み画像を描画
+            finalCtx.drawImage(processedCanvas, imagePosition.x, imagePosition.y);
+        }
+
+        // キャンバスのクリックイベントを設定
+        function setupCanvasClickEvents() {
+            const canvas = document.getElementById('processedCanvas');
+            if (!canvas) return;
+
+            canvas.addEventListener('click', (e) => {
+                if (!selectedColor || !processedImageData) return;
+
+                // 編集前の状態を履歴に保存
+                saveToHistory();
+
+                const rect = canvas.getBoundingClientRect();
+                const x = Math.floor(e.clientX - rect.left);
+                const y = Math.floor(e.clientY - rect.top);
+
+                const gridSize = parseInt(document.getElementById('gridSizeSlider').value);
+                const offsetX = parseInt(document.getElementById('offsetXSlider').value);
+                const offsetY = parseInt(document.getElementById('offsetYSlider').value);
+
+                // グリッドに合わせた座標を計算
+                const gridX = Math.floor((x - offsetX) / gridSize) * gridSize + offsetX;
+                const gridY = Math.floor((y - offsetY) / gridSize) * gridSize + offsetY;
+
+                // 選択したツールに応じた処理
+                if (currentTool === 'dot') {
+                    // ドット編集: クリックした位置のドットを選択した色に変更
+                    const [r, g, b] = hexToRgb(selectedColor);
+                    processedCtx.fillStyle = selectedColor;
+                    processedCtx.fillRect(
+                        gridX,
+                        gridY,
+                        Math.min(gridSize, canvas.width - gridX),
+                        Math.min(gridSize, canvas.height - gridY)
+                    );
+                } else if (currentTool === 'fill') {
+                    // 塗りつぶし: クリックした位置と同じ色の連続した領域を選択した色で塗りつぶす
+                    floodFill(gridX, gridY, selectedColor);
+                }
+
+                // 処理後の画像データを更新
+                processedImageData = processedCtx.getImageData(0, 0, canvas.width, canvas.height);
+
+                // 最終キャンバスも更新
+                drawImageOnFinalCanvas();
+
+                // Undoボタンを表示
+                document.getElementById('undoButton').style.display = 'inline-block';
+            });
+        }
+
+        // 編集履歴に現在の状態を保存
+        function saveToHistory() {
+            if (!processedCanvas || !processedCtx || !processedImageData) return;
+
+            // 現在の画像データのコピーを作成
+            const imageDataCopy = new ImageData(
+                new Uint8ClampedArray(processedImageData.data),
+                processedImageData.width,
+                processedImageData.height
+            );
+
+            // 履歴に追加
+            editHistory.push(imageDataCopy);
+
+            // 履歴が最大数を超えたら古いものを削除
+            if (editHistory.length > MAX_HISTORY) {
+                editHistory.shift();
+            }
+        }
+
+        // 編集履歴から前の状態に戻す
+        function undo() {
+            if (editHistory.length === 0) return;
+
+            // 履歴から最新の状態を取得
+            const previousState = editHistory.pop();
+
+            // キャンバスに適用
+            processedCtx.putImageData(previousState, 0, 0);
+            processedImageData = previousState;
+
+            // 最終キャンバスも更新
+            drawImageOnFinalCanvas();
+
+            // 履歴がなくなったらUndoボタンを非表示
+            if (editHistory.length === 0) {
+                document.getElementById('undoButton').style.display = 'none';
+            }
+        }
+
+        // 塗りつぶし処理（フラッドフィル）
+        function floodFill(startX, startY, fillColor) {
+            if (!processedCanvas || !processedCtx || !processedImageData) return;
+
+            const width = processedCanvas.width;
+            const height = processedCanvas.height;
+            const data = processedImageData.data;
+
+            // クリックした位置の色を取得
+            const startPos = (startY * width + startX) * 4;
+            const startR = data[startPos];
+            const startG = data[startPos + 1];
+            const startB = data[startPos + 2];
+            const startA = data[startPos + 3];
+
+            // 塗りつぶす色が同じなら何もしない
+            const [fillR, fillG, fillB] = hexToRgb(fillColor);
+            if (startR === fillR && startG === fillG && startB === fillB) return;
+
+            // 訪問済みの位置を記録する配列
+            const visited = new Array(width * height).fill(false);
+
+            // 塗りつぶし処理を行うキュー
+            const queue = [{x: startX, y: startY}];
+
+            while (queue.length > 0) {
+                const {x, y} = queue.shift();
+                const pos = (y * width + x) * 4;
+
+                // すでに訪問済みならスキップ
+                if (visited[y * width + x]) continue;
+
+                // 現在位置の色を取得
+                const r = data[pos];
+                const g = data[pos + 1];
+                const b = data[pos + 2];
+                const a = data[pos + 3];
+
+                // 開始位置と同じ色でなければスキップ
+                if (r !== startR || g !== startG || b !== startB || a !== startA) continue;
+
+                // 現在位置を塗りつぶす
+                processedCtx.fillStyle = fillColor;
+                processedCtx.fillRect(x, y, 1, 1);
+
+                // 訪問済みにする
+                visited[y * width + x] = true;
+
+                // 上下左右の位置をキューに追加
+                if (x > 0) queue.push({x: x - 1, y: y});
+                if (x < width - 1) queue.push({x: x + 1, y: y});
+                if (y > 0) queue.push({x: x, y: y - 1});
+                if (y < height - 1) queue.push({x: x, y: y + 1});
+            }
+        }
+
+        // 最終キャンバス関連のイベントを設定
+        function setupFinalCanvasEvents() {
+            // 背景色変更ボタン
+            const applyBgColorButton = document.getElementById('applyBgColorButton');
+            if (applyBgColorButton) {
+                applyBgColorButton.addEventListener('click', () => {
+                    drawImageOnFinalCanvas();
+                });
+            }
+
+            // 画像位置調整ボタン
+            const moveLeftButton = document.getElementById('moveLeftButton');
+            const moveRightButton = document.getElementById('moveRightButton');
+            const moveUpButton = document.getElementById('moveUpButton');
+            const moveDownButton = document.getElementById('moveDownButton');
+            const centerImageButton = document.getElementById('centerImageButton');
+
+            if (moveLeftButton) {
+                moveLeftButton.addEventListener('click', () => {
+                    imagePosition.x -= 10;
+                    drawImageOnFinalCanvas();
+                });
+            }
+
+            if (moveRightButton) {
+                moveRightButton.addEventListener('click', () => {
+                    imagePosition.x += 10;
+                    drawImageOnFinalCanvas();
+                });
+            }
+
+            if (moveUpButton) {
+                moveUpButton.addEventListener('click', () => {
+                    imagePosition.y -= 10;
+                    drawImageOnFinalCanvas();
+                });
+            }
+
+            if (moveDownButton) {
+                moveDownButton.addEventListener('click', () => {
+                    imagePosition.y += 10;
+                    drawImageOnFinalCanvas();
+                });
+            }
+
+            if (centerImageButton) {
+                centerImageButton.addEventListener('click', () => {
+                    if (processedCanvas) {
+                        imagePosition.x = (finalCanvas.width - processedCanvas.width) / 2;
+                        imagePosition.y = (finalCanvas.height - processedCanvas.height) / 2;
+                        drawImageOnFinalCanvas();
+                    }
+                });
+            }
+
+            // 最終画像ダウンロードボタン
+            const downloadFinalButton = document.getElementById('downloadFinalButton');
+            if (downloadFinalButton) {
+                downloadFinalButton.addEventListener('click', () => {
+                    if (finalCanvas) {
+                        const link = document.createElement('a');
+                        link.href = finalCanvas.toDataURL('image/png');
+                        link.download = 'final-eyecatch-1200x630.png';
+                        link.click();
+                    }
+                });
+            }
+        }
+
         // グリッドの描画
-        function drawGrid() {
-            if (!gridCanvas || !gridCtx || !imageCanvas) return;
+        function drawGrid(targetCanvas = 'original') {
+            const isOriginal = targetCanvas === 'original';
+            const canvas = isOriginal ? imageCanvas : processedCanvas;
+            const gridCanvasObj = isOriginal ? gridCanvas : processedGridCanvas;
+            const gridCtxObj = isOriginal ? gridCtx : processedGridCtx;
+
+            if (!gridCanvasObj || !gridCtxObj || !canvas) return;
 
             // グリッドをクリア
-            gridCtx.clearRect(0, 0, gridCanvas.width, gridCanvas.height);
+            gridCtxObj.clearRect(0, 0, gridCanvasObj.width, gridCanvasObj.height);
+
+            // グリッド表示がOFFの場合は何も描画しない
+            if (!showGrid) return;
 
             const gridSize = parseInt(document.getElementById('gridSizeSlider').value);
             const offsetX = parseInt(document.getElementById('offsetXSlider').value);
             const offsetY = parseInt(document.getElementById('offsetYSlider').value);
-            const width = imageCanvas.width;
-            const height = imageCanvas.height;
+            const width = canvas.width;
+            const height = canvas.height;
 
-            gridCtx.strokeStyle = 'rgba(255, 0, 0, 0.5)';
-            gridCtx.lineWidth = 1;
+            gridCtxObj.strokeStyle = 'rgba(255, 0, 0, 0.5)';
+            gridCtxObj.lineWidth = 1;
 
             // 縦線を描画（オフセットを考慮）
             for (let x = offsetX; x <= width; x += gridSize) {
-                gridCtx.beginPath();
-                gridCtx.moveTo(x, 0);
-                gridCtx.lineTo(x, height);
-                gridCtx.stroke();
+                gridCtxObj.beginPath();
+                gridCtxObj.moveTo(x, 0);
+                gridCtxObj.lineTo(x, height);
+                gridCtxObj.stroke();
             }
 
             // 横線を描画（オフセットを考慮）
             for (let y = offsetY; y <= height; y += gridSize) {
-                gridCtx.beginPath();
-                gridCtx.moveTo(0, y);
-                gridCtx.lineTo(width, y);
-                gridCtx.stroke();
+                gridCtxObj.beginPath();
+                gridCtxObj.moveTo(0, y);
+                gridCtxObj.lineTo(width, y);
+                gridCtxObj.stroke();
             }
+        }
+
+        // グリッド表示の切り替え
+        function toggleGrid() {
+            showGrid = !showGrid;
+
+            // グリッド表示ボタンの表示を更新
+            const toggleGridButton = document.getElementById('toggleGridButton');
+            if (toggleGridButton) {
+                if (showGrid) {
+                    toggleGridButton.classList.add('selected');
+                } else {
+                    toggleGridButton.classList.remove('selected');
+                }
+            }
+
+            // 両方のグリッドを再描画
+            drawGrid('original');
+            drawGrid('processed');
         }
 
         // 画像処理
@@ -634,11 +1040,11 @@
             // 元の画像データを復元
             imageCtx.putImageData(originalImageData, 0, 0);
 
-            // 処理用のキャンバスを作成
-            const processedCanvas = document.getElementById('processedCanvas');
+            // 処理用のキャンバスを取得
+            processedCanvas = document.getElementById('processedCanvas');
             if (!processedCanvas) return;
 
-            const processedCtx = processedCanvas.getContext('2d');
+            processedCtx = processedCanvas.getContext('2d');
             processedCanvas.width = width;
             processedCanvas.height = height;
 
@@ -742,6 +1148,13 @@
                 processedCtx.putImageData(fullImageData, 0, 0);
             }
 
+            // 処理後の画像データを保存
+            processedImageData = processedCtx.getImageData(0, 0, width, height);
+
+            // usedColorsを更新（配列のコピーを作成）
+            usedColors.length = 0; // 配列を空にする
+            finalColors.forEach(color => usedColors.push(color));
+
             // 色パレットを表示
             displayColorPalette(finalColors);
 
@@ -749,9 +1162,24 @@
             document.getElementById('processedImageContainer').style.display = 'block';
             document.getElementById('colorPaletteContainer').style.display = 'block';
             document.getElementById('downloadProcessedButton').style.display = 'inline-block';
+            document.getElementById('finalCanvasContainer').style.display = 'block';
 
             // 色の数を表示
             document.getElementById('colorCount').textContent = finalColors.length;
+
+            // 加工後の画像用のグリッドキャンバスを初期化
+            processedGridCanvas = document.getElementById('processedGridCanvas');
+            if (processedGridCanvas) {
+                processedGridCtx = processedGridCanvas.getContext('2d');
+                processedGridCanvas.width = width;
+                processedGridCanvas.height = height;
+
+                // グリッドを描画
+                drawGrid('processed');
+            }
+
+            // 最終出力用キャンバスの初期化
+            initializeFinalCanvas();
         }
 
         // 色パレットの表示
@@ -766,8 +1194,63 @@
                 swatch.className = 'color-swatch';
                 swatch.style.backgroundColor = color;
                 swatch.title = color;
+
+                // 色をクリックしたときの処理
+                swatch.addEventListener('click', () => {
+                    // 以前に選択されていた色の選択状態を解除
+                    document.querySelectorAll('.color-swatch').forEach(el => {
+                        el.classList.remove('selected');
+                    });
+
+                    // クリックした色を選択状態にする
+                    swatch.classList.add('selected');
+                    selectedColor = color;
+                });
+
                 paletteContainer.appendChild(swatch);
             });
+
+            // 最初の色を選択状態にする
+            if (colors.length > 0 && !selectedColor) {
+                const firstSwatch = paletteContainer.querySelector('.color-swatch');
+                if (firstSwatch) {
+                    firstSwatch.classList.add('selected');
+                    selectedColor = colors[0];
+                }
+            }
+        }
+
+        // ツール選択ボタンのイベント設定
+        function setupToolButtons() {
+            const dotToolButton = document.getElementById('dotToolButton');
+            const fillToolButton = document.getElementById('fillToolButton');
+            const toggleGridButton = document.getElementById('toggleGridButton');
+
+            if (dotToolButton && fillToolButton) {
+                // ドット編集ツールをクリックしたとき
+                dotToolButton.addEventListener('click', () => {
+                    dotToolButton.classList.add('selected');
+                    fillToolButton.classList.remove('selected');
+                    currentTool = 'dot';
+                });
+
+                // 塗りつぶしツールをクリックしたとき
+                fillToolButton.addEventListener('click', () => {
+                    fillToolButton.classList.add('selected');
+                    dotToolButton.classList.remove('selected');
+                    currentTool = 'fill';
+                });
+            }
+
+            // グリッド表示切替ボタンのクリックイベント
+            if (toggleGridButton) {
+                // 初期状態の設定（デフォルトは表示ON）
+                if (showGrid) {
+                    toggleGridButton.classList.add('selected');
+                }
+
+                toggleGridButton.addEventListener('click', toggleGrid);
+            }
         }
 
         // 色の数を減らす処理
