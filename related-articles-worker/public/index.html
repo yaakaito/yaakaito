@@ -6,10 +6,55 @@
     <title>関連記事API テスト</title>
     <style>
         body {
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
+            margin: 0;
+            padding: 0;
             font-family: sans-serif;
+            display: flex;
+            min-height: 100vh;
+        }
+        /* 2カラムレイアウト用のスタイル */
+        .sidebar {
+            width: 200px;
+            background-color: #f5f5f5;
+            padding: 15px;
+            box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+            z-index: 10;
+            left: 0;
+            top: 0;
+        }
+        .main-content {
+            flex: 1;
+            padding: 20px;
+            margin-left: 230px; /* サイドバーの幅 + パディング */
+            max-width: calc(100% - 230px);
+        }
+        .menu-item {
+            padding: 12px 15px;
+            margin-bottom: 8px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s;
+            border-left: 3px solid transparent;
+            font-weight: 500;
+        }
+        .menu-item:hover {
+            background-color: #e0e0e0;
+            border-left-color: #0066cc;
+        }
+        .menu-item.active {
+            background-color: #0066cc;
+            color: white;
+            border-left-color: #004999;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+        }
+        .content-section {
+            display: none;
+        }
+        .content-section.active {
+            display: block;
         }
         .form-group {
             margin-bottom: 1rem;
@@ -49,6 +94,49 @@
             margin-top: 1rem;
             display: none;
         }
+        .editor-layout {
+            display: flex;
+            gap: 20px;
+            flex-wrap: nowrap;
+        }
+        .editor-preview {
+            flex: 0 0 250px;
+            position: sticky;
+            top: 20px;
+            align-self: flex-start;
+            margin-left: 10px;
+        }
+        .editor-main {
+            flex: 1;
+            min-width: 300px;
+            max-width: calc(100% - 280px);
+        }
+        .editor-steps {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+        .editor-step {
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 1rem;
+            background-color: #f9f9f9;
+            margin-bottom: 1rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        .editor-step-title {
+            font-weight: bold;
+            margin-bottom: 0.8rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid #eee;
+            color: #0066cc;
+        }
+        .editor-step-content {
+            margin-top: 0.8rem;
+        }
         .grid-controls {
             margin-bottom: 1rem;
         }
@@ -74,10 +162,10 @@
         .canvas-container {
             position: relative;
             margin: 1rem 0;
-            overflow: auto;
-            max-height: 600px;
+            overflow: hidden;
             border: 1px solid #ddd;
             border-radius: 4px;
+            white-space: normal;
         }
         #gridCanvas, #processedGridCanvas {
             position: absolute;
@@ -98,13 +186,15 @@
             padding: 0.5rem;
             background: #f5f5f5;
             border-radius: 4px;
+            justify-content: space-between;
         }
         .color-swatch {
-            width: 24px;
-            height: 24px;
+            width: 30px;
+            height: 30px;
             border: 1px solid #ddd;
             border-radius: 4px;
             cursor: pointer;
+            margin-bottom: 0.5rem;
         }
         .color-swatch.selected {
             border: 2px solid #000;
@@ -124,6 +214,8 @@
             align-items: center;
             justify-content: center;
             background-color: #f5f5f5;
+            flex: 1;
+            text-align: center;
         }
         .tool-button.selected {
             background-color: #0066cc;
@@ -155,162 +247,235 @@
     </style>
 </head>
 <body>
-    <h1>関連記事API テスト</h1>
+    <div class="sidebar">
+        <h1>関連記事API テスト</h1>
+        <div class="menu-item active" data-target="register">記事登録</div>
+        <div class="menu-item" data-target="search">関連記事</div>
+        <div class="menu-item" data-target="eyecatch">画像生成</div>
+    </div>
 
-    <section>
-        <h2>記事の登録</h2>
-        <form id="registerForm">
-            <div class="form-group">
-                <label for="apiKey">API Key:</label>
-                <input type="password" id="apiKey" required>
-            </div>
-            <div class="form-group">
-                <label for="articleId">記事ID:</label>
-                <input type="text" id="articleId" required>
-            </div>
-            <div class="form-group">
-                <label for="url">URL:</label>
-                <input type="url" id="url" required>
-            </div>
-            <div class="form-group">
-                <label for="content">記事の内容:</label>
-                <textarea id="content" rows="4" required></textarea>
-            </div>
-            <button type="submit">登録</button>
-        </form>
-        <div id="registerResult" class="result"></div>
-    </section>
-
-    <section>
-        <h2>関連記事の取得</h2>
-        <form id="searchForm">
-            <div class="form-group">
-                <label for="searchId">記事ID:</label>
-                <input type="text" id="searchId" required>
-            </div>
-            <button type="submit">検索</button>
-        </form>
-        <div id="searchResult" class="result"></div>
-    </section>
-
-    <section>
-        <h2>アイキャッチ画像の生成</h2>
-        <form id="eyecatchForm">
-            <div class="form-group">
-                <label for="eyecatchContent">記事の本文:</label>
-                <textarea id="eyecatchContent" rows="4" required placeholder="画像を生成するための記事本文を入力してください"></textarea>
-            </div>
-            <div class="form-group">
-                <label>
-                    <input type="checkbox" id="useTestImages"> テスト画像を使用する（APIを呼び出さない）
-                </label>
-            </div>
-            <button type="submit">画像生成</button>
-        </form>
-        <div id="eyecatchResult" class="result">
-            <div id="eyecatchLoading" style="display: none;">画像生成中...</div>
-            <div id="eyecatchError" class="error" style="display: none;"></div>
-            <div id="eyecatchImageContainer" style="margin-top: 1rem; text-align: center; display: none;">
-                <h3>生成された画像（クリックして選択）</h3>
-                <div id="imagesGrid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1rem; margin-bottom: 1rem;"></div>
-                <div id="selectedImageContainer" style="margin-top: 1rem; display: none;">
-                    <h3>選択された画像</h3>
-                    <img id="selectedImage" style="max-width: 100%; border: 2px solid #0066cc; border-radius: 4px;" />
-                    <div style="margin-top: 0.5rem;">
-                        <button id="downloadButton" style="background-color: #22c55e;">ダウンロード</button>
-                        <button id="editButton" style="background-color: #0066cc; margin-left: 0.5rem;">画像を加工する</button>
-                    </div>
+    <div class="main-content">
+        <section id="register" class="content-section active">
+            <h2>記事の登録</h2>
+            <form id="registerForm">
+                <div class="form-group">
+                    <label for="apiKey">API Key:</label>
+                    <input type="password" id="apiKey" required>
                 </div>
-
-                <!-- 画像編集UI -->
-                <div id="imageEditor" class="editor-container">
-                    <h3>ドット絵加工</h3>
-                    <div class="grid-controls">
-                        <div class="slider-container">
-                            <label for="gridSizeSlider">グリッドサイズ:</label>
-                            <input type="range" id="gridSizeSlider" min="4" max="32" value="8" step="1">
-                            <span id="gridSizeValue" class="slider-value">8px</span>
-                        </div>
-                        <div class="slider-container">
-                            <label for="offsetXSlider">X方向オフセット:</label>
-                            <input type="range" id="offsetXSlider" min="0" max="16" value="0" step="1">
-                            <span id="offsetXValue" class="slider-value">0px</span>
-                        </div>
-                        <div class="slider-container">
-                            <label for="offsetYSlider">Y方向オフセット:</label>
-                            <input type="range" id="offsetYSlider" min="0" max="16" value="0" step="1">
-                            <span id="offsetYValue" class="slider-value">0px</span>
-                        </div>
-                        <p>グリッドサイズは1ドットの大きさを表します。小さいほど細かいドット絵になります。オフセットはグリッドの開始位置をずらします。</p>
-                    </div>
-
-                    <div class="canvas-container">
-                        <canvas id="imageCanvas"></canvas>
-                        <canvas id="gridCanvas"></canvas>
-                    </div>
-
-                    <div class="editor-buttons">
-                        <button id="processButton" style="background-color: #22c55e;">ドット絵に変換</button>
-                        <button id="resetButton" style="background-color: #6b7280;">リセット</button>
-                        <button id="undoButton" style="background-color: #f59e0b; display: none;">元に戻す</button>
-                        <button id="downloadProcessedButton" style="background-color: #0066cc; display: none;">加工画像をダウンロード</button>
-                    </div>
-
-                    <div id="processedImageContainer" style="margin-top: 1rem; display: none;">
-                        <h3>加工後の画像</h3>
-                        <div class="canvas-container">
-                            <canvas id="processedCanvas"></canvas>
-                            <canvas id="processedGridCanvas"></canvas>
-                        </div>
-                    </div>
-
-                    <div id="colorPaletteContainer" style="margin-top: 1rem; display: none;">
-                        <h3>使用色パレット (<span id="colorCount">0</span>色)</h3>
-                        <p>色を選択して画像を編集できます</p>
-                        <div id="colorPalette" class="color-palette"></div>
-
-                        <div class="tool-buttons">
-                            <div id="dotToolButton" class="tool-button selected" title="ドット編集ツール">
-                                <span>ドット編集</span>
-                            </div>
-                            <div id="fillToolButton" class="tool-button" title="塗りつぶしツール">
-                                <span>塗りつぶし</span>
-                            </div>
-                            <div id="toggleGridButton" class="tool-button" title="グリッド表示切替">
-                                <span>グリッド表示</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div id="finalCanvasContainer" class="final-canvas-container">
-                        <h3>最終出力 (1200 x 630)</h3>
-                        <canvas id="finalCanvas" width="1200" height="630"></canvas>
-
-                        <div class="final-canvas-controls">
-                            <div>
-                                <label for="bgColorPicker">背景色:</label>
-                                <input type="color" id="bgColorPicker" value="#ffffff">
-                                <button id="applyBgColorButton">適用</button>
-                            </div>
-
-                            <div class="position-controls">
-                                <label>画像位置:</label>
-                                <button id="moveLeftButton">←</button>
-                                <button id="moveUpButton">↑</button>
-                                <button id="moveDownButton">↓</button>
-                                <button id="moveRightButton">→</button>
-                                <button id="centerImageButton">中央に配置</button>
-                            </div>
-
-                            <button id="downloadFinalButton" style="background-color: #22c55e;">最終画像をダウンロード</button>
-                        </div>
-                    </div>
+                <div class="form-group">
+                    <label for="articleId">記事ID:</label>
+                    <input type="text" id="articleId" required>
                 </div>
+                <div class="form-group">
+                    <label for="url">URL:</label>
+                    <input type="url" id="url" required>
+                </div>
+                <div class="form-group">
+                    <label for="content">記事の内容:</label>
+                    <textarea id="content" rows="4" required></textarea>
+                </div>
+                <button type="submit">登録</button>
+            </form>
+            <div id="registerResult" class="result"></div>
+        </section>
+
+        <section id="search" class="content-section">
+            <h2>関連記事の取得</h2>
+            <form id="searchForm">
+                <div class="form-group">
+                    <label for="searchId">記事ID:</label>
+                    <input type="text" id="searchId" required>
+                </div>
+                <button type="submit">検索</button>
+            </form>
+            <div id="searchResult" class="result"></div>
+        </section>
+
+        <section id="eyecatch" class="content-section">
+            <h2>アイキャッチ画像の生成</h2>
+            <form id="eyecatchForm">
+                <div class="form-group">
+                    <label for="eyecatchContent">記事の本文:</label>
+                    <textarea id="eyecatchContent" rows="4" required placeholder="画像を生成するための記事本文を入力してください"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" id="useTestImages"> テスト画像を使用する（APIを呼び出さない）
+                    </label>
+                </div>
+                <button type="submit">画像生成</button>
+            </form>
+            <div id="eyecatchResult" class="result">
+                <div id="eyecatchLoading" style="display: none;">画像生成中...</div>
+                <div id="eyecatchError" class="error" style="display: none;"></div>
+                <div id="eyecatchImageContainer" style="margin-top: 1rem; display: none;">
+                    <h3>生成された画像（クリックして選択）</h3>
+                    <div id="imagesGrid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1rem; margin-bottom: 1rem;"></div>
+                    <div id="selectedImageContainer" style="margin-top: 1rem; display: none;">
+                        <h3>選択された画像</h3>
+                        <img id="selectedImage" style="max-width: 100%; border: 2px solid #0066cc; border-radius: 4px;" />
+                        <div style="margin-top: 0.5rem;">
+                            <button id="downloadButton" style="background-color: #22c55e;">ダウンロード</button>
+                            <button id="editButton" style="background-color: #0066cc; margin-left: 0.5rem;">画像を加工する</button>
+                        </div>
+                    </div>
+
+                    <!-- 画像編集UI -->
+                    <div id="imageEditor" class="editor-container">
+                        <h3>ドット絵加工</h3>
+                        <div class="editor-layout">
+                            <div class="editor-main">
+                                <div class="editor-steps">
+                                    <!-- ステップ1: グリッド設定 -->
+                                    <div class="editor-step">
+                                        <div class="editor-step-title">
+                                            <span>ステップ1: グリッド設定</span>
+                                        </div>
+                                        <div class="editor-step-content">
+                                            <div class="canvas-container" style="margin-bottom: 15px;">
+                                                <canvas id="imageCanvas"></canvas>
+                                                <canvas id="gridCanvas"></canvas>
+                                            </div>
+
+                                            <div class="grid-controls">
+                                                <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                                                    <div class="slider-container" style="flex: 1; min-width: 200px;">
+                                                        <label for="gridSizeSlider">グリッドサイズ:</label>
+                                                        <input type="range" id="gridSizeSlider" min="4" max="32" value="8" step="1">
+                                                        <span id="gridSizeValue" class="slider-value">8px</span>
+                                                    </div>
+                                                    <div class="slider-container" style="flex: 1; min-width: 200px;">
+                                                        <label for="offsetXSlider">X方向オフセット:</label>
+                                                        <input type="range" id="offsetXSlider" min="0" max="16" value="0" step="1">
+                                                        <span id="offsetXValue" class="slider-value">0px</span>
+                                                    </div>
+                                                    <div class="slider-container" style="flex: 1; min-width: 200px;">
+                                                        <label for="offsetYSlider">Y方向オフセット:</label>
+                                                        <input type="range" id="offsetYSlider" min="0" max="16" value="0" step="1">
+                                                        <span id="offsetYValue" class="slider-value">0px</span>
+                                                    </div>
+                                                </div>
+
+                                                <div class="editor-buttons" style="margin-top: 15px;">
+                                                    <button id="processButton" style="background-color: #22c55e;">ドット絵に変換</button>
+                                                    <button id="resetButton" style="background-color: #6b7280;">リセット</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- ステップ2: ドット絵編集 -->
+                                    <div id="processedImageContainer" class="editor-step" style="display: none;">
+                                        <div class="editor-step-title">
+                                            <span>ステップ2: ドット絵編集</span>
+                                        </div>
+                                        <div class="editor-step-content">
+                                            <div style="display: flex; gap: 20px; align-items: flex-start;">
+                                                <div style="flex: 1;">
+                                                    <div class="canvas-container">
+                                                        <canvas id="processedCanvas"></canvas>
+                                                        <canvas id="processedGridCanvas"></canvas>
+                                                    </div>
+
+                                                    <div class="editor-buttons" style="margin-top: 1rem;">
+                                                        <button id="undoButton" style="background-color: #f59e0b;">元に戻す</button>
+                                                        <button id="downloadProcessedButton" style="background-color: #0066cc;">加工画像をダウンロード</button>
+                                                    </div>
+                                                </div>
+
+                                                <div id="colorPaletteContainer" style="width: 250px; background-color: #f9f9f9; padding: 1rem; border-radius: 4px; border: 1px solid #eee;">
+                                                    <h4 style="margin-top: 0; color: #0066cc; border-bottom: 1px solid #d0e3ff; padding-bottom: 0.5rem;">使用色パレット (<span id="colorCount">0</span>色)</h4>
+                                                    <p>色を選択して画像を編集できます</p>
+                                                    <div id="colorPalette" class="color-palette"></div>
+
+                                                    <div class="tool-buttons" style="margin-top: 1rem;">
+                                                        <div id="dotToolButton" class="tool-button selected" title="ドット編集ツール">
+                                                            <span>ドット編集</span>
+                                                        </div>
+                                                        <div id="fillToolButton" class="tool-button" title="塗りつぶしツール">
+                                                            <span>塗りつぶし</span>
+                                                        </div>
+                                                        <div id="toggleGridButton" class="tool-button" title="グリッド表示切替">
+                                                            <span>グリッド表示</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- ステップ3: 最終出力 -->
+                                    <div id="finalCanvasContainer" class="editor-step final-canvas-container" style="display: none;">
+                                        <div class="editor-step-title">
+                                            <span>ステップ3: 最終出力</span>
+                                        </div>
+                                        <div class="editor-step-content">
+                                            <h4>最終出力 (1200 x 630)</h4>
+                                            <canvas id="finalCanvas" width="1200" height="630"></canvas>
+
+                                            <div class="final-canvas-controls">
+                                                <div>
+                                                    <label for="bgColorPicker">背景色:</label>
+                                                    <input type="color" id="bgColorPicker" value="#ffffff">
+                                                    <button id="applyBgColorButton">適用</button>
+                                                </div>
+
+                                                <div class="position-controls">
+                                                    <label>画像位置:</label>
+                                                    <button id="moveLeftButton">←</button>
+                                                    <button id="moveUpButton">↑</button>
+                                                    <button id="moveDownButton">↓</button>
+                                                    <button id="moveRightButton">→</button>
+                                                    <button id="centerImageButton">中央に配置</button>
+                                                </div>
+
+                                                <button id="downloadFinalButton" style="background-color: #22c55e;">最終画像をダウンロード</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="editor-preview">
+                                <h3 style="color: #0066cc; border-bottom: 1px solid #d0e3ff; padding-bottom: 0.5rem;">現在の編集状態</h3>
+                                <div style="padding: 1rem; background-color: #f5f5f5; border-radius: 4px; border: 1px solid #ddd;">
+                                    <img id="previewImage" src="" style="max-width: 100%; border: 2px solid #0066cc; border-radius: 4px; margin-bottom: 0.5rem; box-shadow: 0 2px 4px rgba(0,0,0,0.1);" />
+                                </div>
+                                <div style="margin-top: 1.5rem; padding: 1rem; background-color: #f0f8ff; border-radius: 4px; border: 1px solid #d0e3ff;">
+                                    <h4 style="margin-top: 0; color: #0066cc;">選択した元画像</h4>
+                                    <img id="selectedImagePreview" style="max-width: 100%; border: 2px solid #22c55e; border-radius: 4px; margin-bottom: 0.5rem; box-shadow: 0 2px 4px rgba(0,0,0,0.1);" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
             </div>
         </div>
     </section>
 
     <script>
+        // メニュー切り替え機能
+        document.addEventListener('DOMContentLoaded', () => {
+            const menuItems = document.querySelectorAll('.menu-item');
+            const contentSections = document.querySelectorAll('.content-section');
+
+            menuItems.forEach(item => {
+                item.addEventListener('click', () => {
+                    // メニューアイテムのアクティブ状態を切り替え
+                    menuItems.forEach(mi => mi.classList.remove('active'));
+                    item.classList.add('active');
+
+                    // コンテンツセクションの表示を切り替え
+                    const targetId = item.getAttribute('data-target');
+                    contentSections.forEach(section => {
+                        section.classList.remove('active');
+                        if (section.id === targetId) {
+                            section.classList.add('active');
+                        }
+                    });
+                });
+            });
+        });
+
         // 記事登録フォームの処理
         document.getElementById('registerForm').addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -537,6 +702,18 @@
                         // 画像編集UIを表示
                         imageEditor.style.display = 'block';
 
+                        // プレビュー画像を設定
+                        const previewImage = document.getElementById('previewImage');
+                        if (previewImage) {
+                            previewImage.src = selectedImage.src;
+                        }
+
+                        // 選択した画像をプレビュー領域にも表示
+                        const selectedImagePreview = document.getElementById('selectedImagePreview');
+                        if (selectedImagePreview) {
+                            selectedImagePreview.src = selectedImage.src;
+                        }
+
                         // キャンバスの初期化
                         initializeCanvas(selectedImage.src);
                     } else {
@@ -611,14 +788,12 @@
                     if (selectedImage && selectedImage.src) {
                         initializeCanvas(selectedImage.src);
 
-                        // 処理後の画像を非表示
+                        // ステップ2と3を非表示
                         const processedImageContainer = document.getElementById('processedImageContainer');
-                        const colorPaletteContainer = document.getElementById('colorPaletteContainer');
-                        const downloadProcessedButton = document.getElementById('downloadProcessedButton');
+                        const finalCanvasContainer = document.getElementById('finalCanvasContainer');
 
                         if (processedImageContainer) processedImageContainer.style.display = 'none';
-                        if (colorPaletteContainer) colorPaletteContainer.style.display = 'none';
-                        if (downloadProcessedButton) downloadProcessedButton.style.display = 'none';
+                        if (finalCanvasContainer) finalCanvasContainer.style.display = 'none';
                     }
                 });
             }
@@ -772,8 +947,17 @@
                 const offsetY = parseInt(document.getElementById('offsetYSlider').value);
 
                 // グリッドに合わせた座標を計算
-                const gridX = Math.floor((x - offsetX) / gridSize) * gridSize + offsetX;
-                const gridY = Math.floor((y - offsetY) / gridSize) * gridSize + offsetY;
+                // 修正: オフセットを考慮してグリッドの位置を正確に計算
+                // クリックした位置がどのグリッドセルに属するかを計算
+                const gridCol = Math.floor((x - offsetX) / gridSize);
+                const gridRow = Math.floor((y - offsetY) / gridSize);
+
+                // グリッドセルの左上の座標を計算
+                const gridX = gridCol * gridSize + offsetX;
+                const gridY = gridRow * gridSize + offsetY;
+
+                // 画像の範囲外なら何もしない
+                if (gridX >= canvas.width || gridY >= canvas.height) return;
 
                 // 選択したツールに応じた処理
                 if (currentTool === 'dot') {
@@ -797,8 +981,13 @@
                 // 最終キャンバスも更新
                 drawImageOnFinalCanvas();
 
-                // Undoボタンを表示
-                document.getElementById('undoButton').style.display = 'inline-block';
+                // プレビュー画像を更新（現在の編集状態のみ）
+                const previewImage = document.getElementById('previewImage');
+                if (previewImage && processedCanvas) {
+                    const dataURL = processedCanvas.toDataURL('image/png');
+                    previewImage.src = dataURL;
+                    // 選択した元画像は更新しない
+                }
             });
         }
 
@@ -992,18 +1181,24 @@
             gridCtxObj.lineWidth = 1;
 
             // 縦線を描画（オフセットを考慮）
-            for (let x = offsetX; x <= width; x += gridSize) {
+            for (let x = 0; x < width; x += gridSize) {
+                const lineX = x + offsetX;
+                if (lineX >= width) continue;
+
                 gridCtxObj.beginPath();
-                gridCtxObj.moveTo(x, 0);
-                gridCtxObj.lineTo(x, height);
+                gridCtxObj.moveTo(lineX, 0);
+                gridCtxObj.lineTo(lineX, height);
                 gridCtxObj.stroke();
             }
 
             // 横線を描画（オフセットを考慮）
-            for (let y = offsetY; y <= height; y += gridSize) {
+            for (let y = 0; y < height; y += gridSize) {
+                const lineY = y + offsetY;
+                if (lineY >= height) continue;
+
                 gridCtxObj.beginPath();
-                gridCtxObj.moveTo(0, y);
-                gridCtxObj.lineTo(width, y);
+                gridCtxObj.moveTo(0, lineY);
+                gridCtxObj.lineTo(width, lineY);
                 gridCtxObj.stroke();
             }
         }
@@ -1058,8 +1253,15 @@
             const cornerColors = [];
 
             // グリッドごとに処理（オフセットを考慮）
-            for (let y = offsetY; y < height; y += gridSize) {
-                for (let x = offsetX; x < width; x += gridSize) {
+            for (let baseY = 0; baseY < height; baseY += gridSize) {
+                for (let baseX = 0; baseX < width; baseX += gridSize) {
+                    // オフセットを適用
+                    const x = baseX + offsetX;
+                    const y = baseY + offsetY;
+
+                    // 画像の範囲外ならスキップ
+                    if (x >= width || y >= height) continue;
+
                     // グリッド内の画素を取得
                     const gridWidth = Math.min(gridSize, width - x);
                     const gridHeight = Math.min(gridSize, height - y);
@@ -1158,11 +1360,19 @@
             // 色パレットを表示
             displayColorPalette(finalColors);
 
-            // 処理後の画像を表示
+            // ステップ2を表示
             document.getElementById('processedImageContainer').style.display = 'block';
-            document.getElementById('colorPaletteContainer').style.display = 'block';
-            document.getElementById('downloadProcessedButton').style.display = 'inline-block';
+
+            // ステップ3も表示
             document.getElementById('finalCanvasContainer').style.display = 'block';
+
+            // プレビュー画像を更新（現在の編集状態のみ）
+            const previewImage = document.getElementById('previewImage');
+            if (previewImage && processedCanvas) {
+                const dataURL = processedCanvas.toDataURL('image/png');
+                previewImage.src = dataURL;
+                // 選択した元画像は更新しない
+            }
 
             // 色の数を表示
             document.getElementById('colorCount').textContent = finalColors.length;
