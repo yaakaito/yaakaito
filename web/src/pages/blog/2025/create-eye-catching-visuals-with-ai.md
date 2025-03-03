@@ -16,8 +16,7 @@ tags:
 
 - AI Coding が初めてとかではなく、 GitHub Copilot の β に始まり Cursor Pro は 1 年くらい使っているし、 Cline 系も初めて触るとかではない
 - Tier 4 の 3.7 Sonnet
-- 素の Roo Code でどんなものかを試したかったので、 Code で書く以外は何もしていない
-    - rules やメモリーバンクみたいなのは今回は使っていない
+- 素の Roo Code でどんなものかを試したかったので、 Code で書く以外は何もしていない、 rules やプロンプトをカスタマイズしていない
 - 一部は Cursor を使っている
 
 ## 実装過程
