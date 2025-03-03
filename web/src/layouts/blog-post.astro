@@ -133,6 +133,7 @@ const dateString = new Date(frontmatter.date).toLocaleDateString("en-US", {
             font-family: -apple-system, BlinkMacSystemFont, 'Hiragino Sans', 'Hiragino Kaku Gothic ProN', 'ヒラギノ角ゴ ProN W3', 'Meiryo', 'メイリオ', 'Yu Gothic', 'YuGothic', '游ゴシック', 'MS Gothic', sans-serif;
             line-height: 1.8;
             letter-spacing: 0.01em;
+            position: relative;
         }
 
         .markdown p {
@@ -154,7 +155,35 @@ const dateString = new Date(frontmatter.date).toLocaleDateString("en-US", {
             font-weight: normal;
             color: var(--text-color-level-0);
             line-height: 1em;
+            position: relative;
+            margin-top: 1.5em;
+            padding-top: 0.5em;
         }
+
+        /* 見出しの前に#マークを表示 */
+        .markdown h1::before,
+        .markdown h2::before,
+        .markdown h3::before,
+        .markdown h4::before,
+        .markdown h5::before,
+        .markdown h6::before {
+            position: absolute;
+            left: 0;
+            top: -0.8em;
+            color: var(--text-color-level-2, rgba(120, 120, 120, 0.5));
+            opacity: 0.7;
+            font-weight: normal;
+            font-family: monospace;
+            font-size: 0.6em;
+            line-height: 1;
+        }
+
+        .markdown h1::before { content: "#"; }
+        .markdown h2::before { content: "##"; }
+        .markdown h3::before { content: "###"; }
+        .markdown h4::before { content: "####"; }
+        .markdown h5::before { content: "#####"; }
+        .markdown h6::before { content: "######"; }
 
         .markdown h3,
         .markdown h4,
@@ -175,7 +204,10 @@ const dateString = new Date(frontmatter.date).toLocaleDateString("en-US", {
             padding-bottom: 0.3em;
             margin-top: 1.2em;
             margin-bottom: 0.3em;
+            position: relative;
         }
+
+        /* h2::beforeは共通定義で対応 */
 
         .markdown h3 {
             font-size: 1.5em;
@@ -231,6 +263,28 @@ const dateString = new Date(frontmatter.date).toLocaleDateString("en-US", {
             padding: 0.1em 0.2em;
             border-radius: 2px;
             font-size: 0.92em;
+            position: relative;
+            margin: 0 0.5em;
+        }
+
+        .markdown p > code::before {
+            content: "`";
+            position: absolute;
+            left: -0.5em;
+            color: var(--text-color-level-2, rgba(120, 120, 120, 0.5));
+            opacity: 0.7;
+            font-family: monospace;
+            font-size: 0.8em;
+        }
+
+        .markdown p > code::after {
+            content: "`";
+            position: absolute;
+            right: -0.5em;
+            color: var(--text-color-level-2, rgba(120, 120, 120, 0.5));
+            opacity: 0.7;
+            font-family: monospace;
+            font-size: 0.8em;
         }
 
         .markdown pre {
@@ -241,6 +295,56 @@ const dateString = new Date(frontmatter.date).toLocaleDateString("en-US", {
             margin: 1em 0;
             background-color: var(--bg-color-level-4);
             border-radius: 4px;
+            position: relative;
+            padding-top: 2em;
+        }
+
+        .markdown pre {
+            padding: 14px;
+            white-space: pre;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            margin: 1em 0;
+            background-color: var(--bg-color-level-4);
+            border-radius: 4px;
+            position: relative;
+            padding-top: 2em;
+        }
+
+        .markdown pre::before {
+            content: "```";
+            position: absolute;
+            top: 0;
+            left: 14px;
+            color: var(--text-color-level-2, rgba(120, 120, 120, 0.5));
+            opacity: 0.7;
+            font-family: monospace;
+            font-size: 0.75em;
+            line-height: 1.5;
+        }
+
+        .markdown pre::after {
+            content: "```";
+            position: absolute;
+            bottom: 0;
+            left: 14px;
+            color: var(--text-color-level-2, rgba(120, 120, 120, 0.5));
+            opacity: 0.7;
+            font-family: monospace;
+            font-size: 0.75em;
+            line-height: 1.5;
+        }
+
+        .markdown pre[data-language]::before {
+            content: "```" attr(data-language);
+            position: absolute;
+            top: 0;
+            left: 14px;
+            color: var(--text-color-level-2, rgba(120, 120, 120, 0.5));
+            opacity: 0.7;
+            font-family: monospace;
+            font-size: 0.75em;
+            line-height: 1.5;
         }
 
         .markdown pre + pre {
@@ -250,6 +354,31 @@ const dateString = new Date(frontmatter.date).toLocaleDateString("en-US", {
         .markdown b,
         .markdown strong {
             font-weight: bold;
+            position: relative;
+            padding: 0 0.2em;
+            margin: 0 0.5em;
+        }
+
+        .markdown b::before,
+        .markdown strong::before {
+            content: "**";
+            position: absolute;
+            left: -0.5em;
+            color: var(--text-color-level-2, rgba(120, 120, 120, 0.5));
+            opacity: 0.7;
+            font-family: monospace;
+            font-size: 0.8em;
+        }
+
+        .markdown b::after,
+        .markdown strong::after {
+            content: "**";
+            position: absolute;
+            right: -0.5em;
+            color: var(--text-color-level-2, rgba(120, 120, 120, 0.5));
+            opacity: 0.7;
+            font-family: monospace;
+            font-size: 0.8em;
         }
 
         .markdown ul,
@@ -267,7 +396,23 @@ const dateString = new Date(frontmatter.date).toLocaleDateString("en-US", {
         }
 
         .markdown ul {
-            list-style: circle;
+            list-style: none;
+            padding-left: 1.8em;
+        }
+
+        .markdown ul > li {
+            position: relative;
+        }
+
+        .markdown ul > li::before {
+            content: "-";
+            position: absolute;
+            left: -1.2em;
+            color: var(--text-color-level-2, rgba(120, 120, 120, 0.5));
+            opacity: 0.7;
+            font-family: monospace;
+            font-size: 0.8em;
+            line-height: 1.8;
         }
 
         .markdown ol {
