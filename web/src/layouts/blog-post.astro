@@ -130,10 +130,15 @@ const dateString = new Date(frontmatter.date).toLocaleDateString("en-US", {
         .markdown {
             word-break: auto-phrase;
             text-wrap: pretty;
+            font-family: -apple-system, BlinkMacSystemFont, 'Hiragino Sans', 'Hiragino Kaku Gothic ProN', 'ヒラギノ角ゴ ProN W3', 'Meiryo', 'メイリオ', 'Yu Gothic', 'YuGothic', '游ゴシック', 'MS Gothic', sans-serif;
+            line-height: 1.8;
+            letter-spacing: 0.01em;
         }
 
         .markdown p {
-            margin: 1em 0;
+            margin: 1.2em 0;
+            line-height: 1.9;
+            color: var(--text-color-level-0);
         }
 
         .markdown img {
@@ -198,9 +203,16 @@ const dateString = new Date(frontmatter.date).toLocaleDateString("en-US", {
 
         .markdown blockquote {
             color: var(--text-color-level-2);
-            margin: 0;
-            padding-left: 1.5em;
+            margin: 1.2em 0;
+            padding: 0.5em 0 0.5em 1.5em;
             border-left: 0.2em var(--text-color-level-2) solid;
+            background-color: var(--bg-color-level-2);
+            border-radius: 0 4px 4px 0;
+            font-size: 0.98em;
+        }
+
+        .markdown blockquote p {
+            margin: 0.6em 0;
         }
 
         .markdown pre,
@@ -208,22 +220,31 @@ const dateString = new Date(frontmatter.date).toLocaleDateString("en-US", {
         .markdown kbd,
         .markdown samp {
             color: var(--text-color-level-0);
-            font-family: 'Courier New', monospace;
-            font-feature-settings: unset;
+            font-family: 'JetBrains Mono', 'Fira Code', 'SF Mono', 'Menlo', 'Consolas', 'Courier New', monospace;
+            font-feature-settings: "liga" 0;
+            font-size: 0.92em;
+            line-height: 1.4;
         }
 
         .markdown p > code {
             background-color: var(--bg-color-level-4);
             padding: 0.1em 0.2em;
             border-radius: 2px;
-            font-size: 0.98em;
+            font-size: 0.92em;
         }
 
         .markdown pre {
-            padding: 16px;
+            padding: 14px;
             white-space: pre;
             white-space: pre-wrap;
             word-wrap: break-word;
+            margin: 1em 0;
+            background-color: var(--bg-color-level-4);
+            border-radius: 4px;
+        }
+
+        .markdown pre + pre {
+            margin-top: -0.5em;
         }
 
         .markdown b,
@@ -235,6 +256,14 @@ const dateString = new Date(frontmatter.date).toLocaleDateString("en-US", {
         .markdown ol {
             margin: 1em 0;
             padding: 0 0 0 2em;
+            font-size: 0.95em;
+        }
+
+        .markdown ul ul,
+        .markdown ol ol,
+        .markdown ul ol,
+        .markdown ol ul {
+            margin: 0.5em 0;
         }
 
         .markdown ul {
@@ -268,10 +297,39 @@ const dateString = new Date(frontmatter.date).toLocaleDateString("en-US", {
             vertical-align: top;
         }
 
+        /* 注釈用のスタイル */
+        .markdown sup {
+            font-size: 0.75em;
+            line-height: 0;
+            position: relative;
+            vertical-align: baseline;
+            top: -0.4em;
+            display: inline-block;
+            padding: 0 1px;
+        }
+
+        .markdown sup a {
+            color: var(--text-color-level-1);
+            text-decoration: none;
+            border-bottom: 1px dotted var(--text-color-level-2);
+        }
+
         .footnotes {
             margin-top: 3em;
             font-size: 0.9em;
             color: var(--text-color-level-2);
+            border-top: 1px solid var(--bg-color-level-3);
+            padding-top: 1em;
+        }
+
+        .footnotes p {
+            line-height: 1.7;
+            margin: 0.6em 0;
+        }
+
+        .footnotes .footnote-backref {
+            text-decoration: none;
+            margin-left: 0.3em;
         }
 
         /* OGP Card styles */
