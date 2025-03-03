@@ -348,67 +348,82 @@ const dateString = new Date(frontmatter.date).toLocaleDateString("en-US", {
         }
     </style>
     <style>
-        .container {
-            max-width: 800px;
-            margin: 32px auto;
-            padding: 32px;
-            border-radius: 16px;
-            background-color: var(--bg-color-level-1);
-        }
-
-        @media screen and (max-width: 800px) {
             .container {
-                border-radius: 0px;
-                margin: 16px auto 0;
+                max-width: 800px;
+                margin: 32px auto;
+                padding: 32px;
+                border-radius: 16px;
+                background-color: var(--bg-color-level-1);
             }
-        }
 
-        .header {
-            margin-bottom: 2em;
-        }
+            @media screen and (max-width: 800px) {
+                .container {
+                    border-radius: 0px;
+                    margin: 16px auto 0;
+                }
+            }
 
-        .title {
-            font-size: 1.9em;
-            font-weight: bold;
-            margin: 0;
-            text-wrap: pretty;
-        }
+            .header {
+                margin-bottom: 2em;
+            }
 
-        .emoji {
-            display: block;
-            font-size: 6em;
-            line-height: 1.3em;
-            margin: 0 0 -0.2em 0;
-            text-align: center;
-        }
+            .title {
+                font-size: 1.9em;
+                font-weight: bold;
+                margin: 0;
+                text-wrap: pretty;
+            }
 
-        time {
-            display: block;
-            font-size: 0.9em;
-            color: var(--text-color-level-2);
-            margin-bottom: 0.2em;
-        }
+            .emoji {
+                display: block;
+                font-size: 6em;
+                line-height: 1.3em;
+                margin: 0 0 -0.2em 0;
+                text-align: center;
+            }
 
-        .author {
-            margin-top: 2.4em;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            color: var(--text-color-level-1);
-        }
+            time {
+                display: block;
+                font-size: 0.9em;
+                color: var(--text-color-level-2);
+                margin-bottom: 0.2em;
+            }
 
-        .author > img {
-            margin-top: 0.2em;
-            margin-right: 0.5em;
-            width: 1.4em;
-            height: 1.4em;
-            border-radius: 50%;
-            vertical-align: middle;
-        }
+            .author {
+                margin-top: 2.4em;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-weight: bold;
+                color: var(--text-color-level-1);
+            }
+
+            .author > img {
+                margin-top: 0.2em;
+                margin-right: 0.5em;
+                width: 1.4em;
+                height: 1.4em;
+                border-radius: 50%;
+                vertical-align: middle;
+            }
+
+            .eyecatch {
+                width: 100%;
+                max-height: 400px;
+                object-fit: cover;
+                border-radius: 8px;
+                margin-bottom: 1.5em;
+            }
     </style>
     <div class="container">
         <hgroup class="header">
+            {frontmatter.eyecatch && (
+                <img
+                    src={`https://articles.yaakai.to/eyecatch?id=${frontmatter.eyecatch}`}
+                    alt={frontmatter.title}
+                    class="eyecatch"
+                />
+            )}
             <p class="emoji">{frontmatter.emoji}</p>
             <time datetime={frontmatter.date}>{dateString}</time>
             <h1 class="title">{frontmatter.title}</h1>
