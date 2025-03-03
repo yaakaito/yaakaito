@@ -370,7 +370,7 @@ const dateString = new Date(frontmatter.date).toLocaleDateString("en-US", {
             .title {
                 font-size: 1.9em;
                 font-weight: bold;
-                margin: 0;
+                margin: 0 0 1.2em 0;
                 text-wrap: pretty;
             }
 
@@ -417,6 +417,13 @@ const dateString = new Date(frontmatter.date).toLocaleDateString("en-US", {
     </style>
     <div class="container">
         <hgroup class="header">
+            <time datetime={frontmatter.date}>{dateString}</time>
+            <h1 class="title">
+                {frontmatter.eyecatch ? `${frontmatter.emoji} ${frontmatter.title}` : frontmatter.title}
+            </h1>
+            {!frontmatter.eyecatch && (
+                <p class="emoji">{frontmatter.emoji}</p>
+            )}
             {frontmatter.eyecatch && (
                 <img
                     src={`https://articles.yaakai.to/eyecatch?id=${frontmatter.eyecatch}`}
@@ -424,9 +431,6 @@ const dateString = new Date(frontmatter.date).toLocaleDateString("en-US", {
                     class="eyecatch"
                 />
             )}
-            <p class="emoji">{frontmatter.emoji}</p>
-            <time datetime={frontmatter.date}>{dateString}</time>
-            <h1 class="title">{frontmatter.title}</h1>
         </hgroup>
         <div class="markdown"><slot /></div>
     </div>

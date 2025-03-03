@@ -74,8 +74,14 @@ const blogs = loadPosts(blogPosts);
                             class="post-eyecatch"
                         />
                     )}
-                    <div class="post-emoji">{post.frontmatter.emoji}</div>
-                    <div class="post-title"><a href={post.url}>{post.frontmatter.title}</a></div>
+                    {!post.frontmatter.eyecatch && (
+                        <div class="post-emoji">{post.frontmatter.emoji}</div>
+                    )}
+                    <div class="post-title">
+                        <a href={post.url}>
+                            {post.frontmatter.eyecatch ? `${post.frontmatter.emoji} ${post.frontmatter.title}` : post.frontmatter.title}
+                        </a>
+                    </div>
                     <div class="post-date">{new Date(post.frontmatter.date).toLocaleDateString()}</div>
                 </div>
             ))}
