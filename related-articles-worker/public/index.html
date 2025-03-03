@@ -2188,7 +2188,7 @@
             const usedColors = Object.keys(colorUsage);
 
             // 色の数を減らす処理
-            let finalColors = usedColors;
+            let finalColors = [...usedColors];
             if (usedColors.length > 16) {
                 finalColors = reduceColors(usedColors, cornerColors);
 
