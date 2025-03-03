@@ -5,9 +5,9 @@
 
 ## Latest Blog Posts
 
+- 📚 [ドット絵なアイキャッチを AI で作る機能を Roo Code で作ってみた雑記](https://yaakai.to/blog/2025/create-eye-catching-visuals-with-ai) - 3/2/2025
 - 📚 [Cloudflare Vectorize と Workers AI で関連する記事を作ってみる](https://yaakai.to/blog/2025/cf-vectorize-and-workes-ai) - 2/23/2025
 - ☁️ [Cloudflare Workers の Static Assets と Frameworks を試す](https://yaakai.to/blog/2025/cf-workers-static-assets-and-frameworks) - 2/2/2025
-- 🎈 [Popover API と Dialog に関する備忘録](https://yaakai.to/blog/2025/popover-dialog) - 1/23/2025
 
 ## Latest Notes
 
