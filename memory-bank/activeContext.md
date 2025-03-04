@@ -8,6 +8,11 @@
 - 重複コードの削減と日付フォーマット関数の共通化
 
 ## 最近の変更点
+- **2025-03-04**: OGPカードの表示問題を解決
+  - OGPカードの高さを96pxから124pxに増加（タイトル + 2行の説明 + URLに最適なサイズ）
+  - 画像サイズを1200:630比率に基づいて調整（236px × 124px）
+  - リスト表示を縦並びフレックスボックスに変更（常に1カラム表示を維持）
+  - スタイルをblog-post.astroで一元管理し、remark-ogp-card.jsからスタイル定義を削除
 - **2025-03-04**: OGPとTwitterカード対応の実装
   - GlobalLayoutコンポーネントにOGPメタタグとTwitterカードメタタグを追加
   - 各ページ（blog-post.astro、note/index.astro）のOGP/Twitter情報設定
@@ -66,9 +71,175 @@
   - 条件付きレンダリングによる不要な要素の削減
 
 ## コード変更の詳細
-最近の変更では、絵文字とアイキャッチ画像の表示方法を最適化しました：
+最近の主な変更は以下の通りです：
 
-### 1. アイキャッチと絵文字の表示方法変更
+### 1. OGPカードのレイアウト改善（`blog-post.astro`）
+```css
+/* OGP Card styles */
+.ogp-card {
+  margin: 1em 0;
+  display: flex;
+  height: 124px; /* タイトル + 2行の説明 + URL に最適な高さ */
+  width: 100%;
+  background-color: var(--bg-color-level-1);
+  border: 1px solid var(--bg-color-level-3);
+  border-radius: 8px;
+  overflow: hidden;
+  text-decoration: none;
+  transition: all 0.2s ease-in-out;
+}
+
+.ogp-card img {
+  width: 236px; /* 1200:630比率で124pxの高さに対応する幅 */
+  height: 124px;
+  object-fit: cover;
+  order: 2; /* 画像を右側に配置 */
+  flex-shrink: 0;
+  background-color: var(--bg-color-level-0);
+}
+
+.ogp-content {
+  flex: 1;
+  min-width: 0;
+  padding: 12px 16px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 100%;
+}
+
+.ogp-content h3 {
+  margin: 0 0 6px 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-color-level-0);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
+}
+
+.ogp-content p {
+  margin: 0 0 8px 0;
+  font-size: 14px;
+  color: var(--text-color-level-2);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2; /* 厳密に2行に制限 */
+  -webkit-box-orient: vertical;
+  line-height: 1.4;
+  max-height: 2.8em; /* 2行分の高さを確保 */
+  flex-grow: 1;
+}
+
+.ogp-domain {
+  font-size: 12px;
+  color: var(--text-color-level-2);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-top: auto;
+}
+
+/* ogp-card-list用のスタイル */
+.ogp-card-list {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  margin: 1em 0;
+}
+```
+
+### 2. OGPカード生成処理の改善（`remark-ogp-card.js`）
+スタイル定義を削除し、`blog-post.astro`で定義されたスタイルを使用するように変更：
+
+```javascript
+function createOgpCard(url, ogpData) {
+  // URLからドメイン名を取得（ホスト部分の表示用）
+  let domain = '';
+  try {
+    const urlObj = new URL(url);
+    domain = urlObj.hostname;
+  } catch (e) {
+    domain = url;
+  }
+
+  // スタイルはblog-post.astroで定義済み
+  const imageElement = ogpData.image
+    ? h('img', {
+        src: ogpData.image,
+        alt: ogpData.title || domain,
+        class: 'ogp-card-image',
+        loading: 'lazy',
+        onerror: "this.style.display='none';"  // 画像読み込みエラー時に非表示
+      })
+    : null;
+
+  const card = h('a', { href: url, class: 'ogp-card', target: '_blank', rel: 'noopener noreferrer' }, [
+    imageElement,
+    h('div', { class: 'ogp-content' }, [
+      h('h3', { class: 'ogp-title' }, ogpData.title || domain),
+      ogpData.description
+        ? h('p', { class: 'ogp-description' }, ogpData.description)
+        : null,
+      h('span', { class: 'ogp-domain' }, domain)
+    ]),
+  ]);
+
+  // カードを含むdivを返す（スタイル要素なし）
+  return h('div', { class: 'ogp-card-wrapper' }, [card]);
+}
+```
+
+### 3. OGPリスト表示の最適化
+```javascript
+// カードのリストを作成（スタイルを含まない）
+const cardComponents = ogpDataList.map((ogpData) => {
+  // URLからドメイン名を取得
+  let domain = '';
+  try {
+    const urlObj = new URL(ogpData.url);
+    domain = urlObj.hostname;
+  } catch (e) {
+    domain = ogpData.url;
+  }
+
+  const imageElement = ogpData.image
+    ? h('img', {
+        src: ogpData.image,
+        alt: ogpData.title || domain,
+        class: 'ogp-card-image',
+        loading: 'lazy',
+        onerror: "this.style.display='none';"
+      })
+    : null;
+
+  // カードのみを作成
+  return h('div', { class: 'ogp-card-wrapper' }, [
+    h('a', { href: ogpData.url, class: 'ogp-card', target: '_blank', rel: 'noopener noreferrer' }, [
+      imageElement,
+      h('div', { class: 'ogp-content' }, [
+        h('h3', { class: 'ogp-title' }, ogpData.title || domain),
+        ogpData.description
+          ? h('p', { class: 'ogp-description' }, ogpData.description)
+          : null,
+        h('span', { class: 'ogp-domain' }, domain)
+      ])
+    ])
+  ]);
+});
+
+// カードリストをラップしたHTML要素を作成（スタイル要素なし）
+node.type = 'html';
+node.value = toHtml(
+  h('div', { class: 'ogp-card-list-container' }, [
+    h('div', { class: 'ogp-card-list' }, cardComponents)
+  ])
+);
+```
+
+### 前回の変更: アイキャッチと絵文字の表示方法変更
 ホームページ（`index.astro`）とブログ一覧（`blog/index.astro`）で同様の変更を行いました：
 
 ```jsx
@@ -87,63 +258,4 @@
 </div>
 ```
 
-### 2. ブログ記事レイアウト（`blog-post.astro`）の変更
-ブログ記事ページのレイアウトを改善：
-
-```jsx
-// 変更前
-{frontmatter.eyecatch && (
-    <img
-        src={`https://articles.yaakai.to/eyecatch?id=${frontmatter.eyecatch}`}
-        alt={frontmatter.title}
-        class="eyecatch"
-    />
-)}
-<p class="emoji">{frontmatter.emoji}</p>
-<time datetime={frontmatter.date}>{dateString}</time>
-<h1 class="title">{frontmatter.title}</h1>
-
-// 変更後
-<time datetime={frontmatter.date}>{dateString}</time>
-<h1 class="title">
-    {frontmatter.eyecatch ? `${frontmatter.emoji} ${frontmatter.title}` : frontmatter.title}
-</h1>
-{!frontmatter.eyecatch && (
-    <p class="emoji">{frontmatter.emoji}</p>
-)}
-{frontmatter.eyecatch && (
-    <img
-        src={`https://articles.yaakai.to/eyecatch?id=${frontmatter.eyecatch}`}
-        alt={frontmatter.title}
-        class="eyecatch"
-    />
-)}
-```
-
-### 3. タイトルとアイキャッチの間のマージン調整
-```css
-.title {
-    font-size: 1.9em;
-    font-weight: bold;
-    margin: 0 0 1.2em 0;
-    text-wrap: pretty;
-}
-```
-
-### 4. サムネイル表示用のCSSの追加
-```css
-.post-thumbnail {
-    width: 100%;
-    height: auto;
-    border-radius: 4px;
-    margin-bottom: 0.5em;
-}
-
-.post-tile {
-    display: flex;
-    flex-direction: column;
-    height: 100%;
-}
-```
-
-これらの変更により、アイキャッチがある場合はタイトルに絵文字を統合し、視覚的な階層と一貫性を向上させました。また、タイル表示のレイアウトを最適化し、サムネイル画像の表示を改善しました。
+これらの変更により、OGPカードの表示が最適化され、複数行の説明文でも適切に表示されるようになりました。また、スタイル定義を一元化することで、今後のデザイン変更も容易になりました。
