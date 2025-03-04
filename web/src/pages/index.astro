@@ -4,6 +4,7 @@ import FeatureGrid from "../components/FeatureGrid.astro";
 import CategorySection from "../components/CategorySection.astro";
 import type { MarkdownInstance } from "astro";
 import * as humans from "../../humans.md";
+import icon from "../../../icon/icon-128.png";
 
 // 投稿の型定義
 interface Post {
@@ -48,7 +49,7 @@ const noteSectionPosts = allNotes.slice(0, 4);
     <section class="profile-section">
       <div class="profile-container">
         <div class="profile-header">
-          <img src="/icon/icon-128.png" alt="yaakai.to" class="profile-icon">
+          <img src={icon.src} width="28" height="28" alt="yaakai.to" class="profile-icon">
           <div class="profile-info">
             <h1 class="profile-name">yaakai.to</h1>
             <p class="profile-description"><humans.Content /></p>
