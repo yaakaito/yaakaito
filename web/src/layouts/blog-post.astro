@@ -1,14 +1,34 @@
 ---
 import GlobalLayout from "../layouts/global-layout.astro";
 import icon from "../../../icon/icon-128.png";
-const { frontmatter } = Astro.props;
+const { frontmatter, content } = Astro.props;
 const dateString = new Date(frontmatter.date).toLocaleDateString("en-US", {
     year: "numeric",
     month: "long",
     day: "numeric",
 });
+
+// OGP用の説明文を用意（frontmatterのdescriptionがあればそれを使い、なければ最初の数行から生成）
+const description = frontmatter.description ||
+    (content && content.length > 120 ?
+        content.substring(0, 120).replace(/\n/g, ' ') + '...' :
+        `${frontmatter.emoji} ${frontmatter.title} | yaakai.to`);
+
+// OGP用のアイキャッチ画像URL
+const ogImage = frontmatter.eyecatch
+    ? `https://articles.yaakai.to/eyecatch?id=${frontmatter.eyecatch}`
+    : icon.src;
+
+// 完全なURL
+const canonicalUrl = new URL(Astro.url.pathname, Astro.site || Astro.url.origin).href;
 ---
-<GlobalLayout title={frontmatter.title}>
+<GlobalLayout
+    title={frontmatter.title}
+    description={description}
+    ogImage={ogImage}
+    ogType="article"
+    ogUrl={canonicalUrl}
+>
     <style is:global>
         /* 関連記事のスタイル */
         .related-section {

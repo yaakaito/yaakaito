@@ -1,16 +1,50 @@
 ---
 import icon from "../../../icon/icon-128.png";
-const { title } = Astro.props
+interface Props {
+    title?: string;
+    description?: string;
+    ogImage?: string;
+    ogType?: string;
+    ogUrl?: string;
+}
+
+const {
+    title,
+    description = "技術的なメモとブログ記事のコレクション",
+    ogImage = icon.src,
+    ogType = "website",
+    ogUrl
+} = Astro.props;
+
+const siteTitle = title ? `${title} - yaakai.to` : 'yaakai.to';
+const canonicalUrl = ogUrl || Astro.url.href;
 ---
 
-<html lang="en">
+<html lang="ja">
 <head>
     <meta charset="utf-8" />
     <link rel="icon" type="image/svg+xml" href={icon.src} />
     <meta name="viewport" content="width=device-width" />
     <meta name="generator" content={Astro.generator} />
     <meta name="Hatena::Bookmark" content="nocomment" />
-    <title>{title ? `${title} - yaakai.to` : 'yaakai.to'}</title>
+    <meta name="description" content={description} />
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content={ogType} />
+    <meta property="og:url" content={canonicalUrl} />
+    <meta property="og:title" content={siteTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:image" content={ogImage.startsWith('http') ? ogImage : new URL(ogImage, Astro.site || Astro.url.origin).href} />
+    <meta property="og:site_name" content="yaakai.to" />
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image" />
+    <meta property="twitter:url" content={canonicalUrl} />
+    <meta property="twitter:title" content={siteTitle} />
+    <meta property="twitter:description" content={description} />
+    <meta property="twitter:image" content={ogImage.startsWith('http') ? ogImage : new URL(ogImage, Astro.site || Astro.url.origin).href} />
+
+    <title>{siteTitle}</title>
     <link rel="stylesheet" href="https://unpkg.com/@acab/reset.css" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>

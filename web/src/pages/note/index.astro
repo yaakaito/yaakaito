@@ -2,6 +2,7 @@
 import GlobalLayout from "../../layouts/global-layout.astro";
 import NoteCard from "../../components/NoteCard.astro";
 import type { MarkdownInstance } from "astro";
+import icon from "../../../../icon/icon-128.png";
 
 // 投稿の型定義
 interface Post {
@@ -26,8 +27,24 @@ function loadPosts(posts: MarkdownInstance<{ title: string; date: string; emoji:
 }
 
 const notes = loadPosts(notePosts);
+
+// OGP用の情報
+const pageTitle = "Notes - yaakai.to";
+const description = "短い備忘録や考え、アイデアなどのノートコレクション。技術的なメモや思考の断片を公開しています。";
+const canonicalUrl = new URL(Astro.url.pathname, Astro.site || Astro.url.origin).href;
+
+// 最新ノートのアイキャッチ画像があればそれを使用（なければデフォルトアイコン）
+const ogImage = notes.length > 0 && notes[0].frontmatter.eyecatch
+  ? `https://articles.yaakai.to/eyecatch?id=${notes[0].frontmatter.eyecatch}`
+  : icon.src;
 ---
-<GlobalLayout title="Notes - yaakai.to">
+<GlobalLayout
+  title={pageTitle}
+  description={description}
+  ogImage={ogImage}
+  ogType="website"
+  ogUrl={canonicalUrl}
+>
   <div class="note-container">
     <header class="note-header">
       <h1 class="note-title">Notes</h1>
