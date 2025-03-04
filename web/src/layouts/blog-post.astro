@@ -590,7 +590,7 @@ const canonicalUrl = new URL(Astro.url.pathname, Astro.site || Astro.url.origin)
         .ogp-card {
             margin: 1em 0;
             display: flex;
-            height: 96px;
+            height: 124px; /* タイトル + 2行の説明 + URL に最適な高さ */
             width: 100%;
             background-color: var(--bg-color-level-1);
             border: 1px solid var(--bg-color-level-3);
@@ -608,10 +608,10 @@ const canonicalUrl = new URL(Astro.url.pathname, Astro.site || Astro.url.origin)
         }
 
         .ogp-card img {
-            width: 200px;
-            height: 96px;
+            width: 236px; /* 1200:630比率で124pxの高さに対応する幅 */
+            height: 124px;
             object-fit: cover;
-            order: 2;
+            order: 2; /* 画像を右側に配置 */
             flex-shrink: 0;
             background-color: var(--bg-color-level-0);
         }
@@ -622,12 +622,12 @@ const canonicalUrl = new URL(Astro.url.pathname, Astro.site || Astro.url.origin)
             padding: 12px 16px;
             display: flex;
             flex-direction: column;
-            justify-content: center;
-            gap: 4px;
+            justify-content: space-between;
+            height: 100%;
         }
 
         .ogp-content h3 {
-            margin: 0;
+            margin: 0 0 6px 0;
             font-size: 16px;
             font-weight: 600;
             color: var(--text-color-level-0);
@@ -638,15 +638,59 @@ const canonicalUrl = new URL(Astro.url.pathname, Astro.site || Astro.url.origin)
         }
 
         .ogp-content p {
-            margin: 0;
+            margin: 0 0 8px 0;
             font-size: 14px;
             color: var(--text-color-level-2);
             overflow: hidden;
+            text-overflow: ellipsis;
             display: -webkit-box;
-            -webkit-line-clamp: 2;
+            -webkit-line-clamp: 2; /* 厳密に2行に制限 */
             -webkit-box-orient: vertical;
             line-height: 1.4;
-            max-height: 2.8em;
+            max-height: 2.8em; /* 2行分の高さを確保 */
+            flex-grow: 1;
+        }
+
+        .ogp-domain {
+            font-size: 12px;
+            color: var(--text-color-level-2);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            margin-top: auto;
+        }
+
+        /* ogp-card-list用のスタイル */
+        .ogp-card-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin: 1em 0;
+        }
+
+        .ogp-card-list .ogp-card-wrapper {
+            height: 100%;
+        }
+
+        @media (max-width: 600px) {
+            .ogp-card {
+                flex-direction: column;
+                height: auto;
+                min-height: auto;
+            }
+
+            .ogp-card img {
+                width: 100%;
+                height: auto;
+                max-height: 180px;
+            }
+
+            .ogp-content {
+                padding: 12px;
+                height: auto;
+            }
+
+            /* モバイル用のスタイル調整 */
         }
 
         @media (prefers-color-scheme: light) {
