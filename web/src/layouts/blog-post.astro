@@ -15,7 +15,7 @@ const dateString = new Date(frontmatter.date).toLocaleDateString("en-US", {
             max-width: 850px;
             margin: 48px auto 0;
             padding: 0;
-            color: white;
+            color: var(--text-color-level-0);
         }
 
         .related-header {
@@ -28,7 +28,7 @@ const dateString = new Date(frontmatter.date).toLocaleDateString("en-US", {
             font-size: 1.5em;
             font-weight: bold;
             margin: 0;
-            color: white;
+            color: var(--text-color-level-0);
             position: relative;
             padding-left: 16px;
         }
@@ -51,12 +51,12 @@ const dateString = new Date(frontmatter.date).toLocaleDateString("en-US", {
         }
 
         .related-article-card {
-            background: #404040; /* ダークテーマ基準 */
+            background: var(--bg-color-level-1);
             border-radius: 10px;
             padding: 24px;
             transition: all 0.2s ease-in-out;
             text-decoration: none;
-            color: white;
+            color: var(--text-color-level-0);
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -69,8 +69,8 @@ const dateString = new Date(frontmatter.date).toLocaleDateString("en-US", {
 
         .related-article-card:hover {
             transform: translateY(-4px);
-            background: #505050;
-            box-shadow: 0 6px 14px rgba(0, 0, 0, 0.3);
+            background: var(--bg-color-level-2);
+            box-shadow: 0 6px 14px rgba(0, 0, 0, 0.2);
         }
 
         .related-article-card::before {
@@ -95,7 +95,7 @@ const dateString = new Date(frontmatter.date).toLocaleDateString("en-US", {
             font-size: 1.1em;
             font-weight: bold;
             margin: 0 0 12px 0;
-            color: white;
+            color: var(--text-color-level-0);
             text-align: center;
             display: -webkit-box;
             -webkit-line-clamp: 2;
@@ -109,7 +109,7 @@ const dateString = new Date(frontmatter.date).toLocaleDateString("en-US", {
 
         .related-article-content {
             font-size: 0.9em;
-            color: rgba(255, 255, 255, 0.7);
+            color: var(--text-color-level-2);
             display: -webkit-box;
             -webkit-line-clamp: 3;
             -webkit-box-orient: vertical;
@@ -627,6 +627,27 @@ const dateString = new Date(frontmatter.date).toLocaleDateString("en-US", {
             max-height: 2.8em;
         }
 
+        @media (prefers-color-scheme: light) {
+            .related-article-card {
+                background: var(--bg-color-level-1);
+                color: var(--text-color-level-0);
+                box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+            }
+
+            .related-article-card:hover {
+                background: var(--bg-color-level-2);
+                box-shadow: 0 6px 14px rgba(0, 0, 0, 0.1);
+            }
+
+            .related-article-title {
+                color: var(--text-color-level-0);
+            }
+
+            .related-article-content {
+                color: var(--text-color-level-2);
+            }
+        }
+
         @media (prefers-color-scheme: dark) {
             .ogp-card:hover {
                 box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
@@ -634,6 +655,10 @@ const dateString = new Date(frontmatter.date).toLocaleDateString("en-US", {
 
             .ogp-card img {
                 opacity: 0.9;
+            }
+
+            .related-article-card:hover {
+                box-shadow: 0 6px 14px rgba(0, 0, 0, 0.2);
             }
         }
     </style>
@@ -745,18 +770,18 @@ const dateString = new Date(frontmatter.date).toLocaleDateString("en-US", {
                 margin-top: 0;
                 position: relative;
                 border-radius: 8px 8px 0 0;
-                color: white;
+                color: var(--text-color-level-0);
             }
 
             .author {
                 margin-top: 3em;
                 padding-top: 1.5em;
-                border-top: 1px solid rgba(255, 255, 255, 0.2);
+                border-top: 1px solid var(--bg-color-level-3);
                 display: flex;
                 align-items: center;
                 justify-content: center;
                 font-weight: bold;
-                color: white;
+                color: var(--text-color-level-0);
             }
 
             .author > img {
@@ -775,18 +800,51 @@ const dateString = new Date(frontmatter.date).toLocaleDateString("en-US", {
             .back-link {
                 display: inline-block;
                 padding: 8px 16px;
-                color: white;
-                border: 1px solid rgba(255, 255, 255, 0.2);
+                color: var(--text-color-level-0);
+                border: 1px solid var(--bg-color-level-3);
                 border-radius: 4px;
                 transition: all 0.3s ease;
                 font-size: 0.9em;
             }
 
             .back-link:hover {
-                background-color: rgba(255, 255, 255, 0.1);
+                background-color: var(--bg-color-level-2);
                 color: var(--primary-color-level-0);
-                border-color: rgba(255, 255, 255, 0.3);
+                border-color: var(--bg-color-level-4);
                 transform: translateY(-2px);
+            }
+
+            @media (prefers-color-scheme: light) {
+                .article-header {
+                    background-color: var(--gray-900);
+                    color: white;
+                }
+
+                .title {
+                    color: white;
+                }
+
+                time {
+                    color: rgba(255, 255, 255, 0.8);
+                }
+
+                .article-content {
+                    background-color: var(--bg-color-level-0);
+                }
+
+                .overlay-background {
+                    background-color: var(--bg-color-level-0);
+                }
+
+                .back-link {
+                    color: var(--text-color-level-0);
+                    border: 1px solid var(--bg-color-level-3);
+                }
+
+                .back-link:hover {
+                    background-color: var(--bg-color-level-2);
+                    color: var(--primary-color-level-0);
+                }
             }
 
             @media (prefers-color-scheme: dark) {
