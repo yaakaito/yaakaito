@@ -39,19 +39,23 @@ const relativeDate = getRelativeDate(date);
   <div class="note-card">
     <div class="note-indicator"></div>
     <div class="note-content">
-      <div class="note-emoji">{emoji}</div>
+      {eyecatch && (
+        <img
+          src={`https://articles.yaakai.to/eyecatch?id=${eyecatch}`}
+          alt={title}
+          class="note-eyecatch"
+        />
+      )}
+      {!eyecatch && (
+        <div class="note-emoji">{emoji}</div>
+      )}
       <div class="note-info">
-        <h3 class="note-title">{title}</h3>
+        <h3 class="note-title">
+          {eyecatch ? `${emoji} ${title}` : title}
+        </h3>
         <div class="note-date" title={formattedDate}>{relativeDate}</div>
       </div>
     </div>
-    {eyecatch && (
-      <img
-        src={`https://articles.yaakai.to/eyecatch?id=${eyecatch}`}
-        alt={title}
-        class="note-eyecatch"
-      />
-    )}
   </div>
 </a>
 
@@ -91,44 +95,48 @@ const relativeDate = getRelativeDate(date);
 
   .note-content {
     padding: 16px 16px 16px 24px;
+    flex-grow: 1;
     display: flex;
-    align-items: center;
-    flex-grow: 1;
-  }
-
-  .note-emoji {
-    font-size: 2em;
-    margin-right: 16px;
-    flex-shrink: 0;
-  }
-
-  .note-info {
-    flex-grow: 1;
+    flex-direction: column;
   }
 
   .note-eyecatch {
     width: 100%;
-    height: 100px;
+    height: 160px;
     object-fit: cover;
+    border-radius: 4px;
+    margin-bottom: 16px;
+  }
+
+  .note-emoji {
+    font-size: 2.5em;
+    margin-bottom: 16px;
+    text-align: center;
+  }
+
+  .note-info {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
   }
 
   .note-title {
-    font-size: 1.1em;
+    font-size: 1.2em;
     font-weight: bold;
-    margin: 0 0 4px 0;
-    line-height: 1.3;
+    margin: 0 0 8px 0;
+    line-height: 1.4;
     color: var(--text-color-level-0);
     text-decoration: none;
   }
 
   .note-card-link:hover .note-title {
-    color: var(--text-color-level-1);
+    color: var(--primary-color-level-0);
   }
 
   .note-date {
-    font-size: 0.8em;
+    font-size: 0.9em;
     color: var(--text-color-level-2);
-    text-align: left;
+    margin-top: auto;
   }
 
   @media (prefers-color-scheme: dark) {
@@ -147,8 +155,18 @@ const relativeDate = getRelativeDate(date);
     }
 
     .note-emoji {
-      font-size: 1.8em;
-      margin-right: 12px;
+      font-size: 2em;
+      margin-bottom: 12px;
+    }
+
+    .note-eyecatch {
+      height: 120px;
+      margin-bottom: 12px;
+    }
+
+    .note-title {
+      font-size: 1.1em;
+      margin: 0 0 6px 0;
     }
   }
 </style>
