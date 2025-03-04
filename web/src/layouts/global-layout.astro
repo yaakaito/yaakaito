@@ -1,5 +1,5 @@
 ---
-import icon from "../../../icon/icon-64.png";
+import icon from "../../../icon/icon-128.png";
 const { title } = Astro.props
 ---
 
@@ -17,32 +17,62 @@ const { title } = Astro.props
     <script src="https://kit.fontawesome.com/57385c1b35.js" crossorigin="anonymous"></script>
     <style is:global>
         :root {
-            --bg-color-level-0: #ffffff;
-            --bg-color-level-1: #FEFEFE;
-            --bg-color-level-2: #FDFDFD;
-            --bg-color-level-3: #FCFCFC;
-            --bg-color-level-4: #FBFBFB;
-            --text-color-level-0: #182D3B;
-            --text-color-level-1: #304860;
-            --text-color-level-2: #486378;
-            --primary-color-level-0: #FF7043;
-            --primary-color-level-1: #FF8A65;
-            --primary-color-level-2: #FFA18A;
+            /* グレースケールパレット - ライトモード */
+            --gray-100: #FFFFFF;
+            --gray-200: #F9F9F9;
+            --gray-300: #F0F0F0;
+            --gray-400: #E0E0E0;
+            --gray-500: #C0C0C0;
+            --gray-600: #808080;
+            --gray-700: #505050;
+            --gray-800: #303030;
+            --gray-900: #121212;
+
+            /* アクセントカラー - 赤色系 */
+            --red-500: #E53935;
+            --red-600: #D32F2F;
+            --red-700: #C62828;
+
+            /* 機能的な色の割り当て */
+            --bg-color-level-0: var(--gray-100);
+            --bg-color-level-1: var(--gray-200);
+            --bg-color-level-2: var(--gray-300);
+            --bg-color-level-3: var(--gray-400);
+            --bg-color-level-4: var(--gray-500);
+
+            --text-color-level-0: var(--gray-900);
+            --text-color-level-1: var(--gray-800);
+            --text-color-level-2: var(--gray-700);
+
+            --primary-color-level-0: var(--red-600);
+            --primary-color-level-1: var(--red-500);
+            --primary-color-level-2: var(--red-700);
+
+            /* コンテンツタイプ識別色 */
+            --blog-color: var(--red-600);
+            --note-color: var(--gray-600);
         }
 
         @media (prefers-color-scheme: dark) {
             :root {
-                --bg-color-level-0: #1B1D28;
-                --bg-color-level-1: #21232E;
-                --bg-color-level-2: #262934;
-                --bg-color-level-3: #2B2F3A;
-                --bg-color-level-4: #303540;
+                /* ダークモード用の色の割り当て */
+                --bg-color-level-0: var(--gray-800);
+                --bg-color-level-1: #303030;
+                --bg-color-level-2: #404040;
+                --bg-color-level-3: #505050;
+                --bg-color-level-4: #606060;
+
                 --text-color-level-0: #FFFFFF;
                 --text-color-level-1: #E0E0E0;
-                --text-color-level-2: #C0C0C0;
+                --text-color-level-2: #BDBDBD;
+
                 --primary-color-level-0: #F44336;
-                --primary-color-level-1: #F66156;
-                --primary-color-level-2: #F77E76;
+                --primary-color-level-1: #EF5350;
+                --primary-color-level-2: #E53935;
+
+                /* ダークモードでのコンテンツタイプ識別色 */
+                --blog-color: #FF5252;
+                --note-color: #A0A0A0;
             }
         }
         body {
@@ -58,94 +88,92 @@ const { title } = Astro.props
             /* overflow-x: hidden; */
         }
         a {
-            color: #4285F4;
+            color: var(--primary-color-level-0);
             text-decoration: none;
         }
 
         a:hover {
-            color: #5391FF;
+            color: var(--primary-color-level-1);
         }
 
         a:visited {
-            color: #8AB4F8;
+            color: var(--primary-color-level-2);
         }
 
         @media (prefers-color-scheme: dark) {
             a {
-                color: #82B1FF;
+                color: var(--primary-color-level-0);
             }
 
             a:hover {
-                color: #92C9FF;
+                color: var(--primary-color-level-1);
             }
 
             a:visited {
-                color: #AEDAFF;
+                color: var(--primary-color-level-2);
             }
         }
     </style>
     <style>
-        .background {
-            position: relative;
-            background-color: var(--bg-color-level-0);
-            width: 100%;
-            height: min(100svh, 100vw);
-            overflow: hidden;
-            z-index: 0;
-        }
-
         .header {
             width: 100%;
-            margin-top: 8px;
+            padding: 16px 0;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            margin-bottom: 24px;
         }
 
-        .linkRoot {
-            margin: 0 auto;
-        }
-
-        .author {
+        .site-nav {
             display: flex;
-            padding: 0.1em 1em;
-            align-items: center;
-            justify-content: center;
+            gap: 24px;
+        }
+
+        .nav-link {
             font-weight: bold;
             color: var(--text-color-level-1);
-            font-size: 0.9em;
-            background-color: var(--bg-color-level-1);
-            border-radius: 1em;
-
+            text-decoration: none;
+            padding: 8px 0;
+            position: relative;
+            transition: color 0.2s ease;
         }
 
-        .author > img {
-            margin-top: 0.2em;
-            margin-right: 0.5em;
-            width: 1.4em;
-            height: 1.4em;
-            border-radius: 50%;
-            vertical-align: middle;
+        .nav-link:hover {
+            color: var(--primary-color-level-0);
+        }
+
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background-color: var(--primary-color-level-0);
+            transition: width 0.3s ease;
+        }
+
+        .nav-link:hover::after {
+            width: 100%;
         }
 
         .container {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
+            position: relative;
+            max-width: 1200px;
+            margin: 0 auto;
             z-index: 1;
-            padding-bottom: 32px;
+            padding: 0 24px 48px 24px;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 0 16px 32px 16px;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="background">
-    </div>
     <div class="container">
-        <header class="header">
-            <a class="linkRoot" href="/"><p class="author"><img src={icon.src} width={icon.width} height={icon.height}>yaakai.to</p></a>
-            <!-- <p>☀</p> -->
-        </header>
         <slot />
     </div>
 </body>

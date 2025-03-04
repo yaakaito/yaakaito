@@ -1,0 +1,141 @@
+---
+import BlogCard from './BlogCard.astro';
+import NoteCard from './NoteCard.astro';
+
+interface Post {
+  frontmatter: {
+    title: string;
+    date: string;
+    emoji: string;
+    eyecatch?: string;
+  };
+  url: string;
+}
+
+interface Props {
+  title: string;
+  type: 'blog' | 'note';
+  posts: Post[];
+  viewAllLink: string;
+}
+
+const { title, type, posts, viewAllLink } = Astro.props;
+---
+
+<section class="category-section">
+  <div class="category-header">
+    <h2 class="category-title">{title}</h2>
+    <a href={viewAllLink} class="view-all-link">もっと見る</a>
+  </div>
+
+  <div class="category-grid">
+    {posts.map((post) => (
+      type === 'blog' ? (
+        <BlogCard
+          title={post.frontmatter.title}
+          date={post.frontmatter.date}
+          emoji={post.frontmatter.emoji}
+          url={post.url}
+          eyecatch={post.frontmatter.eyecatch}
+        />
+      ) : (
+        <NoteCard
+          title={post.frontmatter.title}
+          date={post.frontmatter.date}
+          emoji={post.frontmatter.emoji}
+          url={post.url}
+          eyecatch={post.frontmatter.eyecatch}
+        />
+      )
+    ))}
+  </div>
+</section>
+
+<style>
+  .category-section {
+    margin-bottom: 48px;
+  }
+
+  .category-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid var(--bg-color-level-3);
+  }
+
+  .category-title {
+    font-size: 1.6em;
+    font-weight: bold;
+    color: var(--text-color-level-0);
+    margin: 0;
+    position: relative;
+    padding-left: 16px;
+  }
+
+  .category-title::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 6px;
+    background-color: var(--primary-color-level-0);
+    border-radius: 3px;
+  }
+
+  .view-all-link {
+    font-size: 0.9em;
+    color: var(--text-color-level-2);
+    text-decoration: none;
+    transition: color 0.2s ease;
+    display: flex;
+    align-items: center;
+  }
+
+  .view-all-link:hover {
+    color: var(--primary-color-level-0);
+  }
+
+  .view-all-link::after {
+    content: '→';
+    margin-left: 4px;
+    transition: transform 0.2s ease;
+  }
+
+  .view-all-link:hover::after {
+    transform: translateX(4px);
+  }
+
+  .category-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 24px;
+  }
+
+  /* レスポンシブデザイン対応 */
+  @media (max-width: 1023px) {
+    .category-grid {
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 20px;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .category-grid {
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 16px;
+    }
+
+    .category-title {
+      font-size: 1.4em;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .category-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

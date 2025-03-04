@@ -1,0 +1,154 @@
+---
+interface Props {
+  title: string;
+  date: string;
+  emoji: string;
+  url: string;
+  eyecatch?: string;
+}
+
+const { title, date, emoji, url, eyecatch } = Astro.props;
+const formattedDate = new Date(date).toLocaleDateString();
+
+// 相対日付を計算する関数
+function getRelativeDate(dateString: string): string {
+  const date = new Date(dateString);
+  const now = new Date();
+  const diffTime = Math.abs(now.getTime() - date.getTime());
+  const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+
+  if (diffDays === 0) {
+    return "今日";
+  } else if (diffDays === 1) {
+    return "昨日";
+  } else if (diffDays < 7) {
+    return `${diffDays}日前`;
+  } else if (diffDays < 30) {
+    return `${Math.floor(diffDays / 7)}週間前`;
+  } else if (diffDays < 365) {
+    return `${Math.floor(diffDays / 30)}ヶ月前`;
+  } else {
+    return `${Math.floor(diffDays / 365)}年前`;
+  }
+}
+
+const relativeDate = getRelativeDate(date);
+---
+
+<a href={url} class="note-card-link">
+  <div class="note-card">
+    <div class="note-indicator"></div>
+    <div class="note-content">
+      <div class="note-emoji">{emoji}</div>
+      <div class="note-info">
+        <h3 class="note-title">{title}</h3>
+        <div class="note-date" title={formattedDate}>{relativeDate}</div>
+      </div>
+    </div>
+    {eyecatch && (
+      <img
+        src={`https://articles.yaakai.to/eyecatch?id=${eyecatch}`}
+        alt={title}
+        class="note-eyecatch"
+      />
+    )}
+  </div>
+</a>
+
+<style>
+  .note-card-link {
+    display: block;
+    text-decoration: none;
+    color: inherit;
+    height: 100%;
+  }
+
+  .note-card {
+    position: relative;
+    background-color: var(--bg-color-level-1);
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .note-card-link:hover .note-card {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
+  .note-indicator {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 4px;
+    background-color: var(--note-color);
+  }
+
+
+  .note-content {
+    padding: 16px 16px 16px 24px;
+    display: flex;
+    align-items: center;
+    flex-grow: 1;
+  }
+
+  .note-emoji {
+    font-size: 2em;
+    margin-right: 16px;
+    flex-shrink: 0;
+  }
+
+  .note-info {
+    flex-grow: 1;
+  }
+
+  .note-eyecatch {
+    width: 100%;
+    height: 100px;
+    object-fit: cover;
+  }
+
+  .note-title {
+    font-size: 1.1em;
+    font-weight: bold;
+    margin: 0 0 4px 0;
+    line-height: 1.3;
+    color: var(--text-color-level-0);
+    text-decoration: none;
+  }
+
+  .note-card-link:hover .note-title {
+    color: var(--text-color-level-1);
+  }
+
+  .note-date {
+    font-size: 0.8em;
+    color: var(--text-color-level-2);
+    text-align: left;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    .note-card {
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    }
+
+    .note-card:hover {
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+    }
+  }
+
+  @media (max-width: 768px) {
+    .note-content {
+      padding: 12px 12px 12px 20px;
+    }
+
+    .note-emoji {
+      font-size: 1.8em;
+      margin-right: 12px;
+    }
+  }
+</style>

@@ -1,0 +1,94 @@
+---
+import FeatureCard from './FeatureCard.astro';
+
+interface Post {
+  frontmatter: {
+    title: string;
+    date: string;
+    emoji: string;
+    eyecatch?: string;
+  };
+  url: string;
+}
+
+interface Props {
+  posts: Post[];
+}
+
+const { posts } = Astro.props;
+
+// 最初の投稿をメインフィーチャーとして、残りをサブフィーチャーとして使用
+const mainFeature = posts[0];
+const subFeatures = posts.slice(1, 4); // 2番目から4番目の投稿（最大3つ）
+---
+
+<section class="feature-section">
+  <div class="feature-main">
+    {mainFeature && (
+      <FeatureCard
+        title={mainFeature.frontmatter.title}
+        date={mainFeature.frontmatter.date}
+        emoji={mainFeature.frontmatter.emoji}
+        url={mainFeature.url}
+        eyecatch={mainFeature.frontmatter.eyecatch}
+        isMain={true}
+      />
+    )}
+  </div>
+
+  <div class="feature-sub">
+    {subFeatures.map((post) => (
+      <FeatureCard
+        title={post.frontmatter.title}
+        date={post.frontmatter.date}
+        emoji={post.frontmatter.emoji}
+        url={post.url}
+        eyecatch={post.frontmatter.eyecatch}
+        isMain={false}
+      />
+    ))}
+  </div>
+</section>
+
+<style>
+  .feature-section {
+    display: grid;
+    grid-template-columns: 2fr 1.5fr;
+    gap: 20px;
+    margin-bottom: 36px;
+  }
+
+  .feature-main {
+    grid-column: 1;
+    height: 100%;
+  }
+
+  .feature-sub {
+    grid-column: 2;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  /* レスポンシブデザイン対応 */
+  @media (max-width: 1023px) {
+    .feature-section {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .feature-section {
+      grid-template-columns: 1fr;
+      gap: 16px;
+    }
+
+    .feature-main, .feature-sub {
+      grid-column: 1;
+    }
+
+    .feature-sub {
+      gap: 12px;
+    }
+  }
+</style>

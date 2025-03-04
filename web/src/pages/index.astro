@@ -1,142 +1,211 @@
 ---
 import GlobalLayout from "../layouts/global-layout.astro";
-import icon from "../../../icon/icon-512.png";
+import FeatureGrid from "../components/FeatureGrid.astro";
+import CategorySection from "../components/CategorySection.astro";
 import type { MarkdownInstance } from "astro";
 import * as humans from "../../humans.md";
+
+// 投稿の型定義
+interface Post {
+  frontmatter: {
+    title: string;
+    date: string;
+    emoji: string;
+    eyecatch?: string;
+  };
+  url: string;
+}
 
 // ディレクトリ内の全ての .md ファイルを取得
 const blogPosts = await Astro.glob<{ title: string; date: string; emoji: string; eyecatch?: string }>('./blog/**/*.md');
 const notePosts = await Astro.glob<{ title: string; date: string; emoji: string; eyecatch?: string }>('./note/**/*.md');
 
 // ファイルを読み込む非同期関数
-function loadPosts(posts: MarkdownInstance<{ title: string; date: string; emoji: string; eyecatch?: string }>[]) {
+function loadPosts(posts: MarkdownInstance<{ title: string; date: string; emoji: string; eyecatch?: string }>[]): Post[] {
   return posts.map(post => ({
     frontmatter: post.frontmatter,
-    url: post.url,
+    url: post.url ?? '',
   })).sort((a, b) => new Date(b.frontmatter.date).getTime() - new Date(a.frontmatter.date).getTime());
 }
 
-const blogs = loadPosts(blogPosts).slice(0, 3);
-const notes = loadPosts(notePosts).slice(0, 3);
+// すべての投稿を読み込み、新しい順に並べ替え
+const allBlogs = loadPosts(blogPosts);
+const allNotes = loadPosts(notePosts);
+
+// フィーチャーセクション用に最新の4つの投稿を取得（ブログ優先）
+const featurePosts = [...allBlogs.slice(0, 2), ...allNotes.slice(0, 2)].sort(
+  (a, b) => new Date(b.frontmatter.date).getTime() - new Date(a.frontmatter.date).getTime()
+).slice(0, 4);
+
+// カテゴリセクション用に各カテゴリの投稿を取得（最新4つ）
+const blogSectionPosts = allBlogs.slice(0, 4);
+const noteSectionPosts = allNotes.slice(0, 4);
 ---
+
 <GlobalLayout>
-    <style>
-        .container {
-            max-width: 800px;
-            margin: 32px auto;
-            padding: 32px;
-            border-radius: 16px;
-            background-color: var(--bg-color-level-1);
-        }
-
-        .icon {
-            margin: 32px auto;
-            width: 120px;
-            height: 120px;
-            border-radius: 60px;
-        }
-
-        .posts-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-            gap: 16px;
-        }
-
-        .post-tile {
-            padding: 16px;
-            border-radius: 8px;
-            background-color: var(--bg-color-level-2);
-            text-align: center;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .post-eyecatch {
-            width: 100%;
-            height: 120px;
-            object-fit: cover;
-            border-radius: 4px;
-            margin-bottom: 12px;
-        }
-
-        .post-emoji {
-            font-size: 2em;
-        }
-
-        .post-title {
-            font-size: 1.2em;
-            margin: 8px 0;
-        }
-
-        .post-date {
-            font-size: 0.9em;
-            color: var(--text-color-level-2);
-        }
-
-        h1 {
-            font-size: 1.4em;
-            margin-top: 0.4em;
-        }
-
-        a {
-            display: block;
-            margin-top: 1em;
-            text-align: center;
-        }
-    </style>
-    <div class="container">
-        <img class="icon" src={icon.src} width={icon.width} height={icon.height} />
-        <h1># humans.txt</h1>
-        <humans.Content />
-
-        <h1># Latest Blog Posts</h1>
-        <div class="posts-grid">
-            {blogs.map(post => (
-                <div class="post-tile">
-                    {post.frontmatter.eyecatch && (
-                        <img
-                            src={`https://articles.yaakai.to/eyecatch?id=${post.frontmatter.eyecatch}`}
-                            alt={post.frontmatter.title}
-                            class="post-eyecatch"
-                        />
-                    )}
-                    {!post.frontmatter.eyecatch && (
-                        <div class="post-emoji">{post.frontmatter.emoji}</div>
-                    )}
-                    <div class="post-title">
-                        <a href={post.url}>
-                            {post.frontmatter.eyecatch ? `${post.frontmatter.emoji} ${post.frontmatter.title}` : post.frontmatter.title}
-                        </a>
-                    </div>
-                    <div class="post-date">{new Date(post.frontmatter.date).toLocaleDateString()}</div>
-                </div>
-            ))}
+  <main class="main-content">
+    <!-- プロフィールセクション -->
+    <section class="profile-section">
+      <div class="profile-container">
+        <div class="profile-header">
+          <img src="/icon/icon-128.png" alt="yaakai.to" class="profile-icon">
+          <div class="profile-info">
+            <h1 class="profile-name">yaakai.to</h1>
+            <p class="profile-description"><humans.Content /></p>
+          </div>
         </div>
-        <a href="/blog">View all blog posts</a>
-
-        <h1># Latest Notes</h1>
-        <div class="posts-grid">
-            {notes.map(post => (
-                <div class="post-tile">
-                    {post.frontmatter.eyecatch && (
-                        <img
-                            src={`https://articles.yaakai.to/eyecatch?id=${post.frontmatter.eyecatch}`}
-                            alt={post.frontmatter.title}
-                            class="post-eyecatch"
-                        />
-                    )}
-                    {!post.frontmatter.eyecatch && (
-                        <div class="post-emoji">{post.frontmatter.emoji}</div>
-                    )}
-                    <div class="post-title">
-                        <a href={post.url}>
-                            {post.frontmatter.eyecatch ? `${post.frontmatter.emoji} ${post.frontmatter.title}` : post.frontmatter.title}
-                        </a>
-                    </div>
-                    <div class="post-date">{new Date(post.frontmatter.date).toLocaleDateString()}</div>
-                </div>
-            ))}
+        <div class="profile-meta">
+          <a href="/rss.xml" class="profile-meta-link">
+            <i class="fas fa-rss"></i>
+            <span>RSS Feed</span>
+          </a>
+          <a href="/llms.txt" class="profile-meta-link">
+            <i class="fas fa-robot"></i>
+            <span>For LLMs</span>
+          </a>
+          <a href="https://github.com/yaakaito" class="profile-meta-link" target="_blank" rel="noopener noreferrer">
+            <i class="fab fa-github"></i>
+            <span>GitHub</span>
+          </a>
         </div>
-        <a href="/note">View all notes</a>
-    </div>
+      </div>
+    </section>
+
+    <!-- フィーチャーセクション -->
+    <section class="featured-section">
+      <FeatureGrid posts={featurePosts} />
+    </section>
+
+    <!-- ブログセクション -->
+    <CategorySection
+      title="Blog"
+      type="blog"
+      posts={blogSectionPosts}
+      viewAllLink="/blog"
+    />
+
+    <!-- ノートセクション -->
+    <CategorySection
+      title="Note"
+      type="note"
+      posts={noteSectionPosts}
+      viewAllLink="/note"
+    />
+  </main>
 </GlobalLayout>
+
+<style>
+  .main-content {
+    padding: 32px 0;
+  }
+
+  .profile-section {
+    margin-bottom: 48px;
+  }
+
+  .profile-container {
+    background-color: var(--bg-color-level-1);
+    border-radius: 12px;
+    padding: 24px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  }
+
+  .profile-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 24px;
+  }
+
+  .profile-icon {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    margin-right: 24px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
+
+  .profile-info {
+    flex: 1;
+  }
+
+  .profile-name {
+    font-size: 1.8em;
+    margin: 0 0 8px 0;
+    color: var(--text-color-level-0);
+  }
+
+  .profile-description {
+    font-size: 1em;
+    line-height: 1.5;
+    color: var(--text-color-level-1);
+    margin: 0;
+  }
+
+  .profile-meta {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+
+  .profile-meta-link {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background-color: var(--bg-color-level-2);
+    padding: 10px 18px;
+    border-radius: 24px;
+    transition: transform 0.2s ease, background-color 0.2s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    font-size: 0.9em;
+  }
+
+  .profile-meta-link:hover {
+    transform: translateY(-2px);
+    background-color: var(--bg-color-level-3);
+  }
+
+  .section-title {
+    font-size: 1.6em;
+    margin-bottom: 24px;
+    color: var(--text-color-level-0);
+    font-weight: bold;
+    position: relative;
+    padding-left: 16px;
+  }
+
+  .section-title::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 6px;
+    background-color: var(--primary-color-level-0);
+    border-radius: 3px;
+  }
+
+  .featured-section {
+    margin-bottom: 48px;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    .meta-card, .meta-link {
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    }
+  }
+
+  @media (max-width: 768px) {
+    .meta-content {
+      gap: 16px;
+    }
+
+    .meta-links {
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .meta-card {
+      padding: 20px;
+    }
+  }
+</style>
