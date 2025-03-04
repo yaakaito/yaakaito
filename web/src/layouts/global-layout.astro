@@ -6,6 +6,8 @@ interface Props {
     ogImage?: string;
     ogType?: string;
     ogUrl?: string;
+    twitterCard?: string;
+    twitterCreator?: string;
 }
 
 const {
@@ -13,11 +15,14 @@ const {
     description = "技術的なメモとブログ記事のコレクション",
     ogImage = icon.src,
     ogType = "website",
-    ogUrl
+    ogUrl,
+    twitterCard = "summary_large_image",
+    twitterCreator = "@yaakaito"
 } = Astro.props;
 
 const siteTitle = title ? `${title} - yaakai.to` : 'yaakai.to';
 const canonicalUrl = ogUrl || Astro.url.href;
+const fullImageUrl = ogImage.startsWith('http') ? ogImage : new URL(ogImage, Astro.site || Astro.url.origin).href;
 ---
 
 <html lang="ja">
@@ -34,15 +39,20 @@ const canonicalUrl = ogUrl || Astro.url.href;
     <meta property="og:url" content={canonicalUrl} />
     <meta property="og:title" content={siteTitle} />
     <meta property="og:description" content={description} />
-    <meta property="og:image" content={ogImage.startsWith('http') ? ogImage : new URL(ogImage, Astro.site || Astro.url.origin).href} />
+    <meta property="og:image" content={fullImageUrl} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
     <meta property="og:site_name" content="yaakai.to" />
 
     <!-- Twitter -->
-    <meta property="twitter:card" content="summary_large_image" />
-    <meta property="twitter:url" content={canonicalUrl} />
-    <meta property="twitter:title" content={siteTitle} />
-    <meta property="twitter:description" content={description} />
-    <meta property="twitter:image" content={ogImage.startsWith('http') ? ogImage : new URL(ogImage, Astro.site || Astro.url.origin).href} />
+    <meta name="twitter:card" content={twitterCard} />
+    <meta name="twitter:site" content="@yaakaito" />
+    <meta name="twitter:creator" content={twitterCreator} />
+    <meta name="twitter:url" content={canonicalUrl} />
+    <meta name="twitter:title" content={siteTitle} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={fullImageUrl} />
+    <meta name="twitter:image:alt" content={`${siteTitle}のイメージ画像`} />
 
     <title>{siteTitle}</title>
     <link rel="stylesheet" href="https://unpkg.com/@acab/reset.css" />

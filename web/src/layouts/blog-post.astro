@@ -28,6 +28,8 @@ const canonicalUrl = new URL(Astro.url.pathname, Astro.site || Astro.url.origin)
     ogImage={ogImage}
     ogType="article"
     ogUrl={canonicalUrl}
+    twitterCard="summary_large_image"
+    twitterCreator="@yaakaito"
 >
     <style is:global>
         /* 関連記事のスタイル */

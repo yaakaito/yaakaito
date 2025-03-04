@@ -8,10 +8,11 @@
 - 重複コードの削減と日付フォーマット関数の共通化
 
 ## 最近の変更点
-- **2025-03-04**: OGP対応の実装
-  - GlobalLayoutコンポーネントにOGPメタタグを追加
-  - 各ページ（blog-post.astro、note/index.astro）のOGP情報設定
+- **2025-03-04**: OGPとTwitterカード対応の実装
+  - GlobalLayoutコンポーネントにOGPメタタグとTwitterカードメタタグを追加
+  - 各ページ（blog-post.astro、note/index.astro）のOGP/Twitter情報設定
   - 動的なOGP画像と説明文の生成
+  - アイキャッチ画像のサイズ情報とalt属性の追加
 - **2025-03-04**: メモリーバンクの更新とプロジェクト状況の再確認
   - コードベースの現状を再分析
   - ノートカードコンポーネントの最適化が必要と特定
