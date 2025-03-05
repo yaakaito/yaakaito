@@ -32,6 +32,9 @@ const canonicalUrl = new URL(Astro.url.pathname, Astro.site || Astro.url.origin)
     twitterCreator="@yaakaito"
 >
     <style is:global>
+        body {
+            overflow-x: hidden;
+        }
         /* 関連記事のスタイル */
         .related-section {
             max-width: 850px;
@@ -572,7 +575,6 @@ const canonicalUrl = new URL(Astro.url.pathname, Astro.site || Astro.url.origin)
             margin-top: 3em;
             font-size: 0.9em;
             color: var(--text-color-level-2);
-            border-top: 1px solid var(--bg-color-level-3);
             padding-top: 1em;
         }
 
@@ -584,6 +586,10 @@ const canonicalUrl = new URL(Astro.url.pathname, Astro.site || Astro.url.origin)
         .footnotes .footnote-backref {
             text-decoration: none;
             margin-left: 0.3em;
+        }
+
+        .footnotes h2 {
+            display: none;
         }
 
         /* OGP Card styles */
