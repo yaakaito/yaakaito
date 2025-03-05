@@ -11,9 +11,9 @@
 
 ## Latest Notes
 
+- 🔄 [View Transition API を使った MPA でのページ間アニメーション](https://yaakai.to/note/9) - 3/4/2025
 - 🖊 [pnpm の Catalogs を使って monorepo 内のバージョンを統一する](https://yaakai.to/note/45) - 2/28/2025
 - 🖊 [CSS の attr が content と <string> 以外でも利用可能に](https://yaakai.to/note/43) - 2/23/2025
-- 🖊 [Dev Container での wrangler dev で dev-server に繋がらない場合の対処](https://yaakai.to/note/28) - 2/2/2025
 
 <!--
 **yaakaito/yaakaito** is a ✨ _special_ ✨ repository because its `README.md` (this file) appears on your GitHub profile.
