@@ -678,6 +678,73 @@ const canonicalUrl = new URL(Astro.url.pathname, Astro.site || Astro.url.origin)
             height: 100%;
         }
 
+        /* 折りたたみ可能なコードブロック用のスタイル */
+        .collapsible-code {
+            border-radius: 4px;
+            overflow: hidden;
+            margin: 1em 0;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            background-color: #2d2d2d;
+        }
+
+        .collapsible-code summary {
+            padding: 10px 15px;
+            cursor: pointer;
+            font-family: 'JetBrains Mono', 'Fira Code', 'SF Mono', 'Menlo', 'Consolas', 'Courier New', monospace;
+            font-size: 0.9em;
+            color: #e0e0e0;
+            background-color: #252525;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+            transition: background-color 0.2s ease;
+            user-select: none;
+        }
+
+        .collapsible-code summary:hover {
+            background-color: #333333;
+        }
+
+        .collapsible-code summary::before {
+            content: '▶';
+            display: inline-block;
+            margin-right: 8px;
+            font-size: 0.8em;
+            transition: transform 0.3s ease;
+        }
+
+        .collapsible-code[open] summary::before {
+            transform: rotate(90deg);
+        }
+
+        .collapsible-code pre {
+            margin: 0;
+            padding: 15px;
+            max-height: 500px;
+            overflow: auto;
+        }
+
+        .collapsible-code pre::before,
+        .collapsible-code pre::after {
+            display: none; /* マークダウンのコードブロック装飾を非表示 */
+        }
+
+        @media (prefers-color-scheme: light) {
+            .collapsible-code {
+                border: 1px solid rgba(0, 0, 0, 0.1);
+            }
+
+            .collapsible-code summary {
+                background-color: #f0f0f0;
+                color: #333;
+                border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+            }
+
+            .collapsible-code summary:hover {
+                background-color: #e5e5e5;
+            }
+        }
+
         @media (max-width: 600px) {
             .ogp-card {
                 flex-direction: column;
