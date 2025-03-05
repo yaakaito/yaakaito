@@ -592,6 +592,92 @@ const canonicalUrl = new URL(Astro.url.pathname, Astro.site || Astro.url.origin)
             display: none;
         }
 
+        /* アドモニション（注釈・警告ブロック）のスタイル */
+        .admonition {
+            margin: 1.5em 0;
+            padding: 0;
+            border-radius: 8px;
+            border-left: 4px solid var(--admonition-color, #6b7280);
+            background-color: var(--bg-color-level-1);
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .admonition-header {
+            display: flex;
+            align-items: center;
+            background-color: color-mix(in srgb, var(--admonition-color, #6b7280) 15%, var(--bg-color-level-1));
+            padding: 10px 16px;
+            color: var(--text-color-level-0);
+            font-weight: bold;
+        }
+
+        .admonition-icon {
+            margin-right: 8px;
+            font-size: 1.2em;
+            line-height: 1;
+        }
+
+        .admonition-title {
+            font-size: 0.9em;
+            letter-spacing: 0.05em;
+        }
+
+        .admonition-content {
+            padding: 16px;
+            color: var(--text-color-level-0);
+            font-size: 0.95em;
+        }
+
+        .admonition-content > :first-child {
+            margin-top: 0;
+        }
+
+        .admonition-content > :last-child {
+            margin-bottom: 0;
+        }
+
+        /* 各種アドモニションタイプのカスタマイズ */
+        .admonition-note {
+            --admonition-color: #3b82f6;
+        }
+
+        .admonition-warning {
+            --admonition-color: #f59e0b;
+        }
+
+        .admonition-tip {
+            --admonition-color: #10b981;
+        }
+
+        .admonition-important {
+            --admonition-color: #ef4444;
+        }
+
+        .admonition-caution {
+            --admonition-color: #f97316;
+        }
+
+        .admonition-danger {
+            --admonition-color: #dc2626;
+        }
+
+        .admonition-success {
+            --admonition-color: #22c55e;
+        }
+
+        /* ダークモード調整 */
+        @media (prefers-color-scheme: dark) {
+            .admonition {
+                background-color: var(--bg-color-level-1);
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+            }
+
+            .admonition-header {
+                background-color: color-mix(in srgb, var(--admonition-color, #6b7280) 20%, var(--bg-color-level-1));
+            }
+        }
+
         /* OGP Card styles */
         .ogp-card {
             margin: 1em 0;
