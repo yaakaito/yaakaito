@@ -369,6 +369,9 @@ export default {
 					}
 				}
 
+				// あとでなおす
+				selectedTechKeyword = "ai";
+
 				console.log('選択された技術キーワード:', selectedTechKeyword);
 
 				// 選択されたキーワードに対応する動物と背景色を取得
@@ -384,7 +387,7 @@ export default {
 
 				// 5つの画像生成リクエストを並列に実行
 				// frontend のデバッグでコストが掛かるので一旦 1
-				const generateImagePromises = Array(1).fill(null).map(async (_, index) => {
+				const generateImagePromises = Array(5).fill(null).map(async (_, index) => {
 					console.log(`画像生成リクエスト ${index + 1}/5 を開始`);
 
 					// わずかにプロンプトを変えて多様性を確保
