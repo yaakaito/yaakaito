@@ -2,7 +2,7 @@
 layout: ../../../layouts/blog-post.astro
 title: Roo Code の Architect で計画を立ててこのブログをリデザインする
 emoji: 📚
-date: 2025-03-02
+date: 2025-03-05
 eyecatch: blog-redesign-with-architect
 tags:
   - AI
