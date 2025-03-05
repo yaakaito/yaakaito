@@ -733,6 +733,78 @@ const canonicalUrl = new URL(Astro.url.pathname, Astro.site || Astro.url.origin)
                 box-shadow: 0 6px 14px rgba(0, 0, 0, 0.2);
             }
         }
+
+        /* アドモニション（注釈）スタイル */
+        .admonition {
+            margin: 1.5em 0;
+            padding: 0;
+            border-radius: 6px;
+            overflow: hidden;
+            border-left: 0;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        .admonition-header {
+            display: flex;
+            align-items: center;
+            padding: 10px 16px;
+            font-weight: bold;
+            color: white;
+        }
+
+        .admonition-icon {
+            margin-right: 10px;
+            font-size: 1.2em;
+        }
+
+        .admonition-content {
+            padding: 16px;
+            background-color: var(--bg-color-level-1);
+        }
+
+        .admonition-content p:first-of-type {
+            margin-top: 0;
+        }
+
+        .admonition-content p:last-of-type {
+            margin-bottom: 0;
+        }
+
+        /* アドモニションタイプ別のスタイル */
+        .admonition-note .admonition-header {
+            background-color: #0086b3;
+        }
+
+        .admonition-tip .admonition-header {
+            background-color: #00a65a;
+        }
+
+        .admonition-warning .admonition-header {
+            background-color: #ff9800;
+        }
+
+        .admonition-caution .admonition-header {
+            background-color: #ff4e00;
+        }
+
+        .admonition-important .admonition-header {
+            background-color: #dc3545;
+        }
+
+        .admonition-info .admonition-header {
+            background-color: #3498db;
+        }
+
+        /* ダークモード調整 */
+        @media (prefers-color-scheme: dark) {
+            .admonition {
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+            }
+
+            .admonition-content {
+                background-color: var(--bg-color-level-2);
+            }
+        }
     </style>
     <style>
             .article-container {
