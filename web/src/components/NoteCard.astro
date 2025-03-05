@@ -1,4 +1,6 @@
 ---
+import { selectEmoji } from '../scripts/emoji-selector';
+
 interface Props {
   title: string;
   date: string;
@@ -7,7 +9,7 @@ interface Props {
   eyecatch?: string;
 }
 
-const { title, date, emoji, url, eyecatch } = Astro.props;
+const { title, date, emoji: propEmoji, url, eyecatch } = Astro.props;
 const formattedDate = new Date(date).toLocaleDateString();
 
 // 相対日付を計算する関数
@@ -32,11 +34,57 @@ function getRelativeDate(dateString: string): string {
   }
 }
 
+// カテゴリ判定と絵文字選択
+// デフォルトの絵文字が設定されていない場合や単なるペンの絵文字の場合は自動選択
+const isDefaultEmoji = !propEmoji || propEmoji === '🖊️' || propEmoji === '🖊';
+const emoji = isDefaultEmoji ? selectEmoji(title) : propEmoji;
+
+// 絵文字からカテゴリ色をマッピング
+function getColorClassFromEmoji(emoji: string): string {
+  // メモ・ノート系
+  if (['📝', '✍️', '🖊️', '📓', '📔', '📒', '📕', '📗', '📘', '📙'].includes(emoji)) {
+    return 'note-category-notes';
+  }
+  // 開発・コーディング系
+  else if (['💻', '👨‍💻', '👩‍💻', '🧑‍💻', '⌨️', '🖥️', '🚀', '⚙️', '🔧', '🔨', '🛠️', '🧰'].includes(emoji)) {
+    return 'note-category-dev';
+  }
+  // アイデア・思考系
+  else if (['💡', '🧠', '🤔', '💭', '✨', '🔮'].includes(emoji)) {
+    return 'note-category-idea';
+  }
+  // デザイン系
+  else if (['🎨', '🖌️', '🖍️', '✏️', '📐', '📏', '🎭', '👁️', '🔍'].includes(emoji)) {
+    return 'note-category-design';
+  }
+  // ウェブ系
+  else if (['🌐', '🔗', '📡', '📱', '📶', '🌍', '🌎', '🌏'].includes(emoji)) {
+    return 'note-category-web';
+  }
+  // セキュリティ系
+  else if (['🔒', '🔓', '🔐', '🔑', '🗝️', '🛡️'].includes(emoji)) {
+    return 'note-category-security';
+  }
+  // データ・分析系
+  else if (['📊', '📈', '📉', '🧮', '🔢', '📑', '📋'].includes(emoji)) {
+    return 'note-category-data';
+  }
+  // 実験・テスト系
+  else if (['🧪', '🧫', '🔬', '🔭', '🧬'].includes(emoji)) {
+    return 'note-category-experiment';
+  }
+  // デフォルト
+  else {
+    return 'note-category-default';
+  }
+}
+
+const categoryClass = getColorClassFromEmoji(emoji);
 const relativeDate = getRelativeDate(date);
 ---
 
 <a href={url} class="note-card-link">
-  <div class="note-card">
+  <div class={`note-card ${categoryClass}`}>
     <div class="note-indicator"></div>
     <div class="note-content">
       {eyecatch && (
@@ -90,6 +138,43 @@ const relativeDate = getRelativeDate(date);
     height: 100%;
     width: 4px;
     background-color: var(--note-color);
+  }
+
+  /* カテゴリに応じたカラースタイル */
+  .note-category-notes .note-indicator {
+    background-color: #3498db; /* 青 - ノート/メモ */
+  }
+
+  .note-category-dev .note-indicator {
+    background-color: #2ecc71; /* 緑 - 開発 */
+  }
+
+  .note-category-idea .note-indicator {
+    background-color: #f39c12; /* オレンジ - アイデア */
+  }
+
+  .note-category-design .note-indicator {
+    background-color: #9b59b6; /* 紫 - デザイン */
+  }
+
+  .note-category-web .note-indicator {
+    background-color: #1abc9c; /* ターコイズ - ウェブ */
+  }
+
+  .note-category-security .note-indicator {
+    background-color: #e74c3c; /* 赤 - セキュリティ */
+  }
+
+  .note-category-data .note-indicator {
+    background-color: #34495e; /* 濃い青 - データ */
+  }
+
+  .note-category-experiment .note-indicator {
+    background-color: #8e44ad; /* 紫 - 実験 */
+  }
+
+  .note-category-default .note-indicator {
+    background-color: #7f8c8d; /* グレー - デフォルト */
   }
 
 
