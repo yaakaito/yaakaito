@@ -33,7 +33,7 @@
 ```bash
 # Astroサイトの開発サーバー起動
 cd web
-npm run dev  # または npm start
+bun run dev  # または npm start
 
 # Cloudflare Workersのローカル実行
 cd related-articles-worker
