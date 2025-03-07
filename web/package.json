@@ -13,10 +13,10 @@
   "dependencies": {
     "@astrojs/rss": "^4.0.10",
     "astro": "5.0.5",
-    "sanitize-html": "^2.13.1",
+    "node-fetch": "^3.2.0",
     "remark": "^14.0.2",
     "remark-html": "^15.0.0",
-    "node-fetch": "^3.2.0"
+    "sanitize-html": "^2.13.1"
   },
   "devDependencies": {
     "glob": "^11.0.1",
