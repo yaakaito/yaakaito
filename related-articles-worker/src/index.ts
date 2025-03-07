@@ -244,7 +244,7 @@ export default {
 			"typescript": { animal: "guanaco", backgroundColor: "#3178C6" },
 			"html": { animal: "koala", backgroundColor: "#E34F26" },
 			"css": { animal: "fish", backgroundColor: "#1572B6" },
-			"database": { animal: "dumbo-octopus", backgroundColor: "#336791" }
+			"docker": { animal: "whale", backgroundColor: "#336791" }
 		};
 
 		// アイキャッチ画像生成エンドポイント
@@ -370,7 +370,7 @@ export default {
 				}
 
 				// あとでなおす
-				selectedTechKeyword = "ai";
+				selectedTechKeyword = "docker";
 
 				console.log('選択された技術キーワード:', selectedTechKeyword);
 
