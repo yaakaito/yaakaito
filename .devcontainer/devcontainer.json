@@ -1,5 +1,9 @@
 {
-    "image": "mcr.microsoft.com/devcontainers/base:1",
+    "image": "mcr.microsoft.com/devcontainers/base:1-bookworm",
+    "runArgs": [
+        "--cap-add=SYS_ADMIN"
+    ],
+    "postCreateCommand": ".devcontainer/setup-browser-action.sh",
     "features": {
         "ghcr.io/devcontainers/features/node:1": {},
         "ghcr.io/shyim/devcontainers-features/bun:0": {},
@@ -8,7 +12,6 @@
     "customizations": {
         "vscode": {
             "extensions": [
-                "github.copilot",
                 "astro-build.astro-vscode"
             ]
         }
