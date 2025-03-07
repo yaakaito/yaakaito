@@ -1,7 +1,7 @@
 ---
 layout: ../../../layouts/blog-post.astro
 title: Roo Code の Browser が Dev Container で動かない
-emoji: 🐙
+emoji: 🐋
 date: 2025-03-06
 eyecatch: blog-fixing-roo-code-browser-issues-in-dev-container
 tags:
@@ -100,7 +100,7 @@ Sonnet によると `--cap-add=SYS_ADMIN` をつけてコンテナを起動す�
 }
 ```
 
-下にある元の設定と比べて `base:1` から `base:1-bookworm` になっているが、setup-browser-action.sh と揃えるためで本質的には関係がない。
+下にある元の設定と比べて `base:1` から `base:1-bookworm` になっているが、 `setup-browser-action.sh` と揃えるためで本質的には違いがない。
 
 
 ## 動かない状態
