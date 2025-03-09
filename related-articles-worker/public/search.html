@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>関連記事API - 関連記事検索</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="icon" href="image1.png" type="image/png">
+</head>
+<body>
+    <div class="sidebar">
+        <h1>関連記事API</h1>
+        <div class="menu-item" data-target="register">記事登録</div>
+        <div class="menu-item active" data-target="search">関連記事</div>
+        <div class="menu-item" data-target="eyecatch">画像生成</div>
+        <div class="menu-item" data-target="upload">アイキャッチアップロード</div>
+        <div class="menu-item" data-target="direct-upload">ID指定アップロード</div>
+        <button id="logoutButton" class="secondary-button" style="margin-top: 20px; width: 100%;">ログアウト</button>
+    </div>
+
+    <div class="main-content">
+        <section id="search" class="content-section active">
+            <h2>関連記事の取得</h2>
+            <form id="searchForm">
+                <div class="form-group">
+                    <label for="searchId">記事ID:</label>
+                    <input type="text" id="searchId" required>
+                </div>
+                <button type="submit">検索</button>
+            </form>
+            <div id="searchResult" class="result"></div>
+        </section>
+    </div>
+
+    <script src="js/common.js"></script>
+    <script src="js/auth.js"></script>
+</body>
+</html>

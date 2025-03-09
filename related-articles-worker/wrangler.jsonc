@@ -12,7 +12,8 @@
 	],
 	"assets": {
 		"binding": "ASSETS",
-		"directory": "./public"
+		"directory": "./public",
+		"run_worker_first": true
 	},
 	"observability": {
 		"enabled": true

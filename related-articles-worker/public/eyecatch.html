@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>関連記事API - 画像生成</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="icon" href="image1.png" type="image/png">
+</head>
+<body>
+    <div class="sidebar">
+        <h1>関連記事API</h1>
+        <div class="menu-item" data-target="register">記事登録</div>
+        <div class="menu-item" data-target="search">関連記事</div>
+        <div class="menu-item active" data-target="eyecatch">画像生成</div>
+        <div class="menu-item" data-target="upload">アイキャッチアップロード</div>
+        <div class="menu-item" data-target="direct-upload">ID指定アップロード</div>
+        <button id="logoutButton" class="secondary-button" style="margin-top: 20px; width: 100%;">ログアウト</button>
+    </div>
+
+    <div class="main-content">
+        <section id="eyecatch" class="content-section active">
+            <h2>アイキャッチ画像の生成</h2>
+            <form id="eyecatchForm">
+                <div class="form-group">
+                    <label for="eyecatchApiKey">API Key:</label>
+                    <input type="password" id="eyecatchApiKey" autocomplete="current-password">
+                </div>
+                <div class="form-group">
+                    <label>記事の選択方法:</label>
+                    <div style="margin-bottom: 10px;">
+                        <label style="display: inline-block; margin-right: 15px;">
+                            <input type="radio" name="contentSource" value="text" checked> 本文を直接入力
+                        </label>
+                        <label style="display: inline-block;">
+                            <input type="radio" name="contentSource" value="id"> 未作成の記事から選択
+                        </label>
+                    </div>
+                </div>
+
+                <div id="directInputSection" class="form-group">
+                    <label for="eyecatchContent">記事の本文:</label>
+                    <textarea id="eyecatchContent" rows="4" placeholder="画像を生成するための記事本文を入力してください"></textarea>
+                </div>
+
+                <div id="articleSelectSection" class="form-group" style="display: none;">
+                    <button type="button" id="loadPendingArticles" class="secondary-button">未作成の記事を読み込む</button>
+                    <div id="pendingArticlesList" style="margin-top: 10px; max-height: 300px; overflow-y: auto;"></div>
+                    <input type="hidden" id="selectedArticleId" value="">
+                </div>
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" id="useTestImages"> テスト画像を使用する（APIを呼び出さない）
+                    </label>
+                </div>
+                <button type="submit">画像生成</button>
+            </form>
+            <div id="eyecatchResult" class="result">
+                <div id="eyecatchLoading" style="display: none;">画像生成中...</div>
+                <div id="eyecatchError" class="error" style="display: none;"></div>
+                <div id="eyecatchImageContainer" style="margin-top: 1rem; display: none;">
+                    <h3>生成された画像</h3>
+                    <div id="imagesGrid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1rem; margin-bottom: 1rem;"></div>
+                    <img id="selectedImage" style="display: none;" />
+
+                    <!-- 画像編集UI -->
+                    <div id="imageEditor" class="editor-container">
+                        <h3>ドット絵加工</h3>
+                        <div class="editor-layout">
+                            <div class="editor-main">
+                                <div class="editor-steps">
+                                    <!-- ステップ1: グリッド設定 -->
+                                    <div class="editor-step">
+                                        <div class="editor-step-title">
+                                            <span>ステップ1: グリッド設定</span>
+                                        </div>
+                                        <div class="editor-step-content">
+                                            <div class="canvas-container" style="margin-bottom: 15px;">
+                                                <canvas id="imageCanvas"></canvas>
+                                                <canvas id="gridCanvas"></canvas>
+                                            </div>
+
+                                            <div class="grid-controls">
+                                                <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                                                    <div class="slider-container" style="flex: 1; min-width: 200px;">
+                                                        <label for="gridSizeSlider">グリッドサイズ:</label>
+                                                        <input type="range" id="gridSizeSlider" min="4" max="32" value="8" step="1">
+                                                        <span id="gridSizeValue" class="slider-value">8px</span>
+                                                    </div>
+                                                    <div class="slider-container" style="flex: 1; min-width: 200px;">
+                                                        <label for="offsetXSlider">X方向オフセット:</label>
+                                                        <input type="range" id="offsetXSlider" min="0" max="16" value="0" step="1">
+                                                        <span id="offsetXValue" class="slider-value">0px</span>
+                                                    </div>
+                                                    <div class="slider-container" style="flex: 1; min-width: 200px;">
+                                                        <label for="offsetYSlider">Y方向オフセット:</label>
+                                                        <input type="range" id="offsetYSlider" min="0" max="16" value="0" step="1">
+                                                        <span id="offsetYValue" class="slider-value">0px</span>
+                                                    </div>
+                                                </div>
+
+                                                <div class="editor-buttons" style="margin-top: 15px;">
+                                                    <button id="processButton" style="background-color: #22c55e;">ドット絵に変換</button>
+                                                    <button id="resetButton" style="background-color: #6b7280;">リセット</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- ステップ2: ドット絵編集 -->
+                                    <div id="processedImageContainer" class="editor-step" style="display: none;">
+                                        <div class="editor-step-title">
+                                            <span>ステップ2: ドット絵編集</span>
+                                        </div>
+                                        <div class="editor-step-content">
+                                            <div style="display: flex; gap: 20px; align-items: flex-start;">
+                                                <div style="flex: 1;">
+                                                    <div class="canvas-container">
+                                                        <canvas id="processedCanvas"></canvas>
+                                                        <canvas id="processedGridCanvas"></canvas>
+                                                    </div>
+
+                                                    <div class="editor-buttons" style="margin-top: 1rem;">
+                                                        <button id="undoButton" style="background-color: #f59e0b;">元に戻す</button>
+                                                        <button id="downloadProcessedButton" style="background-color: #0066cc;">加工画像をダウンロード</button>
+                                                    </div>
+                                                </div>
+
+                                                <div id="colorPaletteContainer" style="width: 250px; background-color: #f9f9f9; padding: 1rem; border-radius: 4px; border: 1px solid #eee;">
+                                                    <h4 style="margin-top: 0; color: #0066cc; border-bottom: 1px solid #d0e3ff; padding-bottom: 0.5rem;">使用色パレット (<span id="colorCount">0</span>色)</h4>
+                                                    <p>色を選択して画像を編集できます</p>
+                                                    <div id="colorPalette" class="color-palette"></div>
+
+                                                    <div class="tool-buttons" style="margin-top: 1rem;">
+                                                        <div id="dotToolButton" class="tool-button selected" title="ドット編集ツール">
+                                                            <span>ドット編集</span>
+                                                        </div>
+                                                        <div id="fillToolButton" class="tool-button" title="塗りつぶしツール">
+                                                            <span>塗りつぶし</span>
+                                                        </div>
+                                                        <div id="toggleGridButton" class="tool-button" title="グリッド表示切替">
+                                                            <span>グリッド表示</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- ステップ3: 最終出力 -->
+                                    <div id="finalCanvasContainer" class="editor-step final-canvas-container" style="display: none;">
+                                        <div class="editor-step-title">
+                                            <span>ステップ3: 最終出力</span>
+                                        </div>
+                                        <div class="editor-step-content">
+                                            <h4>最終出力 (1200 x 630)</h4>
+                                            <canvas id="finalCanvas" width="1200" height="630"></canvas>
+
+                                            <div class="final-canvas-controls">
+                                                <div style="margin-bottom: 1rem;">
+                                                    <label for="scaleSelector">倍率:</label>
+                                                    <select id="scaleSelector" style="margin-left: 0.5rem; padding: 0.3rem;">
+                                                        <option value="1">1x</option>
+                                                        <option value="2">2x</option>
+                                                        <option value="4">4x</option>
+                                                        <option value="8" selected>8x</option>
+                                                        <option value="12">12x</option>
+                                                        <option value="16">16x</option>
+                                                    </select>
+                                                    <button id="applyScaleButton" style="margin-left: 0.5rem;">倍率を適用</button>
+                                                </div>
+
+                                                <div style="margin-bottom: 1rem;">
+                                                    <div style="margin-bottom: 0.5rem;">
+                                                        <label style="display: block; margin-bottom: 0.5rem;">背景色:</label>
+                                                        <div id="mainBgColorPalette" style="display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 0.5rem;"></div>
+                                                        <input type="hidden" id="bgColorPicker" value="#ffffff">
+                                                    </div>
+                                                    <div id="bgColorSelection" style="margin-top: 1rem;">
+                                                        <label style="display: block; margin-bottom: 0.5rem;">背景として扱う色:</label>
+                                                        <div id="bgColorPalette" style="display: flex; flex-wrap: wrap; gap: 0.3rem; margin-bottom: 0.5rem;"></div>
+                                                        <button id="applyBgColorSelectionButton">選択した色を背景として適用</button>
+                                                    </div>
+                                                </div>
+
+                                                <div class="position-controls" style="margin-bottom: 1rem;">
+                                                    <label>画像位置:</label>
+                                                    <div style="display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.5rem;">
+                                                        <button id="moveLeftButton">←</button>
+                                                        <button id="moveUpButton">↑</button>
+                                                        <button id="moveDownButton">↓</button>
+                                                        <button id="moveRightButton">→</button>
+                                                        <button id="centerImageButton">中央に配置</button>
+                                                    </div>
+                                                    <div style="margin-top: 0.5rem;">
+                                                        <label for="offsetXInput" style="display: inline-block; width: 120px;">X方向オフセット:</label>
+                                                        <input type="number" id="offsetXInput" value="0" style="width: 60px;">
+                                                        <button id="applyOffsetXButton" style="margin-left: 0.5rem;">適用</button>
+                                                    </div>
+                                                    <div style="margin-top: 0.5rem;">
+                                                        <label for="offsetYInput" style="display: inline-block; width: 120px;">Y方向オフセット:</label>
+                                                        <input type="number" id="offsetYInput" value="0" style="width: 60px;">
+                                                        <button id="applyOffsetYButton" style="margin-left: 0.5rem;">適用</button>
+                                                    </div>
+                                                </div>
+
+                                                <button id="downloadFinalButton" style="background-color: #22c55e;">最終画像をダウンロード</button>
+                                                <button id="uploadEyecatchButton" style="background-color: #0066cc; margin-left: 10px;">アイキャッチとして保存</button>
+                                                <div id="uploadStatus" style="margin-top: 10px; display: none; padding: 10px; border-radius: 4px;"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="editor-preview">
+                                <h3 style="color: #0066cc; border-bottom: 1px solid #d0e3ff; padding-bottom: 0.5rem;">現在の編集状態</h3>
+                                <div style="padding: 1rem; background-color: #f5f5f5; border-radius: 4px; border: 1px solid #ddd;">
+                                    <img id="previewImage" src="" style="max-width: 100%; border: 2px solid #0066cc; border-radius: 4px; margin-bottom: 0.5rem; box-shadow: 0 2px 4px rgba(0,0,0,0.1);" />
+                                </div>
+                                <div style="margin-top: 1.5rem; padding: 1rem; background-color: #f0f8ff; border-radius: 4px; border: 1px solid #d0e3ff;">
+                                    <h4 style="margin-top: 0; color: #0066cc;">選択した元画像</h4>
+                                    <img id="selectedImagePreview" style="max-width: 100%; border: 2px solid #22c55e; border-radius: 4px; margin-bottom: 0.5rem; box-shadow: 0 2px 4px rgba(0,0,0,0.1);" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <script src="js/common.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/eyecatch-editor.js"></script>
+    <script>
+        // アイキャッチ画像生成フォームの処理
+        document.getElementById('eyecatchForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const resultDiv = document.getElementById('eyecatchResult');
+            const loadingDiv = document.getElementById('eyecatchLoading');
+            const errorDiv = document.getElementById('eyecatchError');
+            const imageContainer = document.getElementById('eyecatchImageContainer');
+            const imagesGrid = document.getElementById('imagesGrid');
+            const selectedImage = document.getElementById('selectedImage');
+
+            // 表示状態をリセット
+            loadingDiv.style.display = 'block';
+            errorDiv.style.display = 'none';
+            errorDiv.textContent = '';
+            imageContainer.style.display = 'none';
+            imagesGrid.innerHTML = '';
+
+            try {
+                const contentSource = document.querySelector('input[name="contentSource"]:checked').value;
+                const useTestImages = document.getElementById('useTestImages').checked;
+
+                let content = null;
+                let articleId = null;
+
+                // 入力方法に応じてパラメータを設定
+                if (contentSource === 'text') {
+                    content = document.getElementById('eyecatchContent').value;
+                    if (!content) {
+                        throw new Error('記事の本文を入力してください');
+                    }
+                } else {
+                    articleId = document.getElementById('selectedArticleId').value;
+                    if (!articleId) {
+                        throw new Error('記事を選択してください');
+                    }
+                }
+
+                let result;
+
+                if (useTestImages) {
+                    // テスト画像を使用する場合
+                    // Base64エンコードされた画像データを取得する関数
+                    const getBase64Image = async (imagePath) => {
+                        return new Promise((resolve, reject) => {
+                            const img = new Image();
+                            img.crossOrigin = 'Anonymous';
+                            img.onload = () => {
+                                const canvas = document.createElement('canvas');
+                                canvas.width = img.width;
+                                canvas.height = img.height;
+                                const ctx = canvas.getContext('2d');
+                                ctx.drawImage(img, 0, 0);
+                                const dataURL = canvas.toDataURL('image/png');
+                                resolve(dataURL.replace(/^data:image\/(png|jpg);base64,/, ''));
+                            };
+                            img.onerror = () => reject(new Error('画像の読み込みに失敗しました'));
+                            img.src = imagePath;
+                        });
+                    };
+
+                    try {
+                        // テスト用の5つの画像を読み込む
+                        const imagePromises = [];
+                        for (let i = 1; i <= 5; i++) {
+                            imagePromises.push(getBase64Image(`/image${i}.png`));
+                        }
+
+                        const imageDataArray = await Promise.all(imagePromises);
+
+                        // テスト用のレスポンスを作成
+                        result = {
+                            success: true,
+                            images: imageDataArray,
+                            keywords: 'テスト, JavaScript, React, Node.js',
+                            selectedTechKeyword: 'JavaScript',
+                            animal: 'Fox',
+                            backgroundColor: '#f0f0f0'
+                        };
+                    } catch (error) {
+                        throw new Error('テスト画像の読み込みに失敗しました: ' + error.message);
+                    }
+                } else {
+                    // 通常のAPI呼び出し
+                    const apiKey = document.getElementById('eyecatchApiKey').value || getApiKeyFromCookie();
+                    if (!apiKey) {
+                        throw new Error('APIキーが必要です');
+                    }
+
+                    const requestBody = articleId
+                        ? { id: articleId }
+                        : { content };
+
+                    const response = await fetch('/create_eyecatch', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-API-Key': apiKey
+                        },
+                        body: JSON.stringify(requestBody)
+                    });
+
+                    result = await response.json();
+
+                    if (!response.ok) {
+                        throw new Error(result.error || '画像生成に失敗しました');
+                    }
+                }
+
+                // 生成に使用した記事IDを保存（アップロード時に使用）
+                if (articleId) {
+                    window.generatedForArticleId = articleId;
+                }
+
+                if (result.success && result.images && result.images.length > 0) {
+                    // 技術キーワードと動物の情報を表示
+                    const infoElement = document.createElement('div');
+                    infoElement.style.marginBottom = '1rem';
+                    infoElement.innerHTML = `
+                        <p><strong>検出されたキーワード:</strong> ${result.keywords}</p>
+                        <p><strong>選択された技術:</strong> ${result.selectedTechKeyword}</p>
+                        <p><strong>動物キャラクター:</strong> ${result.animal}</p>
+                        <p><strong>背景色:</strong> <span style="display: inline-block; width: 20px; height: 20px; background-color: ${result.backgroundColor}; vertical-align: middle; margin-right: 5px;"></span> ${result.backgroundColor}</p>
+                    `;
+                    imagesGrid.appendChild(infoElement);
+
+                    // 各画像をグリッドに表示
+                    result.images.forEach((imageData, index) => {
+                        const imageCard = document.createElement('div');
+                        imageCard.style.border = '1px solid #ddd';
+                        imageCard.style.borderRadius = '4px';
+                        imageCard.style.padding = '0.5rem';
+                        imageCard.style.cursor = 'pointer';
+                        imageCard.style.transition = 'transform 0.2s';
+
+                        const img = document.createElement('img');
+                        img.src = `data:image/png;base64,${imageData}`;
+                        img.style.width = '100%';
+                        img.style.borderRadius = '4px';
+                        img.alt = `生成画像 ${index + 1}`;
+
+                        const caption = document.createElement('p');
+                        caption.textContent = `バリエーション ${index + 1}`;
+                        caption.style.textAlign = 'center';
+                        caption.style.marginTop = '0.5rem';
+
+                        imageCard.appendChild(img);
+                        imageCard.appendChild(caption);
+
+                        // 画像クリック時の処理
+                        imageCard.addEventListener('click', () => {
+                            // すべてのカードの選択状態をリセット
+                            document.querySelectorAll('#imagesGrid > div').forEach(card => {
+                                if (card.tagName === 'DIV' && card.style.border) {
+                                    card.style.border = '1px solid #ddd';
+                                    card.style.transform = 'scale(1)';
+                                }
+                            });
+
+                            // 選択したカードをハイライト
+                            imageCard.style.border = '2px solid #0066cc';
+                            imageCard.style.transform = 'scale(1.02)';
+
+                            // 選択した画像を設定
+                            selectedImage.src = img.src;
+
+                            // 画像編集UIを更新
+                            const previewImage = document.getElementById('previewImage');
+                            if (previewImage) {
+                                previewImage.src = img.src;
+                            }
+
+                            const selectedImagePreview = document.getElementById('selectedImagePreview');
+                            if (selectedImagePreview) {
+                                selectedImagePreview.src = img.src;
+                            }
+
+                            // キャンバスの初期化
+                            initializeCanvas(img.src);
+                        });
+
+                        imagesGrid.appendChild(imageCard);
+                    });
+
+                    // 画像編集UIを表示（ただし初期状態では画像は選択されていない）
+                    const imageEditor = document.getElementById('imageEditor');
+                    if (imageEditor) {
+                        imageEditor.style.display = 'block';
+                    }
+
+                    // 最初の画像を視覚的に選択状態にする（ただし編集は開始しない）
+                    if (result.images.length > 0) {
+                        const firstImageCard = imagesGrid.querySelector('div');
+                        if (firstImageCard && firstImageCard.tagName === 'DIV') {
+                            firstImageCard.style.border = '2px solid #0066cc';
+                            firstImageCard.style.transform = 'scale(1.02)';
+                        }
+                    }
+
+                    imageContainer.style.display = 'block';
+                } else {
+                    throw new Error('画像データが見つかりません');
+                }
+            } catch (error) {
+                errorDiv.textContent = `エラー: ${error.message}`;
+                errorDiv.style.display = 'block';
+            } finally {
+                loadingDiv.style.display = 'none';
+            }
+        });
+    </script>
+</body>
+</html>

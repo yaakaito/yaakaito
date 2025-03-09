@@ -6,6 +6,7 @@ export interface Env {
 	API_KEY: string;
 	OPENAI_API_KEY: string;
 	EYECATCH_STORE: KVNamespace;
+	ASSETS: { fetch: (request: Request) => Promise<Response> };
 }
 
 // 画像処理用のインターフェース
@@ -41,6 +42,17 @@ interface RelatedArticle {
 // デプロイ時に評価される一意の値を削除
 // const DEPLOY_ID = Date.now().toString(36) + Math.random().toString(36).slice(2);
 
+// 認証処理の追加
+function isAuthenticated(request: Request, env: Env): boolean {
+	// Cookieからのキー取得
+	const cookies = request.headers.get('Cookie') || '';
+	const apiKeyCookie = cookies.split(';').find(c => c.trim().startsWith('apiKey='));
+	const apiKey = apiKeyCookie ? apiKeyCookie.split('=')[1].trim() : null;
+
+	// APIキーの検証
+	return apiKey === env.API_KEY;
+}
+
 export default {
 	async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
 		const url = new URL(request.url);
@@ -58,6 +70,35 @@ export default {
 			return new Response(null, {
 				headers: corsHeaders
 			});
+		}
+
+		// APIキー検証エンドポイント
+		if (path === "/validate_api_key" && request.method === "POST") {
+			const apiKey = request.headers.get('X-API-Key');
+			if (apiKey === env.API_KEY) {
+				return new Response(JSON.stringify({ success: true }), {
+					headers: { "Content-Type": "application/json" }
+				});
+			} else {
+				return new Response(JSON.stringify({ error: "Invalid API key" }), {
+					status: 401,
+					headers: { "Content-Type": "application/json" }
+				});
+			}
+		}
+
+		// 認証チェック（index.htmlへのアクセスは除外）
+		if (path !== '/' && path !== '/index.html' &&
+			!path.startsWith('/css/') && !path.startsWith('/js/')) {
+			if (!isAuthenticated(request, env)) {
+				// 未認証の場合はindex.htmlにリダイレクト
+				return Response.redirect(`${url.origin}/`, 302);
+			}
+		} else if (path === '/' || path === '/index.html') {
+			// index.htmlへのアクセスで認証済みの場合はregister.htmlにリダイレクト
+			if (isAuthenticated(request, env)) {
+				return Response.redirect(`${url.origin}/register.html`, 302);
+			}
 		}
 
 		// APIキーの検証関数
@@ -666,13 +707,7 @@ export default {
 			}
 		}
 
-		// 存在しないエンドポイントへのアクセス
-		return new Response(JSON.stringify({ error: "Not found" }), {
-			status: 404,
-			headers: {
-				"Content-Type": "application/json",
-				...corsHeaders
-			}
-		});
+		// 静的アセットの提供（認証チェック後）
+		return env.ASSETS.fetch(request);
 	},
 } satisfies ExportedHandler<Env>;
