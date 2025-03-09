@@ -46,13 +46,6 @@ const relativeDate = getRelativeDate(date);
             alt={title}
             class="blog-eyecatch"
           />
-          <div class="ai-badge" title="この画像はAIを使用して生成された後、人間が調整したものです">
-            <span class="ai-badge-icon">ⓘ</span>
-            <div class="ai-badge-tooltip">
-              <p>この画像はAIを使用して生成された後、人間が調整したものです</p>
-              <a href="https://github.com/yaakaito/yaakaito/issues/new?template=ai-image-issue.md&title=AI画像の問題報告: ${encodeURIComponent(title)}" target="_blank" rel="noopener noreferrer">問題を報告する</a>
-            </div>
-          </div>
         </div>
       )}
       {!eyecatch && (
@@ -122,67 +115,7 @@ const relativeDate = getRelativeDate(date);
     border-radius: 4px;
   }
 
-  .ai-badge {
-    position: absolute;
-    bottom: 8px;
-    right: 8px;
-    background-color: rgba(0, 0, 0, 0.6);
-    color: white;
-    width: 24px;
-    height: 24px;
-    border-radius: 12px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: help;
-    font-weight: bold;
-    font-size: 14px;
-    z-index: 2;
-  }
-
-  .ai-badge-icon {
-    position: relative;
-    z-index: 3;
-  }
-
-  .ai-badge-tooltip {
-    position: absolute;
-    bottom: 32px;
-    right: 0;
-    width: 240px;
-    background-color: var(--bg-color-level-1);
-    border: 1px solid var(--bg-color-level-3);
-    padding: 12px;
-    border-radius: 6px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
-    opacity: 0;
-    visibility: hidden;
-    transition: opacity 0.2s, visibility 0.2s;
-    z-index: 4;
-  }
-
-  .ai-badge-tooltip p {
-    margin: 0 0 8px 0;
-    font-size: 0.9em;
-    line-height: 1.4;
-    color: var(--text-color-level-0);
-  }
-
-  .ai-badge-tooltip a {
-    font-size: 0.85em;
-    color: var(--primary-color-level-0);
-    text-decoration: none;
-    display: inline-block;
-  }
-
-  .ai-badge-tooltip a:hover {
-    text-decoration: underline;
-  }
-
-  .ai-badge:hover .ai-badge-tooltip {
-    opacity: 1;
-    visibility: visible;
-  }
+=======
 
   .blog-emoji {
     font-size: 2.5em;
