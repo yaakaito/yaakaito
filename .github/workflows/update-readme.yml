@@ -7,6 +7,11 @@ on:
       - 'web/src/pages/note/**'
       - 'web/public/humans.txt'
   workflow_dispatch:
+  issues:
+    types:
+      - closed
+      - deleted
+      - edited
 
 jobs:
   update-readme:
