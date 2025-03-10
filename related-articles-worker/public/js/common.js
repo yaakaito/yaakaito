@@ -71,9 +71,9 @@ function setupRegisterForm() {
             const resultDiv = document.getElementById('registerResult');
 
             try {
-                const apiKey = document.getElementById('apiKey').value || getApiKeyFromCookie();
+                const apiKey = getApiKeyFromCookie();
                 if (!apiKey) {
-                    throw new Error('APIキーが必要です');
+                    throw new Error('認証が必要です。ログインしてください。');
                 }
 
                 const response = await fetch('/register', {
@@ -158,9 +158,9 @@ function setupUploadForm() {
             resultDiv.classList.remove('error');
 
             try {
-                const apiKey = document.getElementById('uploadApiKey').value || getApiKeyFromCookie();
+                const apiKey = getApiKeyFromCookie();
                 if (!apiKey) {
-                    throw new Error('APIキーが必要です');
+                    throw new Error('認証が必要です。ログインしてください。');
                 }
 
                 const articleId = document.getElementById('uploadArticleId').value;
@@ -271,9 +271,9 @@ function setupDirectUploadForm() {
             resultDiv.classList.remove('error');
 
             try {
-                const apiKey = document.getElementById('directUploadApiKey').value || getApiKeyFromCookie();
+                const apiKey = getApiKeyFromCookie();
                 if (!apiKey) {
-                    throw new Error('APIキーが必要です');
+                    throw new Error('認証が必要です。ログインしてください。');
                 }
 
                 const sourceId = document.getElementById('sourceArticleId').value;
@@ -430,13 +430,11 @@ document.addEventListener('DOMContentLoaded', () => {
     setupUploadForm();
     setupDirectUploadForm();
 
-    // APIキーをCookieから取得して自動入力
+    // 認証状態の確認
     const apiKey = getApiKeyFromCookie();
-    if (apiKey) {
-        const apiKeyInputs = document.querySelectorAll('input[type="password"][id$="ApiKey"]');
-        apiKeyInputs.forEach(input => {
-            input.value = apiKey;
-        });
+    if (!apiKey) {
+        // 未認証の場合はログインページにリダイレクト
+        window.location.href = '/';
     }
 });
 
