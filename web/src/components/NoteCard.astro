@@ -40,11 +40,13 @@ const relativeDate = getRelativeDate(date);
     <div class="note-indicator"></div>
     <div class="note-content">
       {eyecatch && (
-        <img
-          src={`https://articles.yaakai.to/eyecatch?id=${eyecatch}`}
-          alt={title}
-          class="note-eyecatch"
-        />
+        <div class="note-eyecatch-container">
+          <img
+            src={`https://articles.yaakai.to/eyecatch?id=${eyecatch}`}
+            alt={title}
+            class="note-eyecatch"
+          />
+        </div>
       )}
       {!eyecatch && (
         <div class="note-emoji">{emoji}</div>
@@ -100,13 +102,20 @@ const relativeDate = getRelativeDate(date);
     flex-direction: column;
   }
 
+  .note-eyecatch-container {
+    position: relative;
+    width: 100%;
+    margin-bottom: 16px;
+  }
+
   .note-eyecatch {
     width: 100%;
     height: 160px;
     object-fit: cover;
     border-radius: 4px;
-    margin-bottom: 16px;
   }
+
+=======
 
   .note-emoji {
     font-size: 2.5em;
@@ -161,12 +170,25 @@ const relativeDate = getRelativeDate(date);
 
     .note-eyecatch {
       height: 120px;
-      margin-bottom: 12px;
     }
 
     .note-title {
       font-size: 1.1em;
       margin: 0 0 6px 0;
+    }
+
+    .ai-badge {
+      width: 20px;
+      height: 20px;
+      font-size: 12px;
+      bottom: 6px;
+      right: 6px;
+    }
+
+    .ai-badge-tooltip {
+      width: 200px;
+      padding: 10px;
+      font-size: 0.85em;
     }
   }
 </style>

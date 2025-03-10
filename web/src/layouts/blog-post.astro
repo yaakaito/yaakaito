@@ -826,6 +826,107 @@ const canonicalUrl = new URL(Astro.url.pathname, Astro.site || Astro.url.origin)
                 position: relative;
             }
 
+            .ai-badge {
+                position: absolute;
+                bottom: 12px;
+                right: 12px;
+                background-color: rgba(0, 0, 0, 0.6);
+                color: white;
+                width: 28px;
+                height: 28px;
+                border-radius: 14px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                cursor: pointer;
+                font-weight: bold;
+                font-size: 16px;
+                z-index: 10;
+                border: none;
+                padding: 0;
+                appearance: none;
+            }
+
+            .ai-badge:hover {
+                background-color: rgba(0, 0, 0, 0.8);
+            }
+
+            .ai-badge-icon {
+                position: relative;
+                z-index: 11;
+            }
+
+            /*
+             * CSS Anchor Positioning の実装
+             *
+             * CSS Anchor Positioning は、要素の位置を別の要素（アンカー）に対して相対的に配置するための新しいCSS機能です。
+             * この機能を使用することで、ポップオーバーやツールチップなどの要素を、特定の要素に対して正確に配置することができます。
+             *
+             * 主な構成要素:
+             * 1. anchor-name: アンカー要素に名前を付けるプロパティ
+             * 2. position-anchor: 位置指定要素をアンカー要素に関連付けるプロパティ
+             * 3. anchor(): アンカー要素の辺に関連した要素の位置指定を行う関数
+             *
+             * 実装手順:
+             * 1. アンカー要素に anchor-name プロパティを設定
+             * 2. 位置指定要素に position-anchor プロパティを設定（アンカー要素の名前を指定）
+             * 3. 位置指定要素の位置を anchor() 関数を使用して設定
+             * 4. JavaScript を使用して表示/非表示を制御
+             */
+
+            /* アンカー要素の定義 */
+            #ai-badge-anchor {
+                anchor-name: --ai-badge; /* カスタム識別子を定義（--で始まる必要がある） */
+            }
+
+            /* ポップオーバー要素の定義 */
+            .ai-badge-popover {
+                width: 260px;
+                background-color: var(--bg-color-level-1);
+                border: 1px solid var(--bg-color-level-3);
+                padding: 14px;
+                border-radius: 6px;
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+                z-index: 12;
+                position: absolute; /* position: absolute が必要 */
+                position-anchor: --ai-badge; /* アンカー要素の名前を指定して関連付け */
+
+                /*
+                 * anchor() 関数の使い方:
+                 * anchor(<anchor-name> <anchor-side>, <fallback-value>)
+                 *
+                 * - <anchor-name>: アンカー要素の名前（省略可能、省略時は position-anchor で指定したアンカーが使用される）
+                 * - <anchor-side>: アンカーのどの辺を参照するか（top, right, bottom, left, center, start, end など）
+                 * - <fallback-value>: アンカーが存在しない場合のフォールバック値
+                 */
+                bottom: anchor(--ai-badge top, auto); /* AIバッジの上端を基準にポップオーバーの下端を配置 */
+                right: 0; /* 右端を揃える */
+                transform: translateY(-10px); /* 少し上に移動させて見た目を調整 */
+                display: none; /* 初期状態では非表示 */
+            }
+
+            .ai-badge-popover.show {
+                display: block;
+            }
+
+            .ai-badge-tooltip p {
+                margin: 0 0 10px 0;
+                font-size: 0.95em;
+                line-height: 1.4;
+                color: var(--text-color-level-0);
+            }
+
+            .ai-badge-tooltip a {
+                font-size: 0.9em;
+                color: var(--primary-color-level-0);
+                text-decoration: none;
+                display: inline-block;
+            }
+
+            .ai-badge-tooltip a:hover {
+                text-decoration: underline;
+            }
+
             .overlay-background {
                 position: absolute;
                 bottom: 0;
@@ -967,6 +1068,20 @@ const canonicalUrl = new URL(Astro.url.pathname, Astro.site || Astro.url.origin)
                 .title {
                     font-size: 1.6em;
                 }
+
+                .ai-badge {
+                    width: 24px;
+                    height: 24px;
+                    font-size: 14px;
+                    bottom: 8px;
+                    right: 8px;
+                    border-radius: 12px;
+                }
+
+                .ai-badge-popover {
+                    width: 220px;
+                    padding: 12px;
+                }
             }
     </style>
     <header class="article-header">
@@ -991,6 +1106,15 @@ const canonicalUrl = new URL(Astro.url.pathname, Astro.site || Astro.url.origin)
                         alt={frontmatter.title}
                         class="eyecatch"
                     />
+                    <button class="ai-badge" title="この画像はAIを使用して生成された後、人間が調整したものです" id="ai-badge-anchor">
+                        <span class="ai-badge-icon">ⓘ</span>
+                    </button>
+                    <div id="ai-badge-popover" class="ai-badge-popover">
+                        <div class="ai-badge-tooltip">
+                            <p>この画像はAIを使用して生成された後、人間が調整したものです</p>
+                            <a href="https://github.com/yaakaito/yaakaito/issues/new?template=ai-image-issue.md" target="_blank" rel="noopener noreferrer">問題を報告する</a>
+                        </div>
+                    </div>
                 </div>
                 <div class="overlay-background"></div>
             </>
@@ -1033,6 +1157,41 @@ const canonicalUrl = new URL(Astro.url.pathname, Astro.site || Astro.url.origin)
                 // norefferer
                 link.setAttribute("rel", "noopener noreferrer");
             });
+
+            /*
+             * CSS Anchor Positioning と JavaScript の連携
+             *
+             * CSS Anchor Positioning は要素の位置決めを担当しますが、
+             * 表示/非表示の制御は JavaScript で行う必要があります。
+             *
+             * 実装のポイント:
+             * 1. display: none と .show クラスを使って表示/非表示を切り替える
+             * 2. クリックイベントでクラスを付け外しする
+             * 3. ポップオーバー外のクリックを検知して閉じる処理を実装
+             *
+             * 注意点:
+             * - popover 属性を使う方法もありますが、ブラウザ互換性の問題がある
+             * - CSS Anchor Positioning は比較的新しい機能なので、フォールバック値を設定するとよい
+             * - position: absolute と組み合わせて使用する
+             */
+
+            // AIバッジのクリックイベント
+            const aiButton = document.getElementById('ai-badge-anchor');
+            const aiPopover = document.getElementById('ai-badge-popover');
+
+            if (aiButton && aiPopover) {
+                // クリックでポップオーバーの表示/非表示を切り替え
+                aiButton.addEventListener('click', function() {
+                    aiPopover.classList.toggle('show');
+                });
+
+                // ポップオーバー以外の場所をクリックしたら閉じる
+                document.addEventListener('click', function(event) {
+                    if (!aiButton.contains(event.target as Node) && !aiPopover.contains(event.target as Node)) {
+                        aiPopover.classList.remove('show');
+                    }
+                });
+            }
 
             // 関連記事を取得して表示
             const pathname = window.location.pathname;

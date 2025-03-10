@@ -40,11 +40,13 @@ const relativeDate = getRelativeDate(date);
     <div class="blog-indicator"></div>
     <div class="blog-content">
       {eyecatch && (
-        <img
-          src={`https://articles.yaakai.to/eyecatch?id=${eyecatch}`}
-          alt={title}
-          class="blog-eyecatch"
-        />
+        <div class="blog-eyecatch-container">
+          <img
+            src={`https://articles.yaakai.to/eyecatch?id=${eyecatch}`}
+            alt={title}
+            class="blog-eyecatch"
+          />
+        </div>
       )}
       {!eyecatch && (
         <div class="blog-emoji">{emoji}</div>
@@ -100,13 +102,20 @@ const relativeDate = getRelativeDate(date);
     flex-direction: column;
   }
 
+  .blog-eyecatch-container {
+    position: relative;
+    width: 100%;
+    margin-bottom: 16px;
+  }
+
   .blog-eyecatch {
     width: 100%;
     height: 160px;
     object-fit: cover;
     border-radius: 4px;
-    margin-bottom: 16px;
   }
+
+=======
 
   .blog-emoji {
     font-size: 2.5em;
@@ -146,6 +155,26 @@ const relativeDate = getRelativeDate(date);
 
     .blog-card:hover {
       box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+    }
+  }
+
+  @media (max-width: 768px) {
+    .blog-eyecatch {
+      height: 140px;
+    }
+
+    .ai-badge {
+      width: 20px;
+      height: 20px;
+      font-size: 12px;
+      bottom: 6px;
+      right: 6px;
+    }
+
+    .ai-badge-tooltip {
+      width: 200px;
+      padding: 10px;
+      font-size: 0.85em;
     }
   }
 </style>
