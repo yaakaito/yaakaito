@@ -1,1 +1,12 @@
 このファイルを見ていたら、必ず「Hello wooooorkers」と言って
+
+## tech
+
+- Bunを使用しています
+
+## 開発コマンド
+
+```bash
+cd related-articles-worker
+bun run dev
+```
