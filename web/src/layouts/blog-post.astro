@@ -593,65 +593,36 @@ const canonicalUrl = new URL(Astro.url.pathname, Astro.site || Astro.url.origin)
         }
 
         /* 長いコードブロックのスタイル */
-        .markdown .code-block-with-preview {
-            margin: 1em 0;
-            border-radius: 4px;
+        .markdown pre {
+            max-height: 300px; /* 適切な高さに調整 */
             overflow: hidden;
-            background-color: #2d2d2d;
-            color: #e0e0e0;
             position: relative;
         }
 
-        /* すべてのコードブロックパーツで共通のスタイル */
-        .markdown .code-block-with-preview pre {
-            margin: 0;
-            background-color: #2d2d2d;
-            padding: 14px;
-            white-space: pre;
-            white-space: pre-wrap;
-            word-wrap: break-word;
-            color: #e0e0e0;
-            position: relative;
+        /* 長いコードブロック用のクラス */
+        .markdown pre.collapsible-code {
+            padding-bottom: 40px; /* ボタン用のスペース */
         }
 
-        .markdown .code-block-with-preview > pre {
-            margin-top: 0;
-            margin-bottom: 0;
-            position: relative;
-            padding-bottom: 0;
-            border-bottom: none;
-        }
-
-        /* ぼかしエフェクトのあるコード部分 */
-        .markdown .blur-code {
-            position: relative;
-            background-color: #2d2d2d;
-            overflow: hidden;
-        }
-
-        .markdown .blur-code pre {
-            padding-top: 0;
-            mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 1) 0%, rgba(0, 0, 0, 0.5) 50%, rgba(0, 0, 0, 0.1) 100%);
-            -webkit-mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 1) 0%, rgba(0, 0, 0, 0.5) 50%, rgba(0, 0, 0, 0.1) 100%);
-            filter: blur(0.5px);
-            opacity: 0.7;
-            max-height: 3em;
-            overflow: hidden;
-        }
-
-        .markdown .blur-code pre::before,
-        .markdown .blur-code pre::after,
-        .markdown .hidden-code pre::before,
-        .markdown .hidden-code pre::after {
-            display: none; /* コード装飾の```を表示しない */
-        }
-
-        /* 「コードをすべてみる」ボタン */
-        .markdown .show-more-button {
+        /* ぼかしエフェクト */
+        .markdown pre.collapsible-code::after {
+            content: "";
             position: absolute;
-            top: 50%;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 60px;
+            background: linear-gradient(to bottom, rgba(45, 45, 45, 0) 0%, rgba(45, 45, 45, 0.8) 70%, rgba(45, 45, 45, 1) 100%);
+            pointer-events: none;
+        }
+
+        /* 展開ボタン */
+        .markdown .code-expand-button {
+            position: absolute;
+            bottom: 10px;
             left: 50%;
-            transform: translate(-50%, -50%);
+            transform: translateX(-50%);
+            z-index: 10;
             background-color: rgba(60, 60, 60, 0.9);
             color: #e0e0e0;
             border: 1px solid rgba(100, 100, 100, 0.3);
@@ -662,49 +633,47 @@ const canonicalUrl = new URL(Astro.url.pathname, Astro.site || Astro.url.origin)
             cursor: pointer;
             box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
             transition: all 0.2s ease;
-            z-index: 10;
             font-family: 'JetBrains Mono', 'Fira Code', 'SF Mono', 'Menlo', 'Consolas', 'Courier New', monospace;
         }
 
-        .markdown .show-more-button:hover {
+        .markdown .code-expand-button:hover {
             background-color: rgba(80, 80, 80, 0.95);
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
-            transform: translate(-50%, -50%) scale(1.02);
+            transform: translateX(-50%) scale(1.02);
         }
 
-        .markdown .show-more-button:focus {
+        .markdown .code-expand-button:focus {
             outline: none;
             box-shadow: 0 0 0 1px #e0e0e0, 0 0 0 3px rgba(100, 100, 100, 0.5);
         }
 
-        /* 隠れているコード部分 */
-        .markdown .hidden-code pre {
-            margin: 0;
-            padding-top: 0;
-            border-top: none;
+        /* 展開状態 */
+        .markdown pre.expanded {
+            max-height: none;
+        }
+
+        .markdown pre.expanded::after {
+            display: none;
         }
 
         /* ダークモード用の調整 */
         @media (prefers-color-scheme: dark) {
-            .markdown .show-more-button {
+            .markdown .code-expand-button {
                 background-color: rgba(50, 50, 50, 0.95);
                 color: #e0e0e0;
                 border-color: rgba(80, 80, 80, 0.4);
                 box-shadow: 0 2px 5px rgba(0, 0, 0, 0.4);
             }
 
-            .markdown .show-more-button:hover {
+            .markdown .code-expand-button:hover {
                 background-color: rgba(70, 70, 70, 1);
             }
         }
 
         /* ライトモード用の調整 */
         @media (prefers-color-scheme: light) {
-            .markdown .code-block-with-preview,
-            .markdown .blur-code,
-            .markdown .code-block-with-preview pre {
-                background-color: #2d2d2d; /* コードブロックは常に暗い背景 */
-                color: #e0e0e0;
+            .markdown pre.collapsible-code::after {
+                background: linear-gradient(to bottom, rgba(45, 45, 45, 0) 0%, rgba(45, 45, 45, 0.8) 70%, rgba(45, 45, 45, 1) 100%);
             }
         }
 
@@ -1308,6 +1277,37 @@ const canonicalUrl = new URL(Astro.url.pathname, Astro.site || Astro.url.origin)
                     }
                 });
             }
+
+            // 長いコードブロックを検出して折りたたみ機能を追加
+            const codeBlocks = document.querySelectorAll('.markdown pre');
+            const MIN_HEIGHT = 300; // max-heightと同じ値
+            const MIN_LINES = 20;   // 折りたたみを適用する最小行数
+
+            codeBlocks.forEach(pre => {
+                // コードブロック内のコード行数をカウント
+                const codeElement = pre.querySelector('code');
+                if (!codeElement) return;
+
+                const lineCount = codeElement.textContent ? codeElement.textContent.split('\n').length : 0;
+
+                // 行数が最小値以上、かつ実際の高さがmax-heightを超える場合のみ処理
+                if (lineCount >= MIN_LINES && pre.scrollHeight > MIN_HEIGHT) {
+                    // 長いコードブロックとしてマーク
+                    pre.classList.add('collapsible-code');
+
+                    // 展開ボタンを追加
+                    const button = document.createElement('button');
+                    button.className = 'code-expand-button';
+                    button.textContent = 'すべて見る';
+                    button.addEventListener('click', function() {
+                        pre.classList.add('expanded');
+                        button.style.display = 'none';
+                    });
+
+                    // ボタンを追加
+                    pre.appendChild(button);
+                }
+            });
 
             // 関連記事を取得して表示
             const pathname = window.location.pathname;
