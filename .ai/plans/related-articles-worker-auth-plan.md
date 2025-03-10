@@ -204,9 +204,10 @@ export default {
       }
     }
 
-    // 認証チェック（index.htmlへのアクセスは除外）
+    // 認証チェック（index.html、CSS、JS、関連記事API、アイキャッチ画像へのアクセスは除外）
     if (path !== '/' && path !== '/index.html' &&
-        !path.startsWith('/css/') && !path.startsWith('/js/')) {
+        !path.startsWith('/css/') && !path.startsWith('/js/') &&
+        path !== '/related_articles' && path !== '/eyecatch') {
       if (!isAuthenticated(request, env)) {
         // 未認証の場合はindex.htmlにリダイレクト
         return Response.redirect(`${url.origin}/`, 302);
@@ -277,3 +278,4 @@ sequenceDiagram
 |------|--------------|------|
 | 2025/03/09 | フェーズ1〜4の全タスク完了 | 認証機能の実装、機能ページの分割、ワーカーの更新が完了。 |
 | 2025/03/09 | フェーズ5の全タスク完了 | 認証機能のテスト、リダイレクト機能のテスト、各機能ページの動作確認を実施。UI/UXの調整として、パスワード入力フィールドにautocomplete属性を追加し、faviconを追加。 |
+| 2025/03/10 | 認証チェックの修正 | `/related_articles` と `/eyecatch` エンドポイントを認証チェックから除外し、ブログの訪問者が認証なしでアクセスできるようにした。テストを追加して動作を確認。 |

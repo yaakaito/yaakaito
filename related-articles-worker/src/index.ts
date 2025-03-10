@@ -87,9 +87,10 @@ export default {
 			}
 		}
 
-		// 認証チェック（index.htmlへのアクセスは除外）
+		// 認証チェック（index.html、CSS、JS、関連記事API、アイキャッチ画像へのアクセスは除外）
 		if (path !== '/' && path !== '/index.html' &&
-			!path.startsWith('/css/') && !path.startsWith('/js/')) {
+			!path.startsWith('/css/') && !path.startsWith('/js/') &&
+			path !== '/related_articles' && path !== '/eyecatch') {
 			if (!isAuthenticated(request, env)) {
 				// 未認証の場合はindex.htmlにリダイレクト
 				return Response.redirect(`${url.origin}/`, 302);

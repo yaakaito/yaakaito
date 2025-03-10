@@ -10,3 +10,9 @@
 cd related-articles-worker
 bun run dev
 ```
+
+## テスト
+
+```bash
+bun run test
+```
