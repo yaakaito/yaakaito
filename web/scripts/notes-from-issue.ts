@@ -1,24 +1,69 @@
 import fs from 'fs';
 import path from 'path';
 
+// GitHub APIのIssueの型定義
+interface GitHubLabel {
+    name: string;
+    [key: string]: any;
+}
+
+interface GitHubIssue {
+    number: number;
+    title: string;
+    body: string;
+    created_at: string;
+    labels: GitHubLabel[];
+    [key: string]: any;
+}
+
 const token = process.env.GH_TOKEN;
 const owner = 'yaakaito';
 const repo = 'yaakaito';
 
 async function fetchIssues() {
-    const url = `https://api.github.com/repos/${owner}/${repo}/issues?creator=${owner}&state=closed`;
+    const baseUrl = `https://api.github.com/repos/${owner}/${repo}/issues`;
+    const params = new URLSearchParams({
+        creator: owner,
+        state: 'closed',
+        per_page: '100' // 1ページあたりの最大数を指定
+    });
     const headers = {
         'Authorization': `token ${token}`,
         'User-Agent': 'request'
     };
 
     try {
-        const response = await fetch(url, { headers });
-        const issues = await response.json();
+        let page = 1;
+        let hasMoreIssues = true;
+        let allIssues: GitHubIssue[] = [];
 
-        issues.forEach(issue => {
-            const hasNoteLabel = issue.labels.some(label => label.name === 'Note');
-            const hasWorkspaceLabel = issue.labels.some(label => label.name === 'Workspace');
+        // すべてのページを取得するまでループ
+        while (hasMoreIssues) {
+            console.log(`Fetching page ${page}...`);
+            const url = `${baseUrl}?${params.toString()}&page=${page}`;
+            const response = await fetch(url, { headers });
+
+            if (!response.ok) {
+                throw new Error(`GitHub API responded with status: ${response.status}`);
+            }
+
+            const issues = await response.json() as GitHubIssue[];
+
+            // 結果が空の場合、ループを終了
+            if (issues.length === 0) {
+                hasMoreIssues = false;
+            } else {
+                allIssues = allIssues.concat(issues);
+                page++;
+            }
+        }
+
+        console.log(`Total issues fetched: ${allIssues.length}`);
+
+        // 取得したすべてのIssueを処理
+        allIssues.forEach(issue => {
+            const hasNoteLabel = issue.labels.some((label: GitHubLabel) => label.name === 'Note');
+            const hasWorkspaceLabel = issue.labels.some((label: GitHubLabel) => label.name === 'Workspace');
 
             if (hasWorkspaceLabel) {
                 console.log(`Ignoring issue #${issue.number} with Workspace label`);
@@ -38,10 +83,11 @@ tags:
 
 ${issue.body}`;
                 fs.writeFileSync(filePath, content);
+                console.log(`Saved issue #${issue.number} as Markdown file`);
             }
         });
 
-        console.log('Issues have been saved as Markdown files.');
+        console.log('All issues have been saved as Markdown files.');
     } catch (error) {
         console.error('Error fetching issues:', error);
     }
