@@ -304,9 +304,10 @@ export default {
 			}
 
 			try {
-				const data = await request.json() as { id?: string, content?: string };
+				const data = await request.json() as { id?: string, content?: string, animal?: string };
 				let content = data.content;
 				const id = data.id;
+				const requestedAnimal = data.animal;
 
 				// IDが指定されている場合は、KVから記事の内容を取得
 				if (id && !content) {
@@ -418,7 +419,29 @@ export default {
 				console.log('選択された技術キーワード:', selectedTechKeyword);
 
 				// 選択されたキーワードに対応する動物と背景色を取得
-				const { animal, backgroundColor } = techAnimalMap[selectedTechKeyword as keyof typeof techAnimalMap];
+				let animal, backgroundColor;
+
+				// リクエストで動物が指定されている場合はそれを使用
+				if (requestedAnimal) {
+					// 指定された動物が有効かチェック
+					const isValidAnimal = Object.values(techAnimalMap).some(item => item.animal === requestedAnimal);
+
+					if (isValidAnimal) {
+						animal = requestedAnimal;
+						// 背景色は選択された技術キーワードから取得
+						backgroundColor = techAnimalMap[selectedTechKeyword as keyof typeof techAnimalMap].backgroundColor;
+					} else {
+						// 無効な動物の場合はデフォルトを使用
+						const defaultMapping = techAnimalMap[selectedTechKeyword as keyof typeof techAnimalMap];
+						animal = defaultMapping.animal;
+						backgroundColor = defaultMapping.backgroundColor;
+					}
+				} else {
+					// 動物が指定されていない場合は技術キーワードから取得
+					const mapping = techAnimalMap[selectedTechKeyword as keyof typeof techAnimalMap];
+					animal = mapping.animal;
+					backgroundColor = mapping.backgroundColor;
+				}
 
 				// ステップ3: OpenAIのDALL·E 3を使って画像を生成
 				const openai = new OpenAI({

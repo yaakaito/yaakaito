@@ -8,7 +8,8 @@ const techAnimalMap = {
     "typescript": { animal: "guanaco", backgroundColor: "#3178C6" },
     "html": { animal: "koala", backgroundColor: "#E34F26" },
     "css": { animal: "fish", backgroundColor: "#1572B6" },
-    "database": { animal: "dumbo-octopus", backgroundColor: "#336791" }
+    "docker": { animal: "whale", backgroundColor: "#336791" },
+    "memorybank": { animal: "shy-octopus", backgroundColor: "#E34234" }
 };
 
 // APIキーの取得（Cookieから）
