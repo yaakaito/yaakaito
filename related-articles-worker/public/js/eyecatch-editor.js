@@ -1212,9 +1212,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 let articleId = window.generatedForArticleId;
 
                 // APIキーを取得
-                const apiKey = document.getElementById('eyecatchApiKey').value || getApiKeyFromCookie();
+                const apiKey = getApiKeyFromCookie();
                 if (!apiKey) {
-                    throw new Error('APIキーが必要です');
+                    throw new Error('APIキーが必要です。ログインしてください。');
                 }
 
                 if (!articleId) {
