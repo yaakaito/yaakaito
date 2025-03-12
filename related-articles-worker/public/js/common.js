@@ -1,25 +1,4 @@
-// メニュー切り替え機能
-document.addEventListener('DOMContentLoaded', () => {
-    const menuItems = document.querySelectorAll('.menu-item');
-    const contentSections = document.querySelectorAll('.content-section');
-
-    menuItems.forEach(item => {
-        item.addEventListener('click', () => {
-            // メニューアイテムのアクティブ状態を切り替え
-            menuItems.forEach(mi => mi.classList.remove('active'));
-            item.classList.add('active');
-
-            // コンテンツセクションの表示を切り替え
-            const targetId = item.getAttribute('data-target');
-            contentSections.forEach(section => {
-                section.classList.remove('active');
-                if (section.id === targetId) {
-                    section.classList.add('active');
-                }
-            });
-        });
-    });
-});
+// common.js - 共通機能
 
 // 技術と動物のマッピング
 const techAnimalMap = {

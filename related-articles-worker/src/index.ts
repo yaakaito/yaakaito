@@ -88,7 +88,7 @@ export default {
 		}
 
 		// 認証チェック（index.html、CSS、JS、関連記事API、アイキャッチ画像へのアクセスは除外）
-		if (path !== '/' && path !== '/index.html' &&
+		if (path !== '/' && path !== '/index.html' && path !== '/register' &&
 			!path.startsWith('/css/') && !path.startsWith('/js/') &&
 			path !== '/related_articles' && path !== '/eyecatch') {
 			if (!isAuthenticated(request, env)) {
@@ -286,7 +286,8 @@ export default {
 			"typescript": { animal: "guanaco", backgroundColor: "#3178C6" },
 			"html": { animal: "koala", backgroundColor: "#E34F26" },
 			"css": { animal: "fish", backgroundColor: "#1572B6" },
-			"docker": { animal: "whale", backgroundColor: "#336791" }
+			"docker": { animal: "whale", backgroundColor: "#336791" },
+			"memorybank": { animal: "shy-octopus", backgroundColor: "#E34234" }
 		};
 
 		// アイキャッチ画像生成エンドポイント
@@ -412,7 +413,7 @@ export default {
 				}
 
 				// あとでなおす
-				selectedTechKeyword = "docker";
+				selectedTechKeyword = "memorybank";
 
 				console.log('選択された技術キーワード:', selectedTechKeyword);
 
@@ -435,6 +436,8 @@ export default {
 					// わずかにプロンプトを変えて多様性を確保
 					const variations = [
 						"cute and playful",
+						"pretty and japanese",
+						"cute and anime",
 						"simple and minimalist",
 						"detailed and expressive",
 						"cheerful and colorful",
@@ -451,7 +454,7 @@ export default {
 						The ${animal} character should be the ONLY element in the image - no icons, symbols, text, UI elements, or any other objects.
 						Make it look like a character sprite from an 80s video game with sharp pixels, no anti-aliasing.
 						The final result should be clean, minimalist, and instantly recognizable as an 8-bit game character with a distinct black outline.
-						The final image should be exactly 64x64 pixels in size.`,
+						The final image should be exactly 128x128 pixels in size.`,
 						// DO NOT include any text, logos, frames, or decorative elements.`,
 						n: 1, // DALL-E 3では1枚ずつ生成
 						size: "1024x1024", // DALL·E 3で利用可能なサイズ
