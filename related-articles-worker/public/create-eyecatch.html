@@ -45,6 +45,19 @@
                     <input type="hidden" id="selectedArticleId" value="">
                 </div>
                 <div class="form-group">
+                    <label for="animalSelect">モチーフにする動物:</label>
+                    <select id="animalSelect" class="form-control">
+                        <option value="">自動選択（APIにお任せ）</option>
+                        <option value="alpaca">アルパカ (Cloudflare)</option>
+                        <option value="owl">フクロウ (AI)</option>
+                        <option value="rhino">サイ (JavaScript)</option>
+                        <option value="guanaco">グアナコ (TypeScript)</option>
+                        <option value="koala">コアラ (HTML)</option>
+                        <option value="fish">魚 (CSS)</option>
+                        <option value="dumbo-octopus">ダンボオクトパス (Database)</option>
+                    </select>
+                </div>
+                <div class="form-group">
                     <label>
                         <input type="checkbox" id="useTestImages"> テスト画像を使用する（APIを呼び出さない）
                     </label>
@@ -299,13 +312,16 @@
 
                         const imageDataArray = await Promise.all(imagePromises);
 
+                        // 選択された動物を取得
+                        const selectedAnimal = document.getElementById('animalSelect').value;
+
                         // テスト用のレスポンスを作成
                         result = {
                             success: true,
                             images: imageDataArray,
                             keywords: 'テスト, JavaScript, React, Node.js',
                             selectedTechKeyword: 'JavaScript',
-                            animal: 'Fox',
+                            animal: selectedAnimal || 'Fox', // 選択された動物または「Fox」（デフォルト）
                             backgroundColor: '#f0f0f0'
                         };
                     } catch (error) {
@@ -318,9 +334,18 @@
                         throw new Error('認証が必要です。ログインしてください。');
                     }
 
+                    // 選択された動物を取得
+                    const selectedAnimal = document.getElementById('animalSelect').value;
+
+                    // リクエストボディを作成
                     const requestBody = articleId
                         ? { id: articleId }
                         : { content };
+
+                    // 動物が選択されている場合はリクエストに追加
+                    if (selectedAnimal) {
+                        requestBody.animal = selectedAnimal;
+                    }
 
                     const response = await fetch('/create_eyecatch', {
                         method: 'POST',
