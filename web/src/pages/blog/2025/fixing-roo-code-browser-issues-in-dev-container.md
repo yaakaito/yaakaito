@@ -10,6 +10,7 @@ tags:
 ---
 
 普段の開発は基本 Dev Container でやっているので、Roo Code もそのまま Dev Container 前提で触っていたが、動作確認なんかで Roo Code が使おうとするブラウザが動作しないのが気になったので直すことにした。
+2025/03/14追記: Cline では `PUPPETEER_EXECUTABLE_PATH` に相当するものが設定でき、コンテナに chromium をインストールしておけば動作する。最後に記載する。
 
 ## 先に結論
 
@@ -180,3 +181,24 @@ aarch64
 - https://docs.orbstack.dev/machines/#multi-architecture
 
 めちゃくちゃ参考になったので、この記事がまた誰かの解決に役立つと良いと思い残そうと思った。
+
+## 2025/03/14 追記
+
+Cline では `PUPPETEER_EXECUTABLE_PATH` に相当するものが設定でき、コンテナに chromium をインストールしておけば動作する。ので、この設定で動作するはず:
+
+```json
+{
+    "image": "mcr.microsoft.com/devcontainers/base:1-bookworm",
+    "runArgs": [
+        "--cap-add=SYS_ADMIN"
+    ],
+    "postCreateCommand": "sudo apt update && sudo apt install -y chromium",
+    "customizations": {
+        "vscode": {
+            "settings": {
+                "cline.chromeExecutablePath": "/usr/bin/chromium"
+            },
+        }
+    }
+}
+```
