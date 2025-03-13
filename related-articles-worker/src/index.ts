@@ -413,9 +413,6 @@ export default {
 					}
 				}
 
-				// あとでなおす
-				selectedTechKeyword = "memorybank";
-
 				console.log('選択された技術キーワード:', selectedTechKeyword);
 
 				// 選択されたキーワードに対応する動物と背景色を取得
