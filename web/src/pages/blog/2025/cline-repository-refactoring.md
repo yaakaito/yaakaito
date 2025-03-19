@@ -3,7 +3,7 @@ layout: ../../../layouts/blog-post.astro
 title: Cline でリポジトリ構造の変更とアーキテクチャのルール整備をした
 emoji: 🪼
 date: 2025-03-19
-eyecatch: blog-clinerules-and-memory-bank
+eyecatch: blog-cline-repository-refactoring
 tags:
   - AI
   - 開発
