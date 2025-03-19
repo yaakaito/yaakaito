@@ -98,7 +98,7 @@ export default {
 		} else if (path === '/' || path === '/index.html') {
 			// index.htmlへのアクセスで認証済みの場合はregister.htmlにリダイレクト
 			if (isAuthenticated(request, env)) {
-				return Response.redirect(`${url.origin}/register.html`, 302);
+				return Response.redirect(`${url.origin}/register-article`, 302);
 			}
 		}
 
