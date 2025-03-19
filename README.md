@@ -5,9 +5,9 @@
 
 ## Latest Blog Posts
 
+- 🪼 [Cline でリポジトリ構造の変更とアーキテクチャのルール整備をした](https://yaakai.to/blog/2025/cline-repository-refactoring) - 3/19/2025
 - 🏦 [2025年3月時点での Memory Bank と .clinerules の使い分けに関する考え](https://yaakai.to/blog/2025/clinerules-and-memory-bank) - 3/13/2025
 - 👾 [Roo Code で GitHub Issue を解決しようとしてくれる Custom Mode を作る](https://yaakai.to/blog/2025/roo-code-issue-hunter) - 3/6/2025
-- 🐋 [Roo Code の Browser が Dev Container で動かない](https://yaakai.to/blog/2025/fixing-roo-code-browser-issues-in-dev-container) - 3/6/2025
 
 ## Latest Notes
 
