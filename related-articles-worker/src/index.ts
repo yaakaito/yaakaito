@@ -287,7 +287,8 @@ export default {
 			"html": { animal: "koala", backgroundColor: "#E34F26" },
 			"css": { animal: "fish", backgroundColor: "#1572B6" },
 			"docker": { animal: "whale", backgroundColor: "#336791" },
-			"memorybank": { animal: "shy-octopus", backgroundColor: "#E34234" }
+			"memorybank": { animal: "shy-octopus", backgroundColor: "#E34234" },
+			"repository": { animal: "jellyfish", backgroundColor: "#A5C9C1" }
 		};
 
 		// アイキャッチ画像生成エンドポイント
@@ -392,7 +393,7 @@ export default {
 					const keywordSelectionPrompt = `
 		あなたは与えられた記事の内容から、最も関連性の高い技術カテゴリを選択するアシスタントです。
 		以下の記事を分析し、次のカテゴリの中から最も関連性の高いものを1つだけ選んでください。
-		カテゴリ: cloudflare, ai, javascript, typescript, html, css, database
+		カテゴリ: cloudflare, ai, javascript, typescript, html, css, database, repository
 
 		記事:
 		${content}
