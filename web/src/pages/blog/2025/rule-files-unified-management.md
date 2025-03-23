@@ -1,8 +1,9 @@
 ---
 layout: ../../../layouts/blog-post.astro
 title: Project Rules や .clinerules や CLAUDE.md をまとめて管理する
-emoji: 🐟
+emoji: 🐠
 date: 2025-03-24
+eye-catch: blog-rule-files-unified-management
 tags:
   - AI
   - 開発
@@ -56,6 +57,9 @@ Cline のフォークだが、少し特殊で `.clinerules` `.cursorrules` `.win
 Cursor や Cline のディレクトリ化以前のシンプルなファイルと本質的には変わらないが、 `claude` を実行したディレクトリのものが適用されるという特性がある。
 当たり前といえばそうなのだが、これを Monorepo の場合で考えると、作業をする際にそのパッケージのディレクトリで `claude` を実行することでコンテキストを切り替えることができる。
 今回はこの特性を基準として rules の構成を考えている。
+
+CLAUDE.md を Claude Code に作らせたときに面白かったことして、 claude code 自身の解説による `/init` がこのファイルは 20 行程度に作るべきだと定義しているっぽく、他のツールと比べて明らかに内容が少なくなる、というのがあった。
+自分はどちらかと言えばこれに賛成というか、(将来的には)長い知識を書き連ねるよりは、最小限にして毎度コンテキストを作ればよいとは思っている。
 
 ### Windsurf / .windsurfrules
 
@@ -198,7 +202,9 @@ $ ./rules/generate-ai-rules.js rss-
 └── .windsurfrules
 ```
 
-あまり汎用的なスクリプトという感じでもないので、それぞれのリポジトリに合うものをそれぞれ AI で作っている。内容はわかりやすいものから順に解説する。
+あまり汎用的なスクリプトという感じでもないし、この状況が長く続くとは思えないので破棄のしやすさも兼ねて、それぞれのリポジトリに合うものを作っている。
+
+わかりやすいものから順に内容を解説する。
 
 ### .clinerules
 
