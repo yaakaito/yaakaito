@@ -10,7 +10,8 @@ const techAnimalMap = {
     "css": { animal: "fish", backgroundColor: "#1572B6" },
     "docker": { animal: "whale", backgroundColor: "#336791" },
     "memorybank": { animal: "shy-octopus", backgroundColor: "#E34234" },
-    "repository": { animal: "jellyfish", backgroundColor: "#A5C9C1" }
+    "repository": { animal: "jellyfish", backgroundColor: "#A5C9C1" },
+    "structure": { animal: "sardine", backgroundColor: "#A5C9C1" }
 };
 
 // APIキーの取得（Cookieから）
