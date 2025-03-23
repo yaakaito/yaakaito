@@ -47,12 +47,15 @@ Cursor の mdc のように glob 機能があるわけではなく、単純に `
 
 #### Roo Code
 
+- https://docs.roocode.com/advanced-usage/custom-instructions/
+
 Cline のフォークだが、少し特殊で `.clinerules` `.cursorrules` `.windsurfrules` の 3 つを読み込んでくれる。
 
-- https://docs.roocode.com/advanced-usage/custom-instructions/
 - https://github.com/RooVetGit/Roo-Code/blob/main/src/core/prompts/sections/custom-instructions.ts#L20
 
 ### Claude Code / CLAUDE.md
+
+- https://docs.anthropic.com/ja/docs/agents-and-tools/claude-code/tutorials#claude-md
 
 Cursor や Cline のディレクトリ化以前のシンプルなファイルと本質的には変わらないが、 `claude` を実行したディレクトリのものが適用されるという特性がある。
 当たり前といえばそうなのだが、これを Monorepo の場合で考えると、作業をする際にそのパッケージのディレクトリで `claude` を実行することでコンテキストを切り替えることができる。
@@ -63,9 +66,14 @@ CLAUDE.md を Claude Code に作らせたときに面白かったことして、
 
 ### Copilot / .github/copilot-instructions.md
 
+- https://docs.github.com/ja/copilot/customizing-copilot/adding-repository-custom-instructions-for-github-copilot
+
 Cursor を使っていて、兼用はしていないので作っていない。
 
+
 ### Windsurf / .windsurfrules
+
+- https://docs.codeium.com/windsurf/memories#windsurfrules
 
 これに関しては自分は Windsurf は使っていないのでそれに関する言及はないが、他とコンフリクトしないので Roo Code 用に作成している。
 
