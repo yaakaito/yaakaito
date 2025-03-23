@@ -3,7 +3,7 @@ layout: ../../../layouts/blog-post.astro
 title: Project Rules や .clinerules や CLAUDE.md をまとめて管理する
 emoji: 🐠
 date: 2025-03-24
-eye-catch: blog-rule-files-unified-management
+eyecatch: blog-rule-files-unified-management
 tags:
   - AI
   - 開発
