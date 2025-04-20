@@ -90,7 +90,8 @@ export default {
 		// 認証チェック（index.html、CSS、JS、関連記事API、アイキャッチ画像へのアクセスは除外）
 		if (path !== '/' && path !== '/index.html' && path !== '/register' &&
 			!path.startsWith('/css/') && !path.startsWith('/js/') &&
-			path !== '/related_articles' && path !== '/eyecatch') {
+			path !== '/related_articles' && path !== '/eyecatch' &&
+			!path.startsWith('/common/')) {
 			if (!isAuthenticated(request, env)) {
 				// 未認証の場合はindex.htmlにリダイレクト
 				return Response.redirect(`${url.origin}/`, 302);
