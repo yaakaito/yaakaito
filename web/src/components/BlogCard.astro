@@ -11,8 +11,9 @@ const { title, date, emoji, url, eyecatch } = Astro.props;
 
 // 汎用アイキャッチ画像の選択（URLに基づいて固定）
 const genericEyecatchColors = ['red', 'blue', 'orange'];
+const pathname = url.split('://')[1]?.split('/').slice(1).join('/') || url;
 const genericEyecatchIndex = Math.abs(
-    Array.from(url).reduce((acc, char) => acc + char.charCodeAt(0), 0)
+    Array.from(pathname).reduce((acc, char) => acc + char.charCodeAt(0), 0)
 ) % genericEyecatchColors.length;
 const genericEyecatchColor = genericEyecatchColors[genericEyecatchIndex];
 
