@@ -14,10 +14,17 @@ const description = frontmatter.description ||
         content.substring(0, 120).replace(/\n/g, ' ') + '...' :
         `${frontmatter.emoji} ${frontmatter.title} | yaakai.to`);
 
+// 汎用アイキャッチ画像の選択（URLに基づいて固定）
+const genericEyecatchColors = ['red', 'blue', 'orange'];
+const genericEyecatchIndex = Math.abs(
+    Array.from(Astro.url.pathname).reduce((acc, char) => acc + char.charCodeAt(0), 0)
+) % genericEyecatchColors.length;
+const genericEyecatchColor = genericEyecatchColors[genericEyecatchIndex];
+
 // OGP用のアイキャッチ画像URL
 const ogImage = frontmatter.eyecatch
     ? `https://articles.yaakai.to/eyecatch?id=${frontmatter.eyecatch}`
-    : icon.src;
+    : `https://articles.yaakai.to/common/${genericEyecatchColor}.png`;
 
 // 完全なURL
 const canonicalUrl = new URL(Astro.url.pathname, Astro.site || Astro.url.origin).href;
@@ -1177,6 +1184,45 @@ const canonicalUrl = new URL(Astro.url.pathname, Astro.site || Astro.url.origin)
                     padding: 12px;
                 }
             }
+
+            .generic-eyecatch {
+                position: relative;
+                width: 100%;
+                height: 450px;
+                background-size: cover;
+                background-position: center;
+                border-radius: 8px;
+                box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            .generic-eyecatch-emoji {
+                font-size: 8em;
+                line-height: 1;
+                text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            }
+
+            @media screen and (max-width: 900px) {
+                .generic-eyecatch {
+                    height: 350px;
+                }
+
+                .generic-eyecatch-emoji {
+                    font-size: 6em;
+                }
+            }
+
+            @media screen and (max-width: 480px) {
+                .generic-eyecatch {
+                    height: 250px;
+                }
+
+                .generic-eyecatch-emoji {
+                    font-size: 4em;
+                }
+            }
     </style>
     <header class="article-header">
         <div class="article-header-inner">
@@ -1184,15 +1230,9 @@ const canonicalUrl = new URL(Astro.url.pathname, Astro.site || Astro.url.origin)
                 <time datetime={frontmatter.date}>{dateString}</time>
             </div>
 
-            <h1 class="title">
-                {frontmatter.eyecatch ? `${frontmatter.emoji} ${frontmatter.title}` : frontmatter.title}
-            </h1>
-
-            {!frontmatter.eyecatch && (
-                <p class="emoji">{frontmatter.emoji}</p>
-            )}
+            <h1 class="title">{frontmatter.title}</h1>
         </div>
-        {frontmatter.eyecatch && (
+        {frontmatter.eyecatch ? (
             <>
                 <div class="eyecatch-container">
                     <img
@@ -1212,8 +1252,19 @@ const canonicalUrl = new URL(Astro.url.pathname, Astro.site || Astro.url.origin)
                 </div>
                 <div class="overlay-background"></div>
             </>
+        ) : (
+            <>
+                <div class="eyecatch-container">
+                    <div
+                        class="generic-eyecatch"
+                        style={`background-image: url('https://articles.yaakai.to/common/${genericEyecatchColor}.png')`}
+                    >
+                        <span class="generic-eyecatch-emoji">{frontmatter.emoji}</span>
+                    </div>
+                </div>
+                <div class="overlay-background"></div>
+            </>
         )}
-
     </header>
 
     <div class="article-container">
