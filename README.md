@@ -11,9 +11,9 @@
 
 ## Latest Notes
 
+- 🖊 [Claude Code を GitHub Actions で動かす](https://yaakai.to/note/75) - 4/20/2025
 - 🖊 [Workers AI の toMarkdown が便利](https://yaakai.to/note/74) - 4/20/2025
 - 🖊 [Static Assets の run_worker_first オプション](https://yaakai.to/note/70) - 3/7/2025
-- 🖊 [pnpm の Catalogs を使って monorepo 内のバージョンを統一する](https://yaakai.to/note/45) - 2/28/2025
 
 <!--
 **yaakaito/yaakaito** is a ✨ _special_ ✨ repository because its `README.md` (this file) appears on your GitHub profile.
