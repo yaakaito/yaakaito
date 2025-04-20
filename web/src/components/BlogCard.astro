@@ -9,37 +9,25 @@ interface Props {
 
 const { title, date, emoji, url, eyecatch } = Astro.props;
 
-// 相対日付を計算する関数
-function getRelativeDate(dateString: string): string {
-  const date = new Date(dateString);
-  const now = new Date();
-  const diffTime = Math.abs(now.getTime() - date.getTime());
-  const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+// 汎用アイキャッチ画像の選択（URLに基づいて固定）
+const genericEyecatchColors = ['red', 'blue', 'orange'];
+const genericEyecatchIndex = Math.abs(
+    Array.from(url).reduce((acc, char) => acc + char.charCodeAt(0), 0)
+) % genericEyecatchColors.length;
+const genericEyecatchColor = genericEyecatchColors[genericEyecatchIndex];
 
-  if (diffDays === 0) {
-    return "今日";
-  } else if (diffDays === 1) {
-    return "昨日";
-  } else if (diffDays < 7) {
-    return `${diffDays}日前`;
-  } else if (diffDays < 30) {
-    return `${Math.floor(diffDays / 7)}週間前`;
-  } else if (diffDays < 365) {
-    return `${Math.floor(diffDays / 30)}ヶ月前`;
-  } else {
-    return `${Math.floor(diffDays / 365)}年前`;
-  }
-}
-
-const formattedDate = new Date(date).toLocaleDateString();
-const relativeDate = getRelativeDate(date);
+const formattedDate = new Date(date).toLocaleDateString('ja-JP', {
+  year: 'numeric',
+  month: '2-digit',
+  day: '2-digit'
+}).replace(/\//g, '/');
 ---
 
 <a href={url} class="blog-card-link">
   <div class="blog-card">
     <div class="blog-indicator"></div>
     <div class="blog-content">
-      {eyecatch && (
+      {eyecatch ? (
         <div class="blog-eyecatch-container">
           <img
             src={`https://articles.yaakai.to/eyecatch?id=${eyecatch}`}
@@ -47,15 +35,19 @@ const relativeDate = getRelativeDate(date);
             class="blog-eyecatch"
           />
         </div>
-      )}
-      {!eyecatch && (
-        <div class="blog-emoji">{emoji}</div>
+      ) : (
+        <div class="blog-eyecatch-container">
+          <div
+            class="blog-generic-eyecatch"
+            style={`background-image: url('https://articles.yaakai.to/common/${genericEyecatchColor}.png')`}
+          >
+            <span class="blog-generic-eyecatch-emoji">{emoji}</span>
+          </div>
+        </div>
       )}
       <div class="blog-info">
-        <h3 class="blog-title">
-          {eyecatch ? `${emoji} ${title}` : title}
-        </h3>
-        <div class="blog-date" title={formattedDate}>{relativeDate}</div>
+        <h3 class="blog-title">{title}</h3>
+        <div class="blog-date">{formattedDate}</div>
       </div>
     </div>
   </div>
@@ -115,7 +107,23 @@ const relativeDate = getRelativeDate(date);
     border-radius: 4px;
   }
 
-=======
+  .blog-generic-eyecatch {
+    position: relative;
+    width: 100%;
+    height: 160px;
+    background-size: cover;
+    background-position: center;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .blog-generic-eyecatch-emoji {
+    font-size: 3em;
+    line-height: 1;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  }
 
   .blog-emoji {
     font-size: 2.5em;
@@ -161,6 +169,14 @@ const relativeDate = getRelativeDate(date);
   @media (max-width: 768px) {
     .blog-eyecatch {
       height: 140px;
+    }
+
+    .blog-generic-eyecatch {
+      height: 140px;
+    }
+
+    .blog-generic-eyecatch-emoji {
+      font-size: 2.5em;
     }
 
     .ai-badge {

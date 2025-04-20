@@ -9,7 +9,11 @@ interface Props {
 }
 
 const { title, date, emoji, url, eyecatch, isMain = false } = Astro.props;
-const formattedDate = new Date(date).toLocaleDateString();
+const formattedDate = new Date(date).toLocaleDateString('ja-JP', {
+  year: 'numeric',
+  month: '2-digit',
+  day: '2-digit'
+}).replace(/\//g, '/');
 
 // 相対日付を計算する関数
 function getRelativeDate(dateString: string): string {
@@ -59,7 +63,7 @@ const relativeDate = getRelativeDate(date);
         <h3 class="feature-title">{title}</h3>
         <div class="feature-meta">
           <span class="feature-emoji-inline">{emoji}</span>
-          <span class="feature-date" title={formattedDate}>{relativeDate}</span>
+          <span class="feature-date">{formattedDate}</span>
         </div>
       </div>
     ) : (
@@ -82,7 +86,7 @@ const relativeDate = getRelativeDate(date);
           <h3 class="feature-title">{title}</h3>
           <div class="feature-meta">
             <span class="feature-emoji-inline">{emoji}</span>
-            <span class="feature-date" title={formattedDate}>{relativeDate}</span>
+            <span class="feature-date">{formattedDate}</span>
           </div>
         </div>
       </div>
