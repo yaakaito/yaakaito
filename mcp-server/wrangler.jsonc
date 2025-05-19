@@ -28,6 +28,15 @@
 	},
 	"observability": {
 		"enabled": true
+	},
+  "vectorize": [
+    {
+      "binding": "VECTORIZE",
+      "index_name": "related-articles-index"
+    }
+  ],
+	"ai": {
+		"binding": "AI"
 	}
 	/**
 	 * Smart Placement
