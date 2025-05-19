@@ -1,3 +1,3 @@
 export * from './fn';
 export * from './types';
-export * from './generated-articles';
+export * from './__generated-articles';

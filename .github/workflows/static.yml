@@ -45,12 +45,17 @@ jobs:
       - run: bun ./scripts/register-articles.ts
         env:
           ARTICLES_API_KEY: ${{ secrets.ARTICLES_API_KEY }}
+      - run: cd ../mcp-server && bun install && bun scripts/generate-articles.ts && cd ../web
       - run: bun run build
       - name: Upload static files as artifact
         id: deployment
         uses: actions/upload-pages-artifact@v3 # or specific "vX.X.X" version tag for this action
         with:
           path: web/dist
+      - name: Deploy MCP server
+        run: cd ../mcp-server && bun run deploy
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
       - name: Purge related articles cache
         env:
           ARTICLES_API_KEY: ${{ secrets.ARTICLES_API_KEY }}

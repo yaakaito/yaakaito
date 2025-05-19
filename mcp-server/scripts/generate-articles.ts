@@ -8,10 +8,10 @@ import * as path from 'path';
 import { Article } from '../src/articles/types';
 
 // マークダウンファイルを探索するディレクトリパス
-const BLOG_DIR = '/workspaces/yaakaito/web/src/pages/blog';
-const NOTE_DIR = '/workspaces/yaakaito/web/src/pages/note';
+const BLOG_DIR = '../web/src/pages/blog';
+const NOTE_DIR = '../web/src/pages/note';
 // 出力ファイルのパス
-const OUTPUT_FILE = path.resolve('/workspaces/yaakaito/mcp-server/src/articles/generated-articles.ts');
+const OUTPUT_FILE = path.resolve('./src/articles/__generated-articles.ts');
 
 /**
  * ディレクトリを再帰的に探索し、マークダウンファイルのパスを収集します

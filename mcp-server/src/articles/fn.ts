@@ -1,4 +1,4 @@
-import { articles } from "./generated-articles";
+import { articles } from "./__generated-articles";
 import { Article } from "./types";
 
 /**

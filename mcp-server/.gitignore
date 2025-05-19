@@ -3,3 +3,5 @@ node_modules
 # wrangler files
 .wrangler
 .dev.vars*
+
+src/articles/__generated-articles.ts
