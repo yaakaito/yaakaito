@@ -291,6 +291,7 @@ export default {
 			"memorybank": { animal: "shy-octopus", backgroundColor: "#E34234" },
 			"repository": { animal: "jellyfish", backgroundColor: "#A5C9C1" },
 			"structure": { animal: "clownfish", backgroundColor: "#A5C9C1" },
+			"search": { animal: "butterfly", backgroundColor: "#A5C9C1" },
 		};
 
 		// アイキャッチ画像生成エンドポイント
