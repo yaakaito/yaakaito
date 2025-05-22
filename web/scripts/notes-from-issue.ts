@@ -72,10 +72,23 @@ async function fetchIssues() {
 
             if (hasNoteLabel) {
                 const filePath = path.join(__dirname, '../src/pages/note', `${issue.number}.md`);
+                // Extract first character of title for emoji if it's an emoji
+                let emoji = '🖊'; // Default emoji
+                const firstChar = issue.title.trim().charAt(0);
+                
+                // Check if the first character is an emoji (in Unicode range for emoji)
+                const isEmoji = /\p{Emoji}/u.test(firstChar);
+                
+                if (isEmoji) {
+                    emoji = firstChar;
+                    // Remove the first character (emoji) from the title
+                    issue.title = issue.title.trim().substring(1).trim();
+                }
+                
                 const content = `---
 layout: ../../layouts/blog-post.astro
 title: "${issue.title}"
-emoji: 🖊
+emoji: ${emoji}
 date: ${issue.created_at}
 tags:
     - note
