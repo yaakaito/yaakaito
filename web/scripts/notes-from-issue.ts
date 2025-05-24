@@ -71,11 +71,29 @@ async function fetchIssues() {
             }
 
             if (hasNoteLabel) {
+                // 絵文字を検出する正規表現（絵文字の後の空白も含む）
+                const emojiRegex = /^(\p{Emoji_Presentation}|\p{Emoji}\uFE0F)\s*/u;
+                const match = issue.title.match(emojiRegex);
+                
+                let emoji = '🖊'; // デフォルトの絵文字
+                let title = issue.title;
+                
+                // タイトルの1文字目が絵文字の場合
+                if (match) {
+                    // 絵文字部分のみを抽出（空白は含まない）
+                    const emojiMatch = match[0].match(/^(\p{Emoji_Presentation}|\p{Emoji}\uFE0F)/u);
+                    if (emojiMatch) {
+                        emoji = emojiMatch[0];
+                        // タイトルから絵文字とその後の空白を削除
+                        title = issue.title.substring(match[0].length);
+                    }
+                }
+                
                 const filePath = path.join(__dirname, '../src/pages/note', `${issue.number}.md`);
                 const content = `---
 layout: ../../layouts/blog-post.astro
-title: "${issue.title}"
-emoji: 🖊
+title: "${title}"
+emoji: ${emoji}
 date: ${issue.created_at}
 tags:
     - note
