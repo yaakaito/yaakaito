@@ -181,8 +181,22 @@ export default {
 			}
 
 			try {
-				// キャッシュを削除
-				await cache.delete(new Request(`${url.origin}/related_articles`));
+				const body = await request.json() as { articleIds?: string[] } | undefined;
+				const articleIds = body?.articleIds;
+
+				if (articleIds && articleIds.length > 0) {
+					// 指定された記事のキャッシュを削除
+					const deletePromises = articleIds.map(id => 
+						cache.delete(new Request(`${url.origin}/related_articles/${id}`))
+					);
+					await Promise.all(deletePromises);
+					console.log(`Purged cache for ${articleIds.length} articles`);
+				} else {
+					// 全記事のキャッシュを削除（VECTORIZEから全IDを取得）
+					// 注意: Vectorizeには全IDを取得するAPIがないため、
+					// 実際には個別のIDを管理する必要がある
+					console.log('Warning: Full cache purge requested but article IDs not provided');
+				}
 
 				return new Response(JSON.stringify({ success: true }), {
 					headers: { "Content-Type": "application/json" }
