@@ -45,7 +45,7 @@ function convertMarkdownToPlainText(markdown: string): string {
 
 function extractMetadataFromMarkdown(content: string): ArticleMetadata {
     // titleをダブルクォートありとなしの両方のパターンに対応
-    const titleMatch = content.match(/title:\s*"([^"]+)"|title:\s*([^\n]+)/);
+    const titleMatch = content.match(/^title:\s*(?:"([^"]+)"|([^\n]+))/m);
     const emojiMatch = content.match(/emoji:\s*([^\n]+)/);
     // titleMatch[1]はクォートあり、titleMatch[2]はクォートなしの場合にマッチ
     const title = titleMatch ? (titleMatch[1] || titleMatch[2] || '').trim() : '';
