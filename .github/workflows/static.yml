@@ -60,7 +60,57 @@ jobs:
         env:
           ARTICLES_API_KEY: ${{ secrets.ARTICLES_API_KEY }}
         run: |
-          curl -X POST https://articles.yaakai.to/purge_cache -H "X-API-Key: $ARTICLES_API_KEY"
+          # 登録された記事のIDを収集してキャッシュをパージ
+          cd web
+          ARTICLE_IDS=$(bun run -e "
+            import fs from 'fs/promises';
+            import path from 'path';
+            
+            async function findMarkdownFiles(dir) {
+              const files = [];
+              const entries = await fs.readdir(dir, { withFileTypes: true });
+              for (const entry of entries) {
+                const fullPath = path.join(dir, entry.name);
+                if (entry.isDirectory()) {
+                  files.push(...await findMarkdownFiles(fullPath));
+                } else if (entry.isFile() && entry.name.endsWith('.md')) {
+                  files.push(fullPath);
+                }
+              }
+              return files;
+            }
+            
+            async function main() {
+              const ids = [];
+              
+              // blog記事のID
+              const blogFiles = await findMarkdownFiles('src/pages/blog');
+              for (const file of blogFiles) {
+                const relativePath = path.relative('src/pages/blog', file);
+                const fileName = path.basename(relativePath, '.md');
+                ids.push('blog-' + fileName);
+              }
+              
+              // note記事のID
+              const noteFiles = await findMarkdownFiles('src/pages/note');
+              for (const file of noteFiles) {
+                if (!file.endsWith('index.md')) {
+                  const fileName = path.basename(file, '.md');
+                  ids.push('note-' + fileName);
+                }
+              }
+              
+              console.log(JSON.stringify(ids));
+            }
+            
+            main();
+          ")
+          
+          # キャッシュパージAPIを呼び出し
+          curl -X POST https://articles.yaakai.to/purge_cache \
+            -H "X-API-Key: $ARTICLES_API_KEY" \
+            -H "Content-Type: application/json" \
+            -d "{\"articleIds\": $ARTICLE_IDS}"
 
   # Deployment job
   deploy:
