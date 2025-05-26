@@ -44,9 +44,11 @@ function convertMarkdownToPlainText(markdown: string): string {
 }
 
 function extractMetadataFromMarkdown(content: string): ArticleMetadata {
-    const titleMatch = content.match(/title:\s*"([^"]+)"/);
+    // titleをダブルクォートありとなしの両方のパターンに対応
+    const titleMatch = content.match(/title:\s*"([^"]+)"|title:\s*([^\n]+)/);
     const emojiMatch = content.match(/emoji:\s*([^\n]+)/);
-    const title = titleMatch ? titleMatch[1] : '';
+    // titleMatch[1]はクォートあり、titleMatch[2]はクォートなしの場合にマッチ
+    const title = titleMatch ? (titleMatch[1] || titleMatch[2] || '').trim() : '';
     const emoji = emojiMatch ? emojiMatch[1].trim() : '';
 
     // フロントマターを除去（---で囲まれた部分を削除）
