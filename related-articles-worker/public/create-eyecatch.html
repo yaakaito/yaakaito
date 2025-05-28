@@ -45,6 +45,18 @@
                     <input type="hidden" id="selectedArticleId" value="">
                 </div>
                 <div class="form-group">
+                    <label>モチーフの選択方法:</label>
+                    <div style="margin-bottom: 10px;">
+                        <label style="display: inline-block; margin-right: 15px;">
+                            <input type="radio" name="motifSource" value="list" checked> リストから選択
+                        </label>
+                        <label style="display: inline-block;">
+                            <input type="radio" name="motifSource" value="custom"> カスタム入力
+                        </label>
+                    </div>
+                </div>
+
+                <div id="animalSelectSection" class="form-group">
                     <label for="animalSelect">モチーフにする動物:</label>
                     <select id="animalSelect" class="form-control">
                         <option value="">自動選択（APIにお任せ）</option>
@@ -60,6 +72,20 @@
                         <option value="clownfish">サーダン (Structure)</option>
                         <option value="butterfly">バタフライ (search)</option>
                     </select>
+                </div>
+
+                <div id="customMotifSection" class="form-group" style="display: none;">
+                    <label for="customMotif">カスタムモチーフ:</label>
+                    <input type="text" id="customMotif" class="form-control" placeholder="例: ヘルメットをかぶったタコ、サングラスをかけたカメレオン">
+                </div>
+
+                <div class="form-group">
+                    <label for="bgColorSelect">背景色:</label>
+                    <div id="bgColorPalette" style="display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 10px;">
+                        <label style="display: inline-flex; align-items: center;">
+                            <input type="radio" name="bgColor" value="" checked style="margin-right: 5px;"> 自動選択
+                        </label>
+                    </div>
                 </div>
                 <div class="form-group">
                     <label>
@@ -247,6 +273,62 @@
     <script src="js/auth.js"></script>
     <script src="js/eyecatch-editor.js"></script>
     <script>
+        // ページ読み込み時の初期化処理
+        document.addEventListener('DOMContentLoaded', () => {
+            // モチーフ選択のラジオボタン切り替え処理
+            const motifRadios = document.querySelectorAll('input[name="motifSource"]');
+            const animalSelectSection = document.getElementById('animalSelectSection');
+            const customMotifSection = document.getElementById('customMotifSection');
+            
+            motifRadios.forEach(radio => {
+                radio.addEventListener('change', (e) => {
+                    if (e.target.value === 'list') {
+                        animalSelectSection.style.display = 'block';
+                        customMotifSection.style.display = 'none';
+                    } else {
+                        animalSelectSection.style.display = 'none';
+                        customMotifSection.style.display = 'block';
+                    }
+                });
+            });
+
+            // 背景色パレットの初期化
+            const bgColorPalette = document.getElementById('bgColorPalette');
+            if (bgColorPalette && typeof backgroundColors !== 'undefined') {
+                backgroundColors.forEach(color => {
+                    const label = document.createElement('label');
+                    label.style.display = 'inline-flex';
+                    label.style.alignItems = 'center';
+                    label.style.marginRight = '10px';
+                    label.style.cursor = 'pointer';
+                    
+                    const radio = document.createElement('input');
+                    radio.type = 'radio';
+                    radio.name = 'bgColor';
+                    radio.value = color.value;
+                    radio.style.marginRight = '5px';
+                    
+                    const colorBlock = document.createElement('span');
+                    colorBlock.style.display = 'inline-block';
+                    colorBlock.style.width = '20px';
+                    colorBlock.style.height = '20px';
+                    colorBlock.style.backgroundColor = color.value;
+                    colorBlock.style.border = '1px solid #ccc';
+                    colorBlock.style.borderRadius = '3px';
+                    colorBlock.style.marginRight = '5px';
+                    
+                    const colorName = document.createElement('span');
+                    colorName.textContent = color.name;
+                    
+                    label.appendChild(radio);
+                    label.appendChild(colorBlock);
+                    label.appendChild(colorName);
+                    
+                    bgColorPalette.appendChild(label);
+                });
+            }
+        });
+
         // アイキャッチ画像生成フォームの処理
         document.getElementById('eyecatchForm').addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -316,8 +398,25 @@
 
                         const imageDataArray = await Promise.all(imagePromises);
 
-                        // 選択された動物を取得
-                        const selectedAnimal = document.getElementById('animalSelect').value;
+                        // モチーフの設定を取得（テスト用）
+                        const motifSource = document.querySelector('input[name="motifSource"]:checked').value;
+                        let motifValue = 'Fox'; // デフォルト
+                        
+                        if (motifSource === 'list') {
+                            const selectedAnimal = document.getElementById('animalSelect').value;
+                            if (selectedAnimal) {
+                                motifValue = selectedAnimal;
+                            }
+                        } else {
+                            const customMotif = document.getElementById('customMotif').value.trim();
+                            if (customMotif) {
+                                motifValue = customMotif;
+                            }
+                        }
+
+                        // 背景色を取得（テスト用）
+                        const selectedBgColor = document.querySelector('input[name="bgColor"]:checked');
+                        const backgroundColor = selectedBgColor ? selectedBgColor.value : '#f0f0f0';
 
                         // テスト用のレスポンスを作成
                         result = {
@@ -325,8 +424,8 @@
                             images: imageDataArray,
                             keywords: 'テスト, JavaScript, React, Node.js',
                             selectedTechKeyword: 'JavaScript',
-                            animal: selectedAnimal || 'Fox', // 選択された動物または「Fox」（デフォルト）
-                            backgroundColor: '#f0f0f0'
+                            animal: motifValue,
+                            backgroundColor: backgroundColor
                         };
                     } catch (error) {
                         throw new Error('テスト画像の読み込みに失敗しました: ' + error.message);
@@ -338,17 +437,45 @@
                         throw new Error('認証が必要です。ログインしてください。');
                     }
 
-                    // 選択された動物を取得
-                    const selectedAnimal = document.getElementById('animalSelect').value;
+                    // モチーフの設定を取得
+                    const motifSource = document.querySelector('input[name="motifSource"]:checked').value;
+                    let motifValue = null;
+                    
+                    if (motifSource === 'list') {
+                        // リストから選択した場合
+                        const selectedAnimal = document.getElementById('animalSelect').value;
+                        if (selectedAnimal) {
+                            motifValue = selectedAnimal;
+                        }
+                    } else {
+                        // カスタム入力の場合
+                        const customMotif = document.getElementById('customMotif').value.trim();
+                        if (customMotif) {
+                            motifValue = customMotif;
+                        }
+                    }
+
+                    // 背景色を取得
+                    const selectedBgColor = document.querySelector('input[name="bgColor"]:checked');
+                    const backgroundColor = selectedBgColor ? selectedBgColor.value : null;
 
                     // リクエストボディを作成
                     const requestBody = articleId
                         ? { id: articleId }
                         : { content };
 
-                    // 動物が選択されている場合はリクエストに追加
-                    if (selectedAnimal) {
-                        requestBody.animal = selectedAnimal;
+                    // モチーフが設定されている場合はリクエストに追加
+                    if (motifValue) {
+                        if (motifSource === 'list') {
+                            requestBody.animal = motifValue;
+                        } else {
+                            requestBody.customPrompt = motifValue;
+                        }
+                    }
+
+                    // 背景色が選択されている場合はリクエストに追加
+                    if (backgroundColor) {
+                        requestBody.backgroundColor = backgroundColor;
                     }
 
                     const response = await fetch('/create_eyecatch', {

@@ -322,10 +322,18 @@ export default {
 			}
 
 			try {
-				const data = await request.json() as { id?: string, content?: string, animal?: string };
+				const data = await request.json() as { 
+					id?: string, 
+					content?: string, 
+					animal?: string,
+					customPrompt?: string,
+					backgroundColor?: string
+				};
 				let content = data.content;
 				const id = data.id;
 				const requestedAnimal = data.animal;
+				const customPrompt = data.customPrompt;
+				const requestedBackgroundColor = data.backgroundColor;
 
 				// IDが指定されている場合は、KVから記事の内容を取得
 				if (id && !content) {
@@ -435,27 +443,40 @@ export default {
 
 				// 選択されたキーワードに対応する動物と背景色を取得
 				let animal, backgroundColor;
+				let characterDescription: string;
 
-				// リクエストで動物が指定されている場合はそれを使用
-				if (requestedAnimal) {
-					// 指定された動物が有効かチェック
+				// カスタムプロンプトが指定されている場合はそれを使用
+				if (customPrompt) {
+					characterDescription = customPrompt;
+					// カスタムプロンプトの場合、animalは使用しないので設定しない
+					animal = null;
+				} else if (requestedAnimal) {
+					// リクエストで動物が指定されている場合はそれを使用
 					const isValidAnimal = Object.values(techAnimalMap).some(item => item.animal === requestedAnimal);
 
 					if (isValidAnimal) {
 						animal = requestedAnimal;
-						// 背景色は選択された技術キーワードから取得
-						backgroundColor = techAnimalMap[selectedTechKeyword as keyof typeof techAnimalMap].backgroundColor;
+						characterDescription = `${animal} character`;
 					} else {
 						// 無効な動物の場合はデフォルトを使用
 						const defaultMapping = techAnimalMap[selectedTechKeyword as keyof typeof techAnimalMap];
 						animal = defaultMapping.animal;
-						backgroundColor = defaultMapping.backgroundColor;
+						characterDescription = `${animal} character`;
 					}
 				} else {
 					// 動物が指定されていない場合は技術キーワードから取得
 					const mapping = techAnimalMap[selectedTechKeyword as keyof typeof techAnimalMap];
 					animal = mapping.animal;
-					backgroundColor = mapping.backgroundColor;
+					characterDescription = `${animal} character`;
+				}
+
+				// 背景色の決定
+				if (requestedBackgroundColor) {
+					// リクエストで背景色が指定されている場合はそれを使用
+					backgroundColor = requestedBackgroundColor;
+				} else {
+					// 指定されていない場合は技術キーワードから取得
+					backgroundColor = techAnimalMap[selectedTechKeyword as keyof typeof techAnimalMap].backgroundColor;
 				}
 
 				// ステップ3: OpenAIのDALL·E 3を使って画像を生成
@@ -484,12 +505,12 @@ export default {
 
 					const imageResponse = await openai.images.generate({
 						model: "dall-e-3",
-						prompt: `Create an 8-bit retro game style pixel art of a ${animal} character representing the concept of ${selectedTechKeyword} and ${keywordsString}.
+						prompt: `Create an 8-bit retro game style pixel art of a ${characterDescription} representing the concept of ${selectedTechKeyword} and ${keywordsString}.
 						The character should be centered on a solid ${backgroundColor} background.
 						Style: Classic 8-bit NES/Famicom era pixel art, extremely limited color palette (4-8 colors maximum), ${variations[index]}.
-						IMPORTANT: The ${animal} character MUST have a black outline/border around it - this is essential for the retro game look.
+						IMPORTANT: The character MUST have a black outline/border around it - this is essential for the retro game look.
 						The black outline should be exactly 1 pixel thick and should completely surround the character.
-						The ${animal} character should be the ONLY element in the image - no icons, symbols, text, UI elements, or any other objects.
+						The character should be the ONLY element in the image - no icons, symbols, text, UI elements, or any other objects.
 						Make it look like a character sprite from an 80s video game with sharp pixels, no anti-aliasing.
 						The final result should be clean, minimalist, and instantly recognizable as an 8-bit game character with a distinct black outline.
 						The final image should be exactly 128x128 pixels in size.`,
