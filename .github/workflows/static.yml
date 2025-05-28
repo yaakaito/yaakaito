@@ -61,7 +61,6 @@ jobs:
           ARTICLES_API_KEY: ${{ secrets.ARTICLES_API_KEY }}
         run: |
           # 登録された記事のIDを収集してキャッシュをパージ
-          cd web
           ARTICLE_IDS=$(bun run -e "
             import fs from 'fs/promises';
             import path from 'path';
