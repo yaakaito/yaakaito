@@ -15,6 +15,22 @@ const techAnimalMap = {
     "search": { animal: "butterfly", backgroundColor: "#A5C9C1" },
 };
 
+// 背景色のリスト
+const backgroundColors = [
+    { name: "オレンジ", value: "#F38020" },
+    { name: "紫", value: "#8A2BE2" },
+    { name: "黄色", value: "#F7DF1E" },
+    { name: "青", value: "#3178C6" },
+    { name: "赤", value: "#E34F26" },
+    { name: "ダークブルー", value: "#1572B6" },
+    { name: "ネイビー", value: "#336791" },
+    { name: "コーラル", value: "#E34234" },
+    { name: "ティール", value: "#A5C9C1" },
+    { name: "白", value: "#FFFFFF" },
+    { name: "黒", value: "#000000" },
+    { name: "グレー", value: "#6B7280" }
+];
+
 // APIキーの取得（Cookieから）
 function getApiKeyFromCookie() {
     const cookies = document.cookie.split(';');

@@ -345,13 +345,17 @@ function setupFinalCanvasEvents() {
     const bgColorPicker = document.getElementById('bgColorPicker');
 
     if (mainBgColorPalette && bgColorPicker) {
-        // techAnimalMapから背景色を抽出
-        const techColors = Object.values(techAnimalMap).map(item => item.backgroundColor);
+        // backgroundColorsからすべての色を取得
+        const allColors = typeof backgroundColors !== 'undefined' 
+            ? backgroundColors.map(c => c.value) 
+            : Object.values(techAnimalMap).map(item => item.backgroundColor);
 
-        // 白色を追加
-        techColors.unshift('#ffffff');
+        // 白色が含まれていない場合は追加
+        if (!allColors.includes('#ffffff') && !allColors.includes('#FFFFFF')) {
+            allColors.unshift('#ffffff');
+        }
 
-        techColors.forEach(color => {
+        allColors.forEach(color => {
             const swatch = document.createElement('div');
             swatch.className = 'color-swatch';
             swatch.style.backgroundColor = color;
