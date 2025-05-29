@@ -6,6 +6,7 @@ export interface Env {
 	API_KEY: string;
 	OPENAI_API_KEY: string;
 	EYECATCH_STORE: KVNamespace;
+	EYECATCH_BUCKET: R2Bucket;
 	ASSETS: { fetch: (request: Request) => Promise<Response> };
 }
 
@@ -696,8 +697,16 @@ export default {
 				article.hasEyecatch = true;
 				await env.EYECATCH_STORE.put(articleKey, JSON.stringify(article));
 
-				// アイキャッチ画像を保存
-				await env.EYECATCH_STORE.put(`eyecatch:${data.id}`, data.imageData);
+				// Base64データをバイナリに変換
+				const binaryData = Uint8Array.from(atob(data.imageData), c => c.charCodeAt(0));
+				
+				// R2にアイキャッチ画像を保存
+				await env.EYECATCH_BUCKET.put(`eyecatch/${data.id}.png`, binaryData, {
+					httpMetadata: {
+						contentType: 'image/png',
+						cacheControl: 'public, max-age=86400'
+					}
+				});
 
 				return new Response(JSON.stringify({ success: true }), {
 					headers: {
@@ -733,7 +742,21 @@ export default {
 			}
 
 			try {
-				// アイキャッチ画像を取得
+				// まずR2から取得を試みる
+				const r2Object = await env.EYECATCH_BUCKET.get(`eyecatch/${id}.png`);
+				
+				if (r2Object) {
+					// R2から取得成功
+					const headers = new Headers({
+						"Content-Type": "image/png",
+						"Cache-Control": "public, max-age=86400", // 24時間のキャッシュ
+						...corsHeaders
+					});
+					
+					return new Response(r2Object.body, { headers });
+				}
+				
+				// R2になければKVから取得（移行期間中のフォールバック）
 				const imageData = await env.EYECATCH_STORE.get(`eyecatch:${id}`);
 
 				if (!imageData) {
