@@ -2,6 +2,7 @@
 import GlobalLayout from "../layouts/global-layout.astro";
 import FeatureGrid from "../components/FeatureGrid.astro";
 import CategorySection from "../components/CategorySection.astro";
+import ThemeSwitcher from "../components/ThemeSwitcher.astro";
 import type { MarkdownInstance } from "astro";
 import * as humans from "../../humans.md";
 import icon from "../../../icon/icon-128.png";
@@ -92,6 +93,13 @@ const noteSectionPosts = allNotes.slice(0, 4);
       posts={noteSectionPosts}
       viewAllLink="/note"
     />
+
+    <!-- テーマセレクター -->
+    <section class="theme-selector-section">
+      <div class="theme-selector-container">
+        <ThemeSwitcher variant="selector" />
+      </div>
+    </section>
   </main>
 </GlobalLayout>
 
@@ -189,10 +197,22 @@ const noteSectionPosts = allNotes.slice(0, 4);
     margin-bottom: 48px;
   }
 
-  @media (prefers-color-scheme: dark) {
-    .meta-card, .meta-link {
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-    }
+  /* テーマセレクターのスタイル */
+  .theme-selector-section {
+    margin-top: 48px;
+    padding-top: 48px;
+    border-top: 1px solid var(--bg-color-level-3);
+  }
+
+  .theme-selector-container {
+    text-align: center;
+  }
+
+  .theme-selector-title {
+    font-size: 1.2em;
+    margin-bottom: 24px;
+    color: var(--text-color-level-1);
+    font-weight: bold;
   }
 
   @media (max-width: 768px) {

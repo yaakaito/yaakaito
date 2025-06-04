@@ -107,7 +107,7 @@ const relativeDate = getRelativeDate(date);
     background-color: var(--bg-color-level-1);
     border-radius: 12px;
     overflow: hidden;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08);
+    box-shadow: light-dark(0 4px 8px rgba(0, 0, 0, 0.08), 0 4px 8px rgba(0, 0, 0, 0.3));
     transition: transform 0.3s ease, box-shadow 0.3s ease;
     height: 100%;
     display: flex;
@@ -116,7 +116,7 @@ const relativeDate = getRelativeDate(date);
 
   .feature-card-link:hover .feature-card {
     transform: translateY(-6px);
-    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.12);
+    box-shadow: light-dark(0 8px 16px rgba(0, 0, 0, 0.12), 0 8px 16px rgba(0, 0, 0, 0.4));
   }
 
   .feature-indicator {
@@ -252,7 +252,7 @@ const relativeDate = getRelativeDate(date);
 
   /* サブフィーチャー用のスタイル調整 */
   .sub-feature {
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    box-shadow: light-dark(0 2px 4px rgba(0, 0, 0, 0.05), 0 2px 4px rgba(0, 0, 0, 0.2));
   }
 
   .sub-feature .feature-indicator {
@@ -268,19 +268,6 @@ const relativeDate = getRelativeDate(date);
     margin: 0 0 8px 0;
   }
 
-  @media (prefers-color-scheme: dark) {
-    .feature-card {
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-    }
-
-    .feature-card:hover {
-      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4);
-    }
-
-    .sub-feature {
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-    }
-  }
 
   @media (max-width: 768px) {
     .main-feature .feature-title,

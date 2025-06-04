@@ -66,7 +66,7 @@ const genericEyecatchColor = genericEyecatchColors[genericEyecatchIndex];
     background-color: var(--bg-color-level-1);
     border-radius: 8px;
     overflow: hidden;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    box-shadow: light-dark(0 2px 4px rgba(0, 0, 0, 0.05), 0 2px 4px rgba(0, 0, 0, 0.2));
     transition: transform 0.2s ease, box-shadow 0.2s ease;
     height: 100%;
     display: flex;
@@ -75,7 +75,7 @@ const genericEyecatchColor = genericEyecatchColors[genericEyecatchIndex];
 
   .note-card-link:hover .note-card {
     transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    box-shadow: light-dark(0 4px 8px rgba(0, 0, 0, 0.1), 0 4px 8px rgba(0, 0, 0, 0.3));
   }
   .note-indicator {
     position: absolute;
@@ -156,15 +156,6 @@ const genericEyecatchColor = genericEyecatchColors[genericEyecatchIndex];
     margin-top: auto;
   }
 
-  @media (prefers-color-scheme: dark) {
-    .note-card {
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-    }
-
-    .note-card:hover {
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-    }
-  }
 
   @media (max-width: 768px) {
     .note-content {

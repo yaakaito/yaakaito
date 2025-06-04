@@ -186,7 +186,7 @@ export default {
 
 				if (articleIds && articleIds.length > 0) {
 					// 指定された記事のキャッシュを削除
-					const deletePromises = articleIds.map(id => 
+					const deletePromises = articleIds.map(id =>
 						cache.delete(new Request(`${url.origin}/related_articles/${id}`))
 					);
 					await Promise.all(deletePromises);
@@ -322,9 +322,9 @@ export default {
 			}
 
 			try {
-				const data = await request.json() as { 
-					id?: string, 
-					content?: string, 
+				const data = await request.json() as {
+					id?: string,
+					content?: string,
 					animal?: string,
 					customPrompt?: string,
 					backgroundColor?: string
@@ -505,12 +505,12 @@ export default {
 
 					const imageResponse = await openai.images.generate({
 						model: "dall-e-3",
-						prompt: `Create an 8-bit retro game style pixel art of a ${characterDescription} representing the concept of ${selectedTechKeyword} and ${keywordsString}.
+						prompt: `Create an 8-bit retro game style pixel art of a ${animal} character representing the concept of ${selectedTechKeyword} and ${keywordsString}.
 						The character should be centered on a solid ${backgroundColor} background.
 						Style: Classic 8-bit NES/Famicom era pixel art, extremely limited color palette (4-8 colors maximum), ${variations[index]}.
-						IMPORTANT: The character MUST have a black outline/border around it - this is essential for the retro game look.
+						IMPORTANT: The ${animal} character MUST have a black outline/border around it - this is essential for the retro game look.
 						The black outline should be exactly 1 pixel thick and should completely surround the character.
-						The character should be the ONLY element in the image - no icons, symbols, text, UI elements, or any other objects.
+						The ${animal} character should be the ONLY element in the image - no icons, symbols, text, UI elements, or any other objects.
 						Make it look like a character sprite from an 80s video game with sharp pixels, no anti-aliasing.
 						The final result should be clean, minimalist, and instantly recognizable as an 8-bit game character with a distinct black outline.
 						The final image should be exactly 128x128 pixels in size.`,

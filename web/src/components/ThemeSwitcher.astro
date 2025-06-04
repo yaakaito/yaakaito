@@ -1,0 +1,232 @@
+---
+interface Props {
+  variant?: 'toggle' | 'selector';
+  class?: string;
+}
+
+const { variant = 'selector', class: className = '' } = Astro.props;
+---
+
+<div class={`theme-switcher ${variant} ${className}`}>
+  {variant === 'selector' ? (
+    <>
+      <input type="radio" name="theme" id="theme-auto" data-command="to-auto">
+      <label for="theme-auto">
+        <i class="fas fa-circle-half-stroke"></i>
+        <span class="label-text">自動</span>
+      </label>
+
+      <input type="radio" name="theme" id="theme-light" data-command="to-light">
+      <label for="theme-light">
+        <i class="fas fa-sun"></i>
+        <span class="label-text">ライト</span>
+      </label>
+
+      <input type="radio" name="theme" id="theme-dark" data-command="to-dark">
+      <label for="theme-dark">
+        <i class="fas fa-moon"></i>
+        <span class="label-text">ダーク</span>
+      </label>
+    </>
+  ) : (
+    <>
+      <input type="radio" name="theme" id="toggle-theme-light" data-command="to-dark">
+      <label for="toggle-theme-light">
+        <i class="fas fa-sun"></i>
+        <span class="label-text">ライト</span>
+      </label>
+
+      <input type="radio" name="theme" id="toggle-theme-dark" data-command="to-light">
+      <label for="toggle-theme-dark">
+        <i class="fas fa-moon"></i>
+        <span class="label-text">ダーク</span>
+      </label>
+    </>
+  )}
+</div>
+
+<style>
+  /* 共通スタイル */
+  .theme-switcher {
+    display: flex;
+  }
+
+  .theme-switcher input[type="radio"] {
+    display: none;
+  }
+
+  .theme-switcher label {
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+
+  /* トグルスタイル（記事ページ用） */
+  .theme-switcher.toggle {
+    /* position: fixedを削除してコンテナ内に配置 */
+  }
+
+  .theme-switcher.toggle label {
+    display: none;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    height: 48px;
+  }
+
+  .theme-switcher.toggle label:hover {
+    transform: scale(1.1);
+  }
+
+  .theme-switcher.toggle .label-text {
+    display: none;
+  }
+
+  .theme-switcher.toggle i {
+    font-size: 20px;
+    color: white;
+  }
+
+  /* テーマに応じて表示を切り替え */
+  /* lightテーマ時: darkボタン（月アイコン）を表示 */
+  html[data-theme="light"] {
+    .theme-switcher.toggle label[for="toggle-theme-light"] {
+        display: flex;
+    }
+  }
+
+  /* darkテーマ時: lightボタン（太陽アイコン）を表示 */
+  html[data-theme="dark"] {
+    .theme-switcher.toggle label[for="toggle-theme-dark"] {
+        display: flex;
+    }
+  }
+
+  /* data-themeが未設定の場合はシステム設定に従う */
+  @media (prefers-color-scheme: light) {
+    html:not([data-theme]) .theme-switcher.toggle label[for="toggle-theme-light"] {
+      display: flex;
+    }
+  }
+
+  @media (prefers-color-scheme: dark) {
+    html:not([data-theme]) .theme-switcher.toggle label[for="toggle-theme-dark"] {
+      display: flex;
+    }
+  }
+
+  /* セレクタースタイル（indexページ用） */
+  .theme-switcher.selector {
+    justify-content: center;
+    gap: 32px;
+    flex-wrap: wrap;
+    position: relative;
+  }
+
+  .theme-switcher.selector label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 0;
+    font-weight: 500;
+    color: var(--text-color-level-1);
+    transition: color 0.3s ease;
+    position: relative;
+  }
+
+  .theme-switcher.selector input[type="radio"]:checked + label {
+    color: var(--primary-color-level-0);
+    anchor-name: --active-theme;
+  }
+
+  .theme-switcher.selector label:hover {
+    color: var(--primary-color-level-0);
+  }
+
+  .theme-switcher.selector i {
+    font-size: 1.1em;
+  }
+
+  .theme-switcher.selector .label-text {
+    display: none;
+  }
+
+  /* CSS Anchor Positioning を使用した下線 */
+  .theme-switcher.selector::after {
+    content: '';
+    position: absolute;
+    height: 2px;
+    background-color: var(--primary-color-level-0);
+    border-radius: 1px;
+    bottom: 0;
+    left: anchor(--active-theme left);
+    right: anchor(--active-theme right);
+    transition: left 0.3s ease, right 0.3s ease;
+  }
+</style>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const switchers = document.querySelectorAll('.theme-switcher');
+    const htmlElement = document.documentElement;
+
+    // 現在のテーマを取得
+    function getCurrentTheme() {
+      const dataTheme = htmlElement.getAttribute('data-theme');
+      if (dataTheme) return dataTheme;
+
+      const savedTheme = localStorage.getItem('theme');
+      if (savedTheme) return savedTheme;
+
+      return 'auto';
+    }
+
+    // テーマを適用
+    function applyTheme(command: string) {
+      switch (command) {
+        case 'to-auto':
+          htmlElement.removeAttribute('data-theme');
+          localStorage.removeItem('theme');
+          break;
+        case 'to-light':
+          htmlElement.setAttribute('data-theme', 'light');
+          localStorage.setItem('theme', 'light');
+          break;
+        case 'to-dark':
+          htmlElement.setAttribute('data-theme', 'dark');
+          localStorage.setItem('theme', 'dark');
+          break;
+      }
+    }
+
+    switchers.forEach(switcher => {
+      const themeRadios = switcher.querySelectorAll('input[name="theme"]') as NodeListOf<HTMLInputElement>;
+      const isToggleMode = switcher.classList.contains('toggle');
+
+      // 初期状態を設定（セレクターモードのみ）
+      if (!isToggleMode) {
+        const currentTheme = getCurrentTheme();
+        const currentRadio = Array.from(themeRadios).find(radio => radio.dataset.command === `to-${currentTheme}`);
+        if (currentRadio) {
+          currentRadio.checked = true;
+        }
+      }
+
+      // テーマ変更ハンドラー
+      themeRadios.forEach(radio => {
+        radio.addEventListener('change', (e) => {
+          const target = e.target as HTMLInputElement;
+          const command = target.dataset.command;
+
+          if (command) {
+            applyTheme(command);
+
+            // トグルモードの場合はチェック状態をリセット
+            if (isToggleMode) {
+              themeRadios.forEach(r => r.checked = false);
+            }
+          }
+        });
+      });
+    });
+  });
+</script>

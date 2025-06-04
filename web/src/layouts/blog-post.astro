@@ -1,5 +1,6 @@
 ---
 import GlobalLayout from "../layouts/global-layout.astro";
+import ThemeSwitcher from "../components/ThemeSwitcher.astro";
 import icon from "../../../icon/icon-128.png";
 const { frontmatter, content } = Astro.props;
 const dateString = new Date(frontmatter.date).toLocaleDateString("en-US", {
@@ -416,11 +417,9 @@ const canonicalUrl = new URL(Astro.url.pathname, Astro.site || Astro.url.origin)
         }
 
         /* インラインコードのみライトモードで調整 */
-        @media (prefers-color-scheme: light) {
-            .markdown p > code, .markdown li > code {
-                background-color: #f3f3f3;
-                color: #333;
-            }
+        .markdown p > code, .markdown li > code {
+            background-color: light-dark(#f3f3f3, var(--bg-color-level-2));
+            color: light-dark(#333, var(--text-color-level-1));
         }
 
         .markdown pre::before {
@@ -460,12 +459,10 @@ const canonicalUrl = new URL(Astro.url.pathname, Astro.site || Astro.url.origin)
         }
 
         /* ライトモードでのコード装飾 */
-        @media (prefers-color-scheme: light) {
-            .markdown pre::before,
-            .markdown pre::after,
-            .markdown pre[data-language]::before {
-                color: #666;
-            }
+        .markdown pre::before,
+        .markdown pre::after,
+        .markdown pre[data-language]::before {
+            color: light-dark(#666, var(--text-color-level-2));
         }
 
         .markdown pre + pre {
@@ -668,18 +665,16 @@ const canonicalUrl = new URL(Astro.url.pathname, Astro.site || Astro.url.origin)
             display: none;
         }
 
-        /* ダークモード用の調整 */
-        @media (prefers-color-scheme: dark) {
-            .markdown .code-expand-button {
-                background-color: rgba(50, 50, 50, 0.95);
-                color: #e0e0e0;
-                border-color: rgba(80, 80, 80, 0.4);
-                box-shadow: 0 2px 5px rgba(0, 0, 0, 0.4);
-            }
+        /* expandボタンのテーマ対応 */
+        .markdown .code-expand-button {
+            background-color: light-dark(rgba(240, 240, 240, 0.95), rgba(50, 50, 50, 0.95));
+            color: light-dark(var(--text-color-level-0), #e0e0e0);
+            border-color: light-dark(rgba(200, 200, 200, 0.4), rgba(80, 80, 80, 0.4));
+            box-shadow: light-dark(0 2px 5px rgba(0, 0, 0, 0.1), 0 2px 5px rgba(0, 0, 0, 0.4));
+        }
 
-            .markdown .code-expand-button:hover {
-                background-color: rgba(70, 70, 70, 1);
-            }
+        .markdown .code-expand-button:hover {
+            background-color: light-dark(rgba(230, 230, 230, 1), rgba(70, 70, 70, 1));
         }
 
         /* ライトモード用の調整 */
@@ -800,39 +795,31 @@ const canonicalUrl = new URL(Astro.url.pathname, Astro.site || Astro.url.origin)
             /* モバイル用のスタイル調整 */
         }
 
-        @media (prefers-color-scheme: light) {
-            .related-article-card {
-                background: var(--bg-color-level-1);
-                color: var(--text-color-level-0);
-                box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
-            }
-
-            .related-article-card:hover {
-                background: var(--bg-color-level-2);
-                box-shadow: 0 6px 14px rgba(0, 0, 0, 0.1);
-            }
-
-            .related-article-title {
-                color: var(--text-color-level-0);
-            }
-
-            .related-article-content {
-                color: var(--text-color-level-2);
-            }
+        .related-article-card {
+            background: var(--bg-color-level-1);
+            color: var(--text-color-level-0);
+            box-shadow: light-dark(0 2px 6px rgba(0, 0, 0, 0.08), 0 2px 6px rgba(0, 0, 0, 0.15));
         }
 
-        @media (prefers-color-scheme: dark) {
-            .ogp-card:hover {
-                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-            }
+        .related-article-card:hover {
+            background: var(--bg-color-level-2);
+            box-shadow: light-dark(0 6px 14px rgba(0, 0, 0, 0.1), 0 6px 14px rgba(0, 0, 0, 0.2));
+        }
 
-            .ogp-card img {
-                opacity: 0.9;
-            }
+        .related-article-title {
+            color: var(--text-color-level-0);
+        }
 
-            .related-article-card:hover {
-                box-shadow: 0 6px 14px rgba(0, 0, 0, 0.2);
-            }
+        .related-article-content {
+            color: var(--text-color-level-2);
+        }
+
+        .ogp-card:hover {
+            box-shadow: light-dark(0 4px 12px rgba(0, 0, 0, 0.15), 0 4px 12px rgba(0, 0, 0, 0.3));
+        }
+
+        .ogp-card img {
+            opacity: light-dark(1, 0.9);
         }
     </style>
     <style>
@@ -859,10 +846,16 @@ const canonicalUrl = new URL(Astro.url.pathname, Astro.site || Astro.url.origin)
                 padding: 0 20px;
             }
 
+            .article-header-top {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 1.2em;
+            }
+
             .article-meta {
                 display: flex;
                 align-items: center;
-                margin-bottom: 1.2em;
             }
 
             .article-type {
@@ -1088,51 +1081,35 @@ const canonicalUrl = new URL(Astro.url.pathname, Astro.site || Astro.url.origin)
                 transform: translateY(-2px);
             }
 
-            @media (prefers-color-scheme: light) {
-                .article-header {
-                    background-color: var(--gray-900);
-                    color: white;
-                }
-
-                .title {
-                    color: white;
-                }
-
-                time {
-                    color: rgba(255, 255, 255, 0.8);
-                }
-
-                .article-content {
-                    background-color: var(--bg-color-level-0);
-                }
-
-                .overlay-background {
-                    background-color: var(--bg-color-level-0);
-                }
-
-                .back-link {
-                    color: var(--text-color-level-0);
-                    border: 1px solid var(--bg-color-level-3);
-                }
-
-                .back-link:hover {
-                    background-color: var(--bg-color-level-2);
-                    color: var(--primary-color-level-0);
-                }
+            .article-header {
+                background-color: var(--gray-900);
+                color: white;
             }
 
-            @media (prefers-color-scheme: dark) {
-                .article-header {
-                    background-color: var(--gray-900);
-                }
+            .title {
+                color: white;
+            }
 
-                .article-content {
-                    background-color: var(--gray-800);
-                }
+            time {
+                color: rgba(255, 255, 255, 0.8);
+            }
 
-                .overlay-background {
-                    background-color: var(--gray-800);
-                }
+            .article-content {
+                background-color: light-dark(var(--bg-color-level-0), var(--gray-800));
+            }
+
+            .overlay-background {
+                background-color: light-dark(var(--bg-color-level-0), var(--gray-800));
+            }
+
+            .back-link {
+                color: var(--text-color-level-0);
+                border: 1px solid var(--bg-color-level-3);
+            }
+
+            .back-link:hover {
+                background-color: var(--bg-color-level-2);
+                color: var(--primary-color-level-0);
             }
 
             @media screen and (max-width: 900px) {
@@ -1226,8 +1203,11 @@ const canonicalUrl = new URL(Astro.url.pathname, Astro.site || Astro.url.origin)
     </style>
     <header class="article-header">
         <div class="article-header-inner">
-            <div class="article-meta">
-                <time datetime={frontmatter.date}>{dateString}</time>
+            <div class="article-header-top">
+                <div class="article-meta">
+                    <time datetime={frontmatter.date}>{dateString}</time>
+                </div>
+                <ThemeSwitcher variant="toggle" />
             </div>
 
             <h1 class="title">{frontmatter.title}</h1>
