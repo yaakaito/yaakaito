@@ -11,7 +11,7 @@
 
 ## Latest Notes
 
-- 🐋 [Dev Container と GHA で Playwright で Chrome 拡張をテストする](https://yaakai.to/note/85) - 6/17/2025
+- 🐋 [Dev Container で Chrome 拡張を Playwright でテストする](https://yaakai.to/note/85) - 6/17/2025
 - 💬 [/command で Claude Code とのやり取りを Commit に残す](https://yaakai.to/note/84) - 6/9/2025
 - 🐙 [git worktree で Claude Code の並列稼働を試す](https://yaakai.to/note/78) - 5/24/2025
 
