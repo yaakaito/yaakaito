@@ -1,0 +1,39 @@
+---
+import fs from 'fs/promises';
+import path from 'path';
+import matter from 'gray-matter';
+import { glob } from 'glob';
+
+export async function getStaticPaths() {
+  const blogFiles = await glob('src/pages/blog/**/*.md');
+  
+  return blogFiles.map(filePath => {
+    const pathMatch = filePath.match(/\/blog\/(\d{4})\/(.+)\.md$/);
+    
+    if (!pathMatch) return null;
+    
+    const [, year, slug] = pathMatch;
+    
+    return {
+      params: { year, slug }
+    };
+  }).filter(Boolean);
+}
+
+const { year, slug } = Astro.params;
+const filePath = path.join(process.cwd(), 'src', 'pages', 'blog', year, `${slug}.md`);
+
+try {
+  const fileContent = await fs.readFile(filePath, 'utf-8');
+  const { content } = matter(fileContent);
+  
+  return new Response(content.trim(), {
+    status: 200,
+    headers: {
+      'Content-Type': 'text/plain; charset=utf-8',
+    }
+  });
+} catch (error) {
+  return new Response('Not found', { status: 404 });
+}
+---

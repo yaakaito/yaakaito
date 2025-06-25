@@ -1,0 +1,247 @@
+---
+export interface Props {
+  url: string;
+}
+
+const { url } = Astro.props;
+---
+
+<div class="copy-page-container">
+  <button id="copy-page-button" class="copy-button">
+    Copy as Markdown
+  </button>
+  <button 
+    id="copy-dropdown-button" 
+    class="dropdown-button" 
+    aria-label="More options"
+    popovertarget="copy-dropdown-menu"
+    popovertargetaction="toggle"
+  >
+    ▽
+  </button>
+  <div 
+    id="copy-dropdown-menu" 
+    class="dropdown-menu" 
+    data-url={url}
+    popover="auto"
+  >
+    <button class="dropdown-item" data-action="copy-page">Copy as Markdown</button>
+    <button class="dropdown-item" data-action="view-markdown">View as Markdown</button>
+    <button class="dropdown-item" data-action="copy-markdown-url">Copy Markdown URL</button>
+  </div>
+</div>
+
+<style>
+  .copy-page-container {
+    display: flex;
+    position: relative;
+  }
+
+  /* Anchor positioning for the dropdown button */
+  .dropdown-button {
+    anchor-name: --copy-dropdown-anchor;
+  }
+
+  .copy-button,
+  .dropdown-button {
+    background-color: var(--bg-color-level-2);
+    color: var(--text-color-level-0);
+    border: 1px solid var(--bg-color-level-3);
+    font-size: 0.85em;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .copy-button {
+    padding: 0.3em 0.8em;
+    border-radius: 16px 0 0 16px;
+    border-right: none;
+  }
+
+  .dropdown-button {
+    padding: 0.3em 0.6em;
+    border-radius: 0 16px 16px 0;
+    font-size: 0.7em;
+  }
+
+  .copy-button:hover,
+  .dropdown-button:hover {
+    background-color: var(--bg-color-level-3);
+    transform: translateY(-1px);
+  }
+
+  .copy-button:active,
+  .dropdown-button:active {
+    background-color: var(--bg-color-level-4);
+    transform: translateY(0);
+  }
+
+  /* Popover styling with anchor positioning */
+  .dropdown-menu {
+    position-anchor: --copy-dropdown-anchor;
+    position-area: bottom span-right;
+    margin-top: 8px;
+    background-color: var(--bg-color-level-1);
+    border: 1px solid var(--bg-color-level-3);
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    overflow: hidden;
+    min-width: 180px;
+    padding: 0;
+  }
+
+  /* Popover open/close animations */
+  .dropdown-menu {
+    opacity: 0;
+    transform: translateY(-10px);
+    transition: 
+      opacity 0.2s ease,
+      transform 0.2s ease,
+      overlay 0.2s ease allow-discrete,
+      display 0.2s ease allow-discrete;
+  }
+
+  .dropdown-menu:popover-open {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  @starting-style {
+    .dropdown-menu:popover-open {
+      opacity: 0;
+      transform: translateY(-10px);
+    }
+  }
+
+  .dropdown-item {
+    display: block;
+    width: 100%;
+    padding: 10px 16px;
+    background: none;
+    border: none;
+    text-align: left;
+    font-size: 0.9em;
+    color: var(--text-color-level-0);
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+  }
+
+  .dropdown-item:hover {
+    background-color: var(--bg-color-level-2);
+  }
+
+  .dropdown-item:active {
+    background-color: var(--bg-color-level-3);
+  }
+
+  .dropdown-item + .dropdown-item {
+    border-top: 1px solid var(--bg-color-level-3);
+  }
+
+  /* Success animation for copy button */
+  @keyframes copy-success {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+  }
+
+  .copy-button.success {
+    animation: copy-success 0.3s ease;
+    background-color: var(--success-color, #4caf50);
+    color: white;
+  }
+</style>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const copyPageButton = document.getElementById('copy-page-button');
+    const dropdownMenu = document.getElementById('copy-dropdown-menu');
+    const url = dropdownMenu?.getAttribute('data-url') || window.location.pathname;
+
+    // Function to get markdown URL
+    function getMarkdownUrl() {
+      const pathname = url || window.location.pathname;
+      
+      // For blog posts: /blog/2025/post-slug -> /blog/2025/post-slug.md
+      if (pathname.match(/^\/blog\/\d{4}\/[^/]+$/)) {
+        return pathname + '.md';
+      }
+      
+      // For notes: /note/1 -> /note/1.md
+      if (pathname.match(/^\/note\/[^/]+$/)) {
+        return pathname + '.md';
+      }
+      
+      return pathname;
+    }
+
+    // Function to fetch and copy markdown content
+    async function copyMarkdown() {
+      try {
+        const markdownUrl = getMarkdownUrl();
+        const response = await fetch(markdownUrl);
+        
+        if (!response.ok) {
+          throw new Error('Failed to fetch markdown');
+        }
+        
+        const markdown = await response.text();
+        await navigator.clipboard.writeText(markdown);
+        
+        // Show success state
+        copyPageButton?.classList.add('success');
+        const originalText = copyPageButton?.textContent;
+        if (copyPageButton) {
+          copyPageButton.textContent = 'Copied!';
+        }
+        
+        setTimeout(() => {
+          copyPageButton?.classList.remove('success');
+          if (copyPageButton && originalText) {
+            copyPageButton.textContent = originalText;
+          }
+        }, 2000);
+      } catch (error) {
+        console.error('Failed to copy markdown:', error);
+        alert('Failed to copy page content');
+      }
+    }
+
+    // Handle main copy button click
+    copyPageButton?.addEventListener('click', copyMarkdown);
+
+    // Handle dropdown menu items
+    dropdownMenu?.addEventListener('click', async (e) => {
+      const target = e.target as HTMLElement;
+      if (!target.matches('.dropdown-item')) return;
+      
+      const action = target.getAttribute('data-action');
+      
+      switch (action) {
+        case 'copy-page':
+          await copyMarkdown();
+          break;
+          
+        case 'view-markdown':
+          window.open(getMarkdownUrl(), '_blank');
+          break;
+          
+        case 'copy-markdown-url':
+          const fullUrl = new URL(getMarkdownUrl(), window.location.origin).href;
+          await navigator.clipboard.writeText(fullUrl);
+          
+          // Show success feedback
+          const originalText = target.textContent;
+          target.textContent = 'Copied!';
+          setTimeout(() => {
+            target.textContent = originalText;
+          }, 2000);
+          break;
+      }
+      
+      // Close popover after action
+      dropdownMenu.hidePopover();
+    });
+  });
+</script>

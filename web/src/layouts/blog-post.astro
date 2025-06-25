@@ -1,6 +1,7 @@
 ---
 import GlobalLayout from "../layouts/global-layout.astro";
 import ThemeSwitcher from "../components/ThemeSwitcher.astro";
+import CopyPageMenu from "../components/CopyPageMenu.astro";
 import icon from "../../../icon/icon-128.png";
 const { frontmatter, content } = Astro.props;
 const dateString = new Date(frontmatter.date).toLocaleDateString("en-US", {
@@ -831,13 +832,9 @@ const canonicalUrl = new URL(Astro.url.pathname, Astro.site || Astro.url.origin)
             }
 
             .article-header {
-                background-color: var(--gray-900);
-                color: white;
-                padding: 40px 0 0;
+                padding: 40px 0 20px;
                 position: relative;
-                width: 100vw;
-                margin-left: calc(-50vw + 50%);
-                left: 0;
+                text-align: center;
             }
 
             .article-header-inner {
@@ -850,7 +847,22 @@ const canonicalUrl = new URL(Astro.url.pathname, Astro.site || Astro.url.origin)
                 display: flex;
                 justify-content: space-between;
                 align-items: center;
-                margin-bottom: 1.2em;
+                margin-bottom: 0.5em;
+                text-align: left;
+            }
+
+            .article-header-bottom {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-top: 1.5em;
+                text-align: left;
+            }
+
+            .article-actions {
+                display: flex;
+                align-items: center;
+                gap: 12px;
             }
 
             .article-meta {
@@ -882,16 +894,32 @@ const canonicalUrl = new URL(Astro.url.pathname, Astro.site || Astro.url.origin)
 
             time {
                 font-size: 0.9em;
-                color: rgba(255, 255, 255, 0.8);
+                color: var(--text-color-level-2);
             }
 
             .title {
                 font-size: 2.4em;
                 font-weight: bold;
-                margin: 0 0 0.8em 0;
+                margin: 0.5em 0;
                 text-wrap: pretty;
                 line-height: 1.3;
-                color: white;
+                color: var(--text-color-level-0);
+                text-align: left;
+            }
+
+            .tags {
+                display: flex;
+                gap: 8px;
+                flex-wrap: wrap;
+            }
+
+            .tag {
+                font-size: 0.85em;
+                background-color: var(--bg-color-level-2);
+                color: var(--text-color-level-0);
+                padding: 0.3em 0.8em;
+                border-radius: 16px;
+                border: 1px solid var(--bg-color-level-3);
             }
 
             .emoji {
@@ -902,22 +930,20 @@ const canonicalUrl = new URL(Astro.url.pathname, Astro.site || Astro.url.origin)
                 text-align: center;
             }
 
-            .eyecatch-container {
+            .eyecatch-wrapper {
                 position: relative;
                 max-width: 850px;
-                margin: 30px auto 0;
-                text-align: center;
-                z-index: 10;
+                margin: 0 auto;
+                display: inline-block;
             }
 
             .eyecatch {
+                display: block;
                 width: 100%;
                 max-height: 450px;
                 object-fit: cover;
-                margin: 0;
                 border-radius: 8px;
                 box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
-                position: relative;
             }
 
             .ai-badge {
@@ -982,20 +1008,10 @@ const canonicalUrl = new URL(Astro.url.pathname, Astro.site || Astro.url.origin)
                 border-radius: 6px;
                 box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
                 z-index: 12;
-                position: absolute; /* position: absolute が必要 */
+                position: fixed; /* popoverはfixedが推奨 */
                 position-anchor: --ai-badge; /* アンカー要素の名前を指定して関連付け */
-
-                /*
-                 * anchor() 関数の使い方:
-                 * anchor(<anchor-name> <anchor-side>, <fallback-value>)
-                 *
-                 * - <anchor-name>: アンカー要素の名前（省略可能、省略時は position-anchor で指定したアンカーが使用される）
-                 * - <anchor-side>: アンカーのどの辺を参照するか（top, right, bottom, left, center, start, end など）
-                 * - <fallback-value>: アンカーが存在しない場合のフォールバック値
-                 */
-                bottom: anchor(--ai-badge top, auto); /* AIバッジの上端を基準にポップオーバーの下端を配置 */
-                right: 0; /* 右端を揃える */
-                transform: translateY(-10px); /* 少し上に移動させて見た目を調整 */
+                position-area: top span-left; /* AIバッジの上左側に配置 */
+                margin: 0 0 10px 0; /* 下に10pxの余白 */
                 display: none; /* 初期状態では非表示 */
             }
 
@@ -1021,22 +1037,11 @@ const canonicalUrl = new URL(Astro.url.pathname, Astro.site || Astro.url.origin)
                 text-decoration: underline;
             }
 
-            .overlay-background {
-                position: absolute;
-                bottom: 0;
-                left: 0;
-                width: 100%;
-                height: 80px;
-                background-color: var(--bg-color-level-0);
-                z-index: 5;
-            }
 
             .article-content {
-                background-color: var(--bg-color-level-0);
-                padding: 30px 20px;
+                padding: 10px 20px 30px;
                 margin-top: 0;
                 position: relative;
-                border-radius: 8px 8px 0 0;
                 color: var(--text-color-level-0);
             }
 
@@ -1081,26 +1086,8 @@ const canonicalUrl = new URL(Astro.url.pathname, Astro.site || Astro.url.origin)
                 transform: translateY(-2px);
             }
 
-            .article-header {
-                background-color: var(--gray-900);
-                color: white;
-            }
 
-            .title {
-                color: white;
-            }
 
-            time {
-                color: rgba(255, 255, 255, 0.8);
-            }
-
-            .article-content {
-                background-color: light-dark(var(--bg-color-level-0), var(--gray-800));
-            }
-
-            .overlay-background {
-                background-color: light-dark(var(--bg-color-level-0), var(--gray-800));
-            }
 
             .back-link {
                 color: var(--text-color-level-0);
@@ -1165,7 +1152,9 @@ const canonicalUrl = new URL(Astro.url.pathname, Astro.site || Astro.url.origin)
             .generic-eyecatch {
                 position: relative;
                 width: 100%;
+                max-width: 850px;
                 height: 450px;
+                margin: 0 auto;
                 background-size: cover;
                 background-position: center;
                 border-radius: 8px;
@@ -1204,47 +1193,46 @@ const canonicalUrl = new URL(Astro.url.pathname, Astro.site || Astro.url.origin)
     <header class="article-header">
         <div class="article-header-inner">
             <div class="article-header-top">
-                <div class="article-meta">
-                    <time datetime={frontmatter.date}>{dateString}</time>
-                </div>
+                <time datetime={frontmatter.date}>{dateString}</time>
                 <ThemeSwitcher variant="toggle" />
             </div>
-
             <h1 class="title">{frontmatter.title}</h1>
         </div>
         {frontmatter.eyecatch ? (
-            <>
-                <div class="eyecatch-container">
-                    <img
-                        src={`https://articles.yaakai.to/eyecatch?id=${frontmatter.eyecatch}`}
-                        alt={frontmatter.title}
-                        class="eyecatch"
-                    />
-                    <button class="ai-badge" title="この画像はAIを使用して生成された後、人間が調整したものです" id="ai-badge-anchor">
-                        <span class="ai-badge-icon">ⓘ</span>
-                    </button>
-                    <div id="ai-badge-popover" class="ai-badge-popover">
-                        <div class="ai-badge-tooltip">
-                            <p>この画像はAIを使用して生成された後、人間が調整したものです</p>
-                            <a href="https://github.com/yaakaito/yaakaito/issues/new?template=ai-image-issue.md" target="_blank" rel="noopener noreferrer">問題を報告する</a>
-                        </div>
+            <div class="eyecatch-wrapper">
+                <img
+                    src={`https://articles.yaakai.to/eyecatch?id=${frontmatter.eyecatch}`}
+                    alt={frontmatter.title}
+                    class="eyecatch"
+                />
+                <button class="ai-badge" title="この画像はAIを使用して生成された後、人間が調整したものです" id="ai-badge-anchor">
+                    <span class="ai-badge-icon">ⓘ</span>
+                </button>
+                <div id="ai-badge-popover" class="ai-badge-popover">
+                    <div class="ai-badge-tooltip">
+                        <p>この画像はAIを使用して生成された後、人間が調整したものです</p>
+                        <a href="https://github.com/yaakaito/yaakaito/issues/new?template=ai-image-issue.md" target="_blank" rel="noopener noreferrer">問題を報告する</a>
                     </div>
                 </div>
-                <div class="overlay-background"></div>
-            </>
+            </div>
         ) : (
-            <>
-                <div class="eyecatch-container">
-                    <div
-                        class="generic-eyecatch"
-                        style={`background-image: url('https://articles.yaakai.to/common/${genericEyecatchColor}.png')`}
-                    >
-                        <span class="generic-eyecatch-emoji">{frontmatter.emoji}</span>
-                    </div>
-                </div>
-                <div class="overlay-background"></div>
-            </>
+            <div
+                class="generic-eyecatch"
+                style={`background-image: url('https://articles.yaakai.to/common/${genericEyecatchColor}.png')`}
+            >
+                <span class="generic-eyecatch-emoji">{frontmatter.emoji}</span>
+            </div>
         )}
+        <div class="article-header-inner">
+            <div class="article-header-bottom">
+                <div class="tags">
+                    {frontmatter.tags && frontmatter.tags.map((tag: string) => (
+                        <span class="tag">{tag}</span>
+                    ))}
+                </div>
+                <CopyPageMenu url={Astro.url.pathname} />
+            </div>
+        </div>
     </header>
 
     <div class="article-container">
