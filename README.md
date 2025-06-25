@@ -11,9 +11,9 @@
 
 ## Latest Notes
 
+- 🏖️ [Biome v2 の GritQL での Linter Plugins を試す](https://yaakai.to/note/86) - 6/25/2025
 - 🐋 [Dev Container で Chrome 拡張を Playwright でテストする](https://yaakai.to/note/85) - 6/17/2025
 - 💬 [/command で Claude Code とのやり取りを Commit に残す](https://yaakai.to/note/84) - 6/9/2025
-- 🐙 [git worktree で Claude Code の並列稼働を試す](https://yaakai.to/note/78) - 5/24/2025
 
 <!--
 **yaakaito/yaakaito** is a ✨ _special_ ✨ repository because its `README.md` (this file) appears on your GitHub profile.
