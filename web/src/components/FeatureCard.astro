@@ -38,6 +38,15 @@ function getRelativeDate(dateString: string): string {
 }
 
 const relativeDate = getRelativeDate(date);
+
+// 汎用アイキャッチ画像の選択（URLに基づいて固定）
+const genericEyecatchColors = ['red', 'blue', 'orange'];
+// URLからパス部分のみを抽出（記事ページと同じロジックに統一）
+const pathname = url.startsWith('/') ? url : new URL(url, 'http://dummy').pathname;
+const genericEyecatchIndex = Math.abs(
+    Array.from(pathname).reduce((acc, char) => acc + char.charCodeAt(0), 0)
+) % genericEyecatchColors.length;
+const genericEyecatchColor = genericEyecatchColors[genericEyecatchIndex];
 ---
 
 <a href={url} class="feature-card-link">
@@ -54,7 +63,10 @@ const relativeDate = getRelativeDate(date);
               class="feature-eyecatch-main"
             />
           ) : (
-            <div class="feature-emoji-container-main">
+            <div 
+              class="feature-emoji-container-main"
+              style={`background-image: url('https://articles.yaakai.to/common/${genericEyecatchColor}.png'); background-size: cover; background-position: center;`}
+            >
               <div class="feature-emoji-main">{emoji}</div>
             </div>
           )}
@@ -76,7 +88,10 @@ const relativeDate = getRelativeDate(date);
               class="feature-eyecatch-sub"
             />
           ) : (
-            <div class="feature-emoji-container-sub">
+            <div 
+              class="feature-emoji-container-sub"
+              style={`background-image: url('https://articles.yaakai.to/common/${genericEyecatchColor}.png'); background-size: cover; background-position: center;`}
+            >
               <div class="feature-emoji-sub">{emoji}</div>
             </div>
           )}
