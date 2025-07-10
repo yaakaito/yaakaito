@@ -42,8 +42,10 @@ const relativeDate = getRelativeDate(date);
 // 汎用アイキャッチ画像の選択（URLに基づいて固定）
 const genericEyecatchColors = ['red', 'blue', 'orange'];
 // URLからパス部分のみを抽出（記事ページと同じロジックに統一）
-const pathname = url.startsWith('/') ? url : new URL(url, 'http://dummy').pathname;
-console.log('pathname:', pathname);
+let pathname = url.startsWith('/') ? url : new URL(url, 'http://dummy').pathname;
+if (! pathname.endsWith('/')) {
+  pathname = `${pathname}/`;
+}
 const genericEyecatchIndex = Math.abs(
     Array.from(pathname).reduce((acc, char) => acc + char.charCodeAt(0), 0)
 ) % genericEyecatchColors.length;
