@@ -10,18 +10,18 @@ const { url } = Astro.props;
   <button id="copy-page-button" class="copy-button">
     Copy as Markdown
   </button>
-  <button 
-    id="copy-dropdown-button" 
-    class="dropdown-button" 
+  <button
+    id="copy-dropdown-button"
+    class="dropdown-button"
     aria-label="More options"
     popovertarget="copy-dropdown-menu"
     popovertargetaction="toggle"
   >
     ▽
   </button>
-  <div 
-    id="copy-dropdown-menu" 
-    class="dropdown-menu" 
+  <div
+    id="copy-dropdown-menu"
+    class="dropdown-menu"
     data-url={url}
     popover="auto"
   >
@@ -81,7 +81,7 @@ const { url } = Astro.props;
   .dropdown-menu {
     position-anchor: --copy-dropdown-anchor;
     position-area: bottom span-right;
-    position-try-fallbacks: 
+    position-try-fallbacks:
       top span-right,
       bottom span-left,
       top span-left;
@@ -99,7 +99,7 @@ const { url } = Astro.props;
   .dropdown-menu {
     opacity: 0;
     transform: translateY(-10px);
-    transition: 
+    transition:
       opacity 0.2s ease,
       transform 0.2s ease,
       overlay 0.2s ease allow-discrete,
@@ -173,17 +173,19 @@ const { url } = Astro.props;
     // Function to get markdown URL
     function getMarkdownUrl() {
       const pathname = url || window.location.pathname;
-      
-      // For blog posts: /blog/2025/post-slug -> /blog/2025/post-slug.md
-      if (pathname.match(/^\/blog\/\d{4}\/[^/]+$/)) {
-        return pathname + '.md';
+
+      // For blog posts: /blog/2025/post-slug/ -> /blog/2025/post-slug.md
+      if (pathname.match(/^\/blog\/\d{4}\/[^/]+\/?$/)) {
+        return pathname.replace(/\/$/, '') + '.md';
       }
-      
-      // For notes: /note/1 -> /note/1.md
-      if (pathname.match(/^\/note\/[^/]+$/)) {
-        return pathname + '.md';
+
+      // For notes: /note/1/ -> /note/1.md
+      if (pathname.match(/^\/note\/[^/]+\/?$/)) {
+        return pathname.replace(/\/$/, '') + '.md';
       }
-      
+
+      console.log(pathname)
+
       return pathname;
     }
 
@@ -198,7 +200,7 @@ const { url } = Astro.props;
           console.warn('Clipboard API failed, trying fallback:', err);
         }
       }
-      
+
       // Fallback for iOS Safari and older browsers
       const textArea = document.createElement('textarea');
       textArea.value = text;
@@ -207,7 +209,7 @@ const { url } = Astro.props;
       textArea.style.left = '-999999px';
       textArea.setAttribute('readonly', '');
       document.body.appendChild(textArea);
-      
+
       // iOS requires the textarea to be contenteditable
       if (navigator.userAgent.match(/ipad|iphone/i)) {
         const range = document.createRange();
@@ -219,7 +221,7 @@ const { url } = Astro.props;
       } else {
         textArea.select();
       }
-      
+
       try {
         const successful = document.execCommand('copy');
         document.body.removeChild(textArea);
@@ -236,14 +238,14 @@ const { url } = Astro.props;
       try {
         const markdownUrl = getMarkdownUrl();
         const response = await fetch(markdownUrl);
-        
+
         if (!response.ok) {
           throw new Error('Failed to fetch markdown');
         }
-        
+
         const markdown = await response.text();
         const success = await copyToClipboard(markdown);
-        
+
         if (success) {
           // Show success state
           copyPageButton?.classList.add('success');
@@ -251,7 +253,7 @@ const { url } = Astro.props;
           if (copyPageButton) {
             copyPageButton.textContent = 'Copied!';
           }
-          
+
           setTimeout(() => {
             copyPageButton?.classList.remove('success');
             if (copyPageButton && originalText) {
@@ -265,7 +267,7 @@ const { url } = Astro.props;
           if (copyPageButton) {
             copyPageButton.textContent = 'Copy failed';
           }
-          
+
           setTimeout(() => {
             if (copyPageButton && originalText) {
               copyPageButton.textContent = originalText;
@@ -279,7 +281,7 @@ const { url } = Astro.props;
         if (copyPageButton) {
           copyPageButton.textContent = 'Error';
         }
-        
+
         setTimeout(() => {
           if (copyPageButton && originalText) {
             copyPageButton.textContent = originalText;
@@ -295,22 +297,22 @@ const { url } = Astro.props;
     dropdownMenu?.addEventListener('click', async (e) => {
       const target = e.target as HTMLElement;
       if (!target.matches('.dropdown-item')) return;
-      
+
       const action = target.getAttribute('data-action');
-      
+
       switch (action) {
         case 'copy-page':
           await copyMarkdown();
           break;
-          
+
         case 'view-markdown':
           window.open(getMarkdownUrl(), '_blank');
           break;
-          
+
         case 'copy-markdown-url':
           const fullUrl = new URL(getMarkdownUrl(), window.location.origin).href;
           const urlCopySuccess = await copyToClipboard(fullUrl);
-          
+
           if (urlCopySuccess) {
             // Show success feedback
             const originalText = target.textContent;
@@ -329,7 +331,7 @@ const { url } = Astro.props;
           }
           break;
       }
-      
+
       // Close popover after action
       dropdownMenu.hidePopover();
     });
