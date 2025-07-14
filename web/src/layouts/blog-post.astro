@@ -2,6 +2,7 @@
 import GlobalLayout from "../layouts/global-layout.astro";
 import ThemeSwitcher from "../components/ThemeSwitcher.astro";
 import CopyPageMenu from "../components/CopyPageMenu.astro";
+import { getGenericEyecatchColor } from "../utils/eyecatch";
 import icon from "../../../icon/icon-128.png";
 const { frontmatter, content } = Astro.props;
 const dateString = new Date(frontmatter.date).toLocaleDateString("en-US", {
@@ -16,12 +17,8 @@ const description = frontmatter.description ||
         content.substring(0, 120).replace(/\n/g, ' ') + '...' :
         `${frontmatter.emoji} ${frontmatter.title} | yaakai.to`);
 
-// 汎用アイキャッチ画像の選択（URLに基づいて固定）
-const genericEyecatchColors = ['red', 'blue', 'orange'];
-const genericEyecatchIndex = Math.abs(
-    Array.from(Astro.url.pathname).reduce((acc, char) => acc + char.charCodeAt(0), 0)
-) % genericEyecatchColors.length;
-const genericEyecatchColor = genericEyecatchColors[genericEyecatchIndex];
+// 汎用アイキャッチ画像の色を取得
+const genericEyecatchColor = getGenericEyecatchColor(Astro.url.pathname);
 
 // OGP用のアイキャッチ画像URL
 const ogImage = frontmatter.eyecatch

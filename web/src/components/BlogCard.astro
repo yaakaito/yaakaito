@@ -1,4 +1,6 @@
 ---
+import { getGenericEyecatchColor } from '../utils/eyecatch';
+
 interface Props {
   title: string;
   date: string;
@@ -9,14 +11,8 @@ interface Props {
 
 const { title, date, emoji, url, eyecatch } = Astro.props;
 
-// 汎用アイキャッチ画像の選択（URLに基づいて固定）
-const genericEyecatchColors = ['red', 'blue', 'orange'];
-// URLからパス部分のみを抽出（記事ページと同じロジックに統一）
-const pathname = url.startsWith('/') ? url : new URL(url, 'http://dummy').pathname;
-const genericEyecatchIndex = Math.abs(
-    Array.from(pathname).reduce((acc, char) => acc + char.charCodeAt(0), 0)
-) % genericEyecatchColors.length;
-const genericEyecatchColor = genericEyecatchColors[genericEyecatchIndex];
+// 汎用アイキャッチ画像の色を取得
+const genericEyecatchColor = getGenericEyecatchColor(url);
 
 const formattedDate = new Date(date).toLocaleDateString('ja-JP', {
   year: 'numeric',
