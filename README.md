@@ -5,9 +5,9 @@
 
 ## Latest Blog Posts
 
+- 🐿️ [2025年7月版個人的開発スタイル with Claude Code](https://yaakai.to/blog/2025/dev-with-claude-code-2025-07) - 7/15/2025
 - 🦋 [このブログを Remote MCP Server にして検索できるようにしてみる](https://yaakai.to/blog/2025/blog-remote-mcp-server) - 5/20/2025
 - 🐠 [Project Rules や .clinerules や CLAUDE.md をまとめて管理する](https://yaakai.to/blog/2025/rule-files-unified-management) - 3/24/2025
-- 🪼 [Cline でリポジトリ構造の変更とアーキテクチャのルール整備をした](https://yaakai.to/blog/2025/cline-repository-refactoring) - 3/19/2025
 
 ## Latest Notes
 
