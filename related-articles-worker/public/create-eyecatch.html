@@ -81,7 +81,7 @@
 
                 <div class="form-group">
                     <label for="bgColorSelect">背景色:</label>
-                    <div id="bgColorPalette" style="display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 10px;">
+                    <div id="generateBgColorPalette" style="display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 10px;">
                         <label style="display: inline-flex; align-items: center;">
                             <input type="radio" name="bgColor" value="" checked style="margin-right: 5px;"> 自動選択
                         </label>
@@ -293,8 +293,8 @@
             });
 
             // 背景色パレットの初期化
-            const bgColorPalette = document.getElementById('bgColorPalette');
-            if (bgColorPalette && typeof backgroundColors !== 'undefined') {
+            const generateBgColorPalette = document.getElementById('generateBgColorPalette');
+            if (generateBgColorPalette && typeof backgroundColors !== 'undefined') {
                 backgroundColors.forEach(color => {
                     const label = document.createElement('label');
                     label.style.display = 'inline-flex';
@@ -324,7 +324,7 @@
                     label.appendChild(colorBlock);
                     label.appendChild(colorName);
                     
-                    bgColorPalette.appendChild(label);
+                    generateBgColorPalette.appendChild(label);
                 });
             }
         });
