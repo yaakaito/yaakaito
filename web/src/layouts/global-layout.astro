@@ -117,11 +117,21 @@ const fullImageUrl = ogImage.startsWith('http') ? ogImage : new URL(ogImage, Ast
         [data-theme="light"] {
             color-scheme: light;
         }
-        body {
+        /* ========================================
+           基本設定（全体に適用）
+        ======================================== */
+        body,
+        html {
             margin: 0;
             padding: 0;
-            font-family: Helvetica Neue,Arial,Hiragino Sans,Hiragino Kaku Gothic ProN,BIZ UDPGothic,Meiryo,-apple-system,sans-serif, Apple Color Emoji, Segoe UI Emoji;
+            /* フォントファミリー（日本語最適化） */
+            font-family: "Helvetica Neue", "Hiragino Kaku Gothic ProN", "Hiragino Sans", "Noto Sans JP", Meiryo, sans-serif;
+            /* カーニング設定 */
+            font-kerning: normal;
+            /* フォントスムージング（WebKit系） */
             -webkit-font-smoothing: antialiased;
+            /* フォントスムージング（Firefox macOS） */
+            -moz-osx-font-smoothing: grayscale;
             font-size: 12pt;
             line-height: 31px;
             font-feature-settings: "palt";
@@ -140,6 +150,54 @@ const fullImageUrl = ogImage.startsWith('http') ? ogImage : new URL(ogImage, Ast
 
         a:visited {
             color: var(--primary-color-level-2);
+        }
+
+        /* ========================================
+           見出し設定
+        ======================================== */
+        h1, h2, h3, h4, h5, h6 {
+            /* 行長のバランス調整（全ブラウザ対応） */
+            text-wrap: balance;
+            /* 厳格な禁則処理 */
+            line-break: strict;
+            /* 見出し用の適切な行間 */
+            line-height: 1.3;
+            /* 文字間隔の微調整 */
+            letter-spacing: 0.02em;
+        }
+
+        /* Chrome系ブラウザでの文節境界改行 */
+        @supports (word-break: auto-phrase) {
+            h1, h2, h3, h4, h5, h6 {
+                word-break: auto-phrase;
+            }
+        }
+
+        /* ========================================
+           本文設定
+        ======================================== */
+        p, li {
+            /* 厳格な禁則処理 */
+            line-break: strict;
+            /* オーバーフロー対策（現代的・推奨） */
+            overflow-wrap: anywhere;
+            /* オーバーフロー対策（レガシー対応） */
+            word-wrap: break-word;
+            /* 本文用の適切な行間 */
+            line-height: 1.6;
+            /* 段落間のマージンを行高単位で設定 */
+            margin-block: 1lh;
+            /* 読みやすさのための文字間隔 */
+            letter-spacing: 0.05em;
+        }
+
+        /* コードブロック（カーニング無効化） */
+        code,
+        pre,
+        .code-block {
+            font-kerning: none;
+            font-family: "Fira Code", "Consolas", "Monaco", "Menlo", monospace;
+            letter-spacing: normal;
         }
     </style>
     <style>
