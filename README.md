@@ -11,9 +11,9 @@
 
 ## Latest Notes
 
+- 🦥 [JavaScript の import defer](https://yaakai.to/note/91) - 8/22/2025
 - 🚲 [Claude Code の Hook で format lint test を実行する](https://yaakai.to/note/88) - 7/10/2025
 - 🚨 [Claude Code の PreToolUse Hook で誤ったパッケージマネージャーの利用を止める](https://yaakai.to/note/87) - 7/10/2025
-- 🏖️ [Biome v2 の GritQL での Linter Plugins を試す](https://yaakai.to/note/86) - 6/25/2025
 
 <!--
 **yaakaito/yaakaito** is a ✨ _special_ ✨ repository because its `README.md` (this file) appears on your GitHub profile.
