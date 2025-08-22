@@ -11,7 +11,7 @@
 
 ## Latest Notes
 
-- 🦥 [JavaScript の import defer](https://yaakai.to/note/91) - 8/22/2025
+- 🦥 [ES Module の import defer](https://yaakai.to/note/91) - 8/22/2025
 - 🚲 [Claude Code の Hook で format lint test を実行する](https://yaakai.to/note/88) - 7/10/2025
 - 🚨 [Claude Code の PreToolUse Hook で誤ったパッケージマネージャーの利用を止める](https://yaakai.to/note/87) - 7/10/2025
 
