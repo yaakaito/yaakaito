@@ -33,6 +33,12 @@
       "id": "dbb3eef7798f4ece9e170a9b09c0b077",
       "preview_id": "fb44463e67bb40c9b1ca95a5b542e6de"
     }
+  ],
+  "r2_buckets": [
+    {
+      "binding": "EYECATCH_BUCKET",
+      "bucket_name": "blog-eyecatch-images"
+    }
   ]
   /**
    * Smart Placement
