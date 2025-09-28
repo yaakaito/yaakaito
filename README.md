@@ -11,9 +11,9 @@
 
 ## Latest Notes
 
+- 🛡️ [dependabot の cooldown と pnpm の minimumReleaseAge を設定する](https://yaakai.to/note/94) - 9/28/2025
 - 🔥 [bun:sqlite を使って bun test で Hono + Cloudflare Workers + D1 をテストする](https://yaakai.to/note/92) - 9/9/2025
 - 🦥 [ES Module の import defer](https://yaakai.to/note/91) - 8/22/2025
-- 🚲 [Claude Code の Hook で format lint test を実行する](https://yaakai.to/note/88) - 7/10/2025
 
 <!--
 **yaakaito/yaakaito** is a ✨ _special_ ✨ repository because its `README.md` (this file) appears on your GitHub profile.
