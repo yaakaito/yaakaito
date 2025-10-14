@@ -5,9 +5,9 @@
 
 ## Latest Blog Posts
 
+- 🐧 [仕様駆動開発風のオレオレ実装計画を作って AI と並走する](https://yaakai.to/blog/2025/my-spec-driven-dev-plan) - 10/14/2025
 - 🐿️ [2025年7月版個人的開発スタイル with Claude Code](https://yaakai.to/blog/2025/dev-with-claude-code-2025-07) - 7/15/2025
 - 🦋 [このブログを Remote MCP Server にして検索できるようにしてみる](https://yaakai.to/blog/2025/blog-remote-mcp-server) - 5/20/2025
-- 🐠 [Project Rules や .clinerules や CLAUDE.md をまとめて管理する](https://yaakai.to/blog/2025/rule-files-unified-management) - 3/24/2025
 
 ## Latest Notes
 
