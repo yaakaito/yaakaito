@@ -1,8 +1,10 @@
 {
     "image": "mcr.microsoft.com/devcontainers/base:1-bookworm",
     "runArgs": [
-        "--cap-add=SYS_ADMIN"
+        "--cap-add=SYS_ADMIN",
+        "--cap-add=NET_RAW"
     ],
+    "initializeCommand": "mkdir -p ${localEnv:HOME}/.local/share/devcontainer/${devcontainerId} && touch ${localEnv:HOME}/.local/share/devcontainer/${devcontainerId}/.zsh_history",
     "postCreateCommand": ".devcontainer/setup-browser-action.sh",
     "features": {
         "ghcr.io/devcontainers/features/node:1": {},
@@ -15,5 +17,8 @@
                 "astro-build.astro-vscode"
             ]
         }
-    }
+    },
+    "mounts": [
+        "source=${localEnv:HOME}/.local/share/devcontainer/${devcontainerId}/.zsh_history,target=/home/vscode/.zsh_history,type=bind"
+    ]
 }
