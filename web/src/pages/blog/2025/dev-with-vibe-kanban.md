@@ -3,7 +3,6 @@ layout: ../../../layouts/blog-post.astro
 title: 実装計画を Vibe Kanban で並列に開発する
 emoji: 🐙
 date: 2025-11-04
-eyecatch: blog-dev-with-vibe-kanban
 tags:
   - AI
 ---
