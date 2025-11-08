@@ -11,9 +11,9 @@
 
 ## Latest Notes
 
+- 🤖 [Chrome DevTools MCP を DevContainer(OrbStack) から使う](https://yaakai.to/note/98) - 11/8/2025
 - 🌿 [Claude Code のステータスラインをカスタマイズする](https://yaakai.to/note/96) - 10/27/2025
 - 📜 [DevContainer で Rebuild しても .zsh_history が残るようにする](https://yaakai.to/note/95) - 10/20/2025
-- 🛡️ [dependabot の cooldown と pnpm の minimumReleaseAge を設定する](https://yaakai.to/note/94) - 9/28/2025
 
 <!--
 **yaakaito/yaakaito** is a ✨ _special_ ✨ repository because its `README.md` (this file) appears on your GitHub profile.
