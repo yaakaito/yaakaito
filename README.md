@@ -11,7 +11,7 @@
 
 ## Latest Notes
 
-- 🖊 [bun test や vitest の onTestFinished Hook](https://yaakai.to/note/99) - 11/18/2025
+- ✅ [bun test や vitest の onTestFinished Hook](https://yaakai.to/note/99) - 11/18/2025
 - 🤖 [Chrome DevTools MCP を DevContainer(OrbStack) から使う](https://yaakai.to/note/98) - 11/8/2025
 - 🌿 [Claude Code のステータスラインをカスタマイズする](https://yaakai.to/note/96) - 10/27/2025
 
