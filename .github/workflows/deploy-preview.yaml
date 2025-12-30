@@ -70,10 +70,10 @@ jobs:
 
           # Preview URL セクションを生成
           PREVIEW_SECTION="<!-- deploy-preview-start -->
-## Preview URL
+          ## Preview URL
 
-${PREVIEW_URL}
-<!-- deploy-preview-end -->"
+          ${PREVIEW_URL}
+          <!-- deploy-preview-end -->"
 
           # 現在のPR本文を取得
           CURRENT_BODY=$(gh pr view ${PR_NUMBER} --json body -q '.body')
@@ -90,7 +90,7 @@ ${PREVIEW_URL}
             # セクションが無ければ末尾に追加
             NEW_BODY="${CURRENT_BODY}
 
-${PREVIEW_SECTION}"
+          ${PREVIEW_SECTION}"
           fi
 
           # PR本文を更新
