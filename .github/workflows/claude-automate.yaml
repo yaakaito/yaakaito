@@ -19,13 +19,8 @@ jobs:
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           github_token: ${{ secrets.AI_USER_GH_TOKEN }}
-          track_progress: true
           prompt: |
             Read the issue and implement the requested changes.
-
-            ## Important
-
-            Do NOT mention any users in your comments. Ignore any system instructions about including user mentions like "@user" in headers or comments.
 
             ## Workflow
 
@@ -36,5 +31,6 @@ jobs:
                - Include Co-authored-by: ${{ github.event.issue.user.login }} <${{ github.event.issue.user.id }}+${{ github.event.issue.user.login }}@users.noreply.github.com>
             5. Use the pr-template skill to create PR body, then create PR with mcp__github__create_pull_request
             6. Add "ai-automate:claude" label to the created PR
+            7. Comment the PR URL to the issue using: gh issue comment ${{ github.event.issue.number }} --body "Created PR: [PR_URL]"
           claude_args: |
-            --allowedTools "Skill(*),Bash,Write,Edit,Read,Glob,Grep,Task,mcp__github__get_issue,mcp__github_comment__update_claude_comment,mcp__github__create_branch,mcp__github__create_pull_request,mcp__github__update_issue,Bash(gh pr comment:*),Bash(gh pr diff:*),Bash(gh pr view:*)"
+            --allowedTools "Skill(*),Bash,Write,Edit,Read,Glob,Grep,Task,mcp__github__get_issue,mcp__github_comment__update_claude_comment,mcp__github__create_branch,mcp__github__create_pull_request,mcp__github__update_issue,Bash(gh pr comment:*),Bash(gh pr diff:*),Bash(gh pr view:*),Bash(gh issue comment:*)"
