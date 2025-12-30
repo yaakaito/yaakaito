@@ -1,0 +1,80 @@
+---
+interface Props {
+    path: string;
+    title: string;
+}
+
+const { path, title } = Astro.props;
+
+// パスからパンくずリストを生成
+const segments = path.split('/').filter(Boolean);
+const breadcrumbs = [
+    { label: '/', href: '/' }
+];
+
+// blog または note セグメントがある場合は追加
+if (segments.length > 0 && (segments[0] === 'blog' || segments[0] === 'note')) {
+    breadcrumbs.push({
+        label: segments[0],
+        href: `/${segments[0]}`
+    });
+}
+
+// 現在のページ
+breadcrumbs.push({
+    label: title,
+    href: path
+});
+---
+
+<nav class="breadcrumb" aria-label="パンくずリスト">
+    {breadcrumbs.map((item, index) => (
+        <>
+            {index > 0 && <span class="breadcrumb-separator"> &gt; </span>}
+            {index === breadcrumbs.length - 1 ? (
+                <span class="breadcrumb-current">{item.label}</span>
+            ) : (
+                <a href={item.href} class="breadcrumb-link">{item.label}</a>
+            )}
+        </>
+    ))}
+</nav>
+
+<style>
+    .breadcrumb {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        font-size: 0.85em;
+        color: var(--text-color-level-2);
+        margin-bottom: 1em;
+        gap: 0.3em;
+    }
+
+    .breadcrumb-link {
+        color: var(--text-color-level-2);
+        text-decoration: none;
+        transition: color 0.2s ease;
+    }
+
+    .breadcrumb-link:hover {
+        color: var(--primary-color-level-0);
+        text-decoration: underline;
+    }
+
+    .breadcrumb-separator {
+        color: var(--text-color-level-2);
+        user-select: none;
+    }
+
+    .breadcrumb-current {
+        color: var(--text-color-level-0);
+        font-weight: 500;
+    }
+
+    @media screen and (max-width: 480px) {
+        .breadcrumb {
+            font-size: 0.8em;
+        }
+    }
+</style>
