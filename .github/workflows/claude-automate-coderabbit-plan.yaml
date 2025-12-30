@@ -8,6 +8,7 @@ jobs:
   # Step 1: Check the "Create Plan" checkbox to trigger CodeRabbit plan generation
   trigger-plan-creation:
     if: |
+      contains(github.event.issue.labels.*.name, 'ai-automate:claude') &&
       github.event.comment.user.login == 'coderabbitai[bot]' &&
       contains(github.event.comment.body, 'CodeRabbit Plan Mode') &&
       contains(github.event.comment.body, '- [ ]')
@@ -33,6 +34,7 @@ jobs:
   # Step 2: Implement based on the generated plan
   automate-from-plan:
     if: |
+      contains(github.event.issue.labels.*.name, 'ai-automate:claude') &&
       github.event.comment.user.login == 'coderabbitai[bot]' &&
       contains(github.event.comment.body, '## Coding Plan')
     runs-on: ubuntu-latest
