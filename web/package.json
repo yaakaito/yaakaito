@@ -8,7 +8,9 @@
     "build": "astro build",
     "preview": "astro preview",
     "astro": "astro",
-    "remark-ogp-card": "node scripts/remark-ogp-card.js"
+    "remark-ogp-card": "node scripts/remark-ogp-card.js",
+    "deploy": "wrangler deploy",
+    "preview:cf": "wrangler dev"
   },
   "dependencies": {
     "@astrojs/rss": "^4.0.10",
@@ -20,6 +22,7 @@
   },
   "devDependencies": {
     "glob": "^11.0.1",
-    "gray-matter": "^4.0.3"
+    "gray-matter": "^4.0.3",
+    "wrangler": "^4.0.0"
   }
 }

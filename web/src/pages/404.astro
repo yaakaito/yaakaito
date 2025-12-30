@@ -1,0 +1,55 @@
+---
+import GlobalLayout from '../layouts/global-layout.astro';
+---
+
+<GlobalLayout title="404 Not Found" description="ページが見つかりませんでした">
+    <header class="header">
+        <nav class="site-nav">
+            <a href="/" class="nav-link">Home</a>
+            <a href="/blog" class="nav-link">Blog</a>
+            <a href="/note" class="nav-link">Note</a>
+        </nav>
+    </header>
+
+    <main class="not-found">
+        <h1>404</h1>
+        <p>ページが見つかりませんでした</p>
+        <a href="/">ホームに戻る</a>
+    </main>
+</GlobalLayout>
+
+<style>
+    .not-found {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        min-height: 60vh;
+        text-align: center;
+    }
+
+    .not-found h1 {
+        font-size: 6rem;
+        margin: 0;
+        color: var(--text-color-level-2);
+    }
+
+    .not-found p {
+        font-size: 1.25rem;
+        color: var(--text-color-level-1);
+        margin-bottom: 2rem;
+    }
+
+    .not-found a {
+        padding: 12px 24px;
+        background-color: var(--primary-color-level-0);
+        color: var(--gray-100);
+        border-radius: 8px;
+        text-decoration: none;
+        transition: background-color 0.2s ease;
+    }
+
+    .not-found a:hover {
+        background-color: var(--primary-color-level-1);
+    }
+</style>
