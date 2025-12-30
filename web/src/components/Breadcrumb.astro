@@ -1,0 +1,50 @@
+---
+interface BreadcrumbSegment {
+    label: string;
+    href: string;
+}
+
+interface Props {
+    segments: BreadcrumbSegment[];
+}
+
+const { segments } = Astro.props;
+---
+
+<nav aria-label="breadcrumb" class="breadcrumb">
+    {segments.map((segment, index) => (
+        <>
+            <a href={segment.href} class="breadcrumb-link">
+                {segment.label}
+            </a>
+            {index < segments.length - 1 && (
+                <span class="breadcrumb-separator">/</span>
+            )}
+        </>
+    ))}
+    <span class="breadcrumb-separator">/</span>
+</nav>
+
+<style>
+    .breadcrumb {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 0.9em;
+    }
+
+    .breadcrumb-link {
+        color: var(--text-color-level-1);
+        text-decoration: none;
+        transition: color 0.2s ease;
+    }
+
+    .breadcrumb-link:hover {
+        color: var(--primary-color-level-0);
+    }
+
+    .breadcrumb-separator {
+        color: var(--text-color-level-2);
+        user-select: none;
+    }
+</style>
