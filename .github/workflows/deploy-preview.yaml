@@ -1,0 +1,97 @@
+name: Deploy Preview
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+  push:
+    branches-ignore:
+      - main
+
+jobs:
+  deploy:
+    if: github.event_name == 'pull_request' || github.event_name == 'push'
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+      contents: read
+    defaults:
+      run:
+        working-directory: web
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - run: bun install
+
+      - run: bun run build
+
+      - name: Generate env name
+        id: env-name
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            BRANCH_NAME="${{ github.head_ref }}"
+          else
+            BRANCH_NAME="${{ github.ref_name }}"
+          fi
+          ENV_HASH=$(echo -n "${BRANCH_NAME}" | sha256sum | cut -c1-8)
+          ENV_NAME="preview-${ENV_HASH}"
+          echo "branch_name=${BRANCH_NAME}" >> $GITHUB_OUTPUT
+          echo "env_name=${ENV_NAME}" >> $GITHUB_OUTPUT
+          echo "env_hash=${ENV_HASH}" >> $GITHUB_OUTPUT
+
+      - name: Deploy preview
+        id: deploy
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: |
+          ENV_NAME="${{ steps.env-name.outputs.env_name }}"
+
+          # wrangler.tomlをコピーしてプレビュー用の設定を作成
+          cp wrangler.toml wrangler.${ENV_NAME}.toml
+
+          # プレビューデプロイを実行
+          OUTPUT=$(bun wrangler versions upload --config wrangler.${ENV_NAME}.toml --tag ${ENV_NAME} 2>&1)
+          echo "$OUTPUT"
+
+          PREVIEW_URL=$(echo "$OUTPUT" | grep -oP 'https://[^\s]+' | head -1)
+          echo "preview_url=${PREVIEW_URL}" >> $GITHUB_OUTPUT
+
+      - name: Update PR body with preview URL
+        if: steps.deploy.outputs.preview_url && github.event_name == 'pull_request'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          PR_NUMBER="${{ github.event.number }}"
+          PREVIEW_URL="${{ steps.deploy.outputs.preview_url }}"
+
+          # Preview URL セクションを生成
+          PREVIEW_SECTION="<!-- deploy-preview-start -->
+## Preview URL
+
+${PREVIEW_URL}
+<!-- deploy-preview-end -->"
+
+          # 現在のPR本文を取得
+          CURRENT_BODY=$(gh pr view ${PR_NUMBER} --json body -q '.body')
+
+          # 既存のPreview URLセクションがあるか確認
+          if echo "${CURRENT_BODY}" | grep -q "<!-- deploy-preview-start -->"; then
+            # 既存セクションを置換
+            NEW_BODY=$(echo "${CURRENT_BODY}" | awk -v section="${PREVIEW_SECTION}" '
+              /<!-- deploy-preview-start -->/{skip=1; print section; next}
+              /<!-- deploy-preview-end -->/{skip=0; next}
+              !skip{print}
+            ')
+          else
+            # セクションが無ければ末尾に追加
+            NEW_BODY="${CURRENT_BODY}
+
+${PREVIEW_SECTION}"
+          fi
+
+          # PR本文を更新
+          gh pr edit ${PR_NUMBER} --body "${NEW_BODY}"
