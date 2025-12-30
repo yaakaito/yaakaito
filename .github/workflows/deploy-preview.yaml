@@ -50,11 +50,11 @@ jobs:
         run: |
           ENV_NAME="${{ steps.env-name.outputs.env_name }}"
 
-          # wrangler.tomlをコピーしてプレビュー用の設定を作成
-          cp wrangler.toml wrangler.${ENV_NAME}.toml
+          # wrangler.jsoncをコピーしてプレビュー用の設定を作成
+          cp wrangler.jsonc wrangler.${ENV_NAME}.jsonc
 
           # プレビューデプロイを実行
-          OUTPUT=$(bun wrangler versions upload --config wrangler.${ENV_NAME}.toml --tag ${ENV_NAME} 2>&1)
+          OUTPUT=$(bun wrangler versions upload --config wrangler.${ENV_NAME}.jsonc --tag ${ENV_NAME} 2>&1)
           echo "$OUTPUT"
 
           PREVIEW_URL=$(echo "$OUTPUT" | grep -oP 'https://[^\s]+' | head -1)
