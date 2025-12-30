@@ -11,6 +11,10 @@ const dateString = new Date(frontmatter.date).toLocaleDateString("en-US", {
     day: "numeric",
 });
 
+// パンくずリスト用のパス情報を取得
+const pathSegments = Astro.url.pathname.split('/').filter(Boolean);
+const pageType = pathSegments[0] || ''; // 'blog' or 'note'
+
 // OGP用の説明文を用意（frontmatterのdescriptionがあればそれを使い、なければ最初の数行から生成）
 const description = frontmatter.description ||
     (content && content.length > 120 ?
@@ -891,6 +895,33 @@ const canonicalUrl = new URL(Astro.url.pathname, Astro.site || Astro.url.origin)
                 text-align: left;
             }
 
+            .breadcrumb {
+                font-size: 0.9em;
+                color: var(--text-color-level-2);
+                display: flex;
+                align-items: center;
+                gap: 0.5em;
+            }
+
+            .breadcrumb a {
+                color: var(--text-color-level-2);
+                text-decoration: none;
+                transition: color 0.2s ease;
+            }
+
+            .breadcrumb a:hover {
+                color: var(--text-color-level-0);
+            }
+
+            .breadcrumb-separator {
+                color: var(--text-color-level-2);
+                user-select: none;
+            }
+
+            .breadcrumb-current {
+                color: var(--text-color-level-1);
+            }
+
             .article-header-bottom {
                 display: flex;
                 justify-content: space-between;
@@ -935,6 +966,13 @@ const canonicalUrl = new URL(Astro.url.pathname, Astro.site || Astro.url.origin)
             time {
                 font-size: 0.9em;
                 color: var(--text-color-level-2);
+            }
+
+            .article-date {
+                font-size: 0.9em;
+                color: var(--text-color-level-2);
+                margin-top: 0.5em;
+                display: block;
             }
 
             .title {
@@ -1246,10 +1284,17 @@ const canonicalUrl = new URL(Astro.url.pathname, Astro.site || Astro.url.origin)
     <header class="article-header">
         <div class="article-header-inner">
             <div class="article-header-top">
-                <time datetime={frontmatter.date}>{dateString}</time>
+                <nav class="breadcrumb" aria-label="パンくずリスト">
+                    <a href="/">/</a>
+                    <span class="breadcrumb-separator">&gt;</span>
+                    <a href={`/${pageType}`}>{pageType}</a>
+                    <span class="breadcrumb-separator">&gt;</span>
+                    <span class="breadcrumb-current">{frontmatter.title}</span>
+                </nav>
                 <ThemeSwitcher variant="toggle" />
             </div>
             <h1 class="title">{frontmatter.title}</h1>
+            <time class="article-date" datetime={frontmatter.date}>{dateString}</time>
         </div>
         {frontmatter.eyecatch ? (
             <div class="eyecatch-wrapper">
