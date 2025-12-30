@@ -45,6 +45,14 @@ jobs:
       id-token: write
     steps:
       - uses: actions/checkout@v5
+      - name: Create branch for issue
+        env:
+          GH_TOKEN: ${{ secrets.AI_USER_GH_TOKEN }}
+        run: |
+          BRANCH_NAME="claude/automate-coderabbit-${{ github.event.issue.number }}-$(date +%Y%m%d-%H%M)"
+          git checkout -b "$BRANCH_NAME"
+          git push -u origin "$BRANCH_NAME"
+          echo "BRANCH_NAME=$BRANCH_NAME" >> $GITHUB_ENV
       - uses: anthropics/claude-code-action@v1
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
@@ -52,6 +60,8 @@ jobs:
           allowed_bots: coderabbitai[bot]
           prompt: |
             Implement based on CodeRabbit's Coding Plan below.
+
+            Note: A branch named "${{ env.BRANCH_NAME }}" has already been created and checked out for this issue.
 
             ## CodeRabbit Coding Plan
 
@@ -63,7 +73,7 @@ jobs:
             2. Read and understand the Coding Plan above carefully
             3. Check CLAUDE.md for repository-specific guidelines
             4. Implement following the plan's phases and tasks in order
-            5. Commit and push changes
+            5. Commit and push changes to the current branch
                - Include Co-authored-by: ${{ github.event.issue.user.login }} <${{ github.event.issue.user.id }}+${{ github.event.issue.user.login }}@users.noreply.github.com>
             6. Use the pr-template skill to create PR body, then create PR with mcp__github__create_pull_request
             7. Add "ai-automate:claude" label to the created PR
