@@ -891,6 +891,37 @@ const canonicalUrl = new URL(Astro.url.pathname, Astro.site || Astro.url.origin)
                 text-align: left;
             }
 
+            .breadcrumb {
+                font-size: 0.9em;
+                display: flex;
+                align-items: center;
+                flex-wrap: wrap;
+            }
+
+            .breadcrumb a {
+                color: var(--text-color-level-1);
+                text-decoration: none;
+                transition: color 0.2s ease;
+            }
+
+            .breadcrumb a:hover {
+                color: var(--primary-color-level-0);
+                text-decoration: underline;
+            }
+
+            .breadcrumb .separator {
+                color: var(--text-color-level-2);
+                margin: 0;
+            }
+
+            .breadcrumb .current {
+                color: var(--text-color-level-1);
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                max-width: 300px;
+            }
+
             .article-header-bottom {
                 display: flex;
                 justify-content: space-between;
@@ -935,6 +966,9 @@ const canonicalUrl = new URL(Astro.url.pathname, Astro.site || Astro.url.origin)
             time {
                 font-size: 0.9em;
                 color: var(--text-color-level-2);
+                display: block;
+                margin-top: 0.5em;
+                text-align: left;
             }
 
             .title {
@@ -1172,6 +1206,10 @@ const canonicalUrl = new URL(Astro.url.pathname, Astro.site || Astro.url.origin)
                 .emoji {
                     font-size: 5em;
                 }
+
+                .breadcrumb .current {
+                    max-width: 200px;
+                }
             }
 
             @media screen and (max-width: 480px) {
@@ -1199,6 +1237,14 @@ const canonicalUrl = new URL(Astro.url.pathname, Astro.site || Astro.url.origin)
                 .ai-badge-popover {
                     width: 220px;
                     padding: 12px;
+                }
+
+                .breadcrumb {
+                    font-size: 0.85em;
+                }
+
+                .breadcrumb .current {
+                    max-width: 150px;
                 }
             }
 
@@ -1246,10 +1292,17 @@ const canonicalUrl = new URL(Astro.url.pathname, Astro.site || Astro.url.origin)
     <header class="article-header">
         <div class="article-header-inner">
             <div class="article-header-top">
-                <time datetime={frontmatter.date}>{dateString}</time>
+                <nav class="breadcrumb">
+                    <a href="/">/ </a>
+                    <span class="separator">&gt; </span>
+                    <a href="/blog/">blog </a>
+                    <span class="separator">&gt; </span>
+                    <span class="current">{frontmatter.title}</span>
+                </nav>
                 <ThemeSwitcher variant="toggle" />
             </div>
             <h1 class="title">{frontmatter.title}</h1>
+            <time datetime={frontmatter.date}>{dateString}</time>
         </div>
         {frontmatter.eyecatch ? (
             <div class="eyecatch-wrapper">
