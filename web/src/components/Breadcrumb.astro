@@ -1,0 +1,86 @@
+---
+interface Props {
+    pathname: string;
+}
+
+const { pathname } = Astro.props;
+
+interface BreadcrumbItem {
+    label: string;
+    path: string;
+}
+
+function generateBreadcrumbs(pathname: string): BreadcrumbItem[] {
+    const breadcrumbs: BreadcrumbItem[] = [
+        { label: 'yaakai.to', path: '/' }
+    ];
+
+    // Remove leading and trailing slashes
+    const cleanPath = pathname.replace(/^\/|\/$/g, '');
+
+    if (!cleanPath) {
+        return breadcrumbs;
+    }
+
+    const parts = cleanPath.split('/');
+
+    // For blog posts: /blog/2025/slug -> show "blog"
+    if (parts[0] === 'blog') {
+        breadcrumbs.push({ label: 'blog', path: '/blog' });
+    }
+    // For notes: /note/43 -> show "note"
+    else if (parts[0] === 'note') {
+        breadcrumbs.push({ label: 'note', path: '/note' });
+    }
+
+    return breadcrumbs;
+}
+
+const breadcrumbs = generateBreadcrumbs(pathname);
+---
+
+<nav class="breadcrumb" aria-label="パンくずリスト">
+    {breadcrumbs.map((item, index) => (
+        <span>
+            {index > 0 && <span class="breadcrumb-separator"> / </span>}
+            <a href={item.path} class="breadcrumb-link">{item.label}</a>
+        </span>
+    ))}
+    <span class="breadcrumb-separator"> /</span>
+</nav>
+
+<style>
+    .breadcrumb {
+        font-size: 0.9em;
+        color: var(--text-color-level-2);
+        margin-bottom: 1em;
+        text-align: left;
+    }
+
+    .breadcrumb-link {
+        color: var(--text-color-level-1);
+        text-decoration: none;
+        transition: color 0.2s ease;
+    }
+
+    .breadcrumb-link:hover {
+        color: var(--primary-color-level-0);
+    }
+
+    .breadcrumb-separator {
+        color: var(--text-color-level-2);
+        margin: 0 0.3em;
+    }
+
+    @media screen and (max-width: 900px) {
+        .breadcrumb {
+            font-size: 0.85em;
+        }
+    }
+
+    @media screen and (max-width: 480px) {
+        .breadcrumb {
+            font-size: 0.8em;
+        }
+    }
+</style>
