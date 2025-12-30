@@ -1,0 +1,56 @@
+---
+interface Props {
+  type: 'blog' | 'note';
+  title: string;
+}
+
+const { type, title } = Astro.props;
+---
+
+<nav class="breadcrumb" aria-label="パンくずリスト">
+  <a href="/">/ </a>
+  <span class="separator">&gt;</span>
+  <a href={`/${type}`}>{type}</a>
+  <span class="separator">&gt;</span>
+  <span class="current">{title}</span>
+</nav>
+
+<style>
+  .breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: 0.5em;
+    font-size: 0.9em;
+    color: var(--text-color-level-2);
+    margin-bottom: 1em;
+  }
+
+  .breadcrumb a {
+    color: var(--text-color-level-2);
+    text-decoration: none;
+    transition: color 0.2s ease;
+  }
+
+  .breadcrumb a:hover {
+    color: var(--primary-color-level-0);
+  }
+
+  .separator {
+    color: var(--text-color-level-2);
+    opacity: 0.5;
+  }
+
+  .current {
+    color: var(--text-color-level-0);
+    font-weight: 500;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  @media screen and (max-width: 600px) {
+    .breadcrumb {
+      font-size: 0.85em;
+    }
+  }
+</style>
