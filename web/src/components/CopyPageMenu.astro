@@ -7,13 +7,14 @@ const { url } = Astro.props;
 ---
 
 <div class="copy-page-container">
-  <a href="#" id="copy-page-link" class="copy-link">
+  <a href="#" id="copy-page-link" class="copy-link" role="button">
     Copy as Markdown
   </a>
   <a
     href="#"
     id="copy-dropdown-toggle"
     class="dropdown-toggle"
+    role="button"
     aria-label="More options"
     popovertarget="copy-dropdown-menu"
     popovertargetaction="toggle"
@@ -26,9 +27,9 @@ const { url } = Astro.props;
     data-url={url}
     popover="auto"
   >
-    <a href="#" class="dropdown-item" data-action="copy-page">Copy as Markdown</a>
-    <a href="#" class="dropdown-item" data-action="view-markdown">View as Markdown</a>
-    <a href="#" class="dropdown-item" data-action="copy-markdown-url">Copy Markdown URL</a>
+    <a href="#" class="dropdown-item" role="button" data-action="copy-page">Copy as Markdown</a>
+    <a href="#" class="dropdown-item" role="button" data-action="view-markdown">View as Markdown</a>
+    <a href="#" class="dropdown-item" role="button" data-action="copy-markdown-url">Copy Markdown URL</a>
   </div>
 </div>
 
@@ -177,8 +178,6 @@ const { url } = Astro.props;
       if (pathname.match(/^\/note\/[^/]+\/?$/)) {
         return pathname.replace(/\/$/, '') + '.md';
       }
-
-      console.log(pathname)
 
       return pathname;
     }
