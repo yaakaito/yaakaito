@@ -24,10 +24,10 @@ const breadcrumbs = generateBreadcrumbs(path);
 ---
 
 <nav class="breadcrumb" aria-label="Breadcrumb">
-    {breadcrumbs.map((item, index) => (
+    {breadcrumbs.map((item) => (
         <span>
             {item}
-            {index < breadcrumbs.length - 1 && <span class="separator"> / </span>}
+            <span class="separator"> / </span>
         </span>
     ))}
 </nav>
