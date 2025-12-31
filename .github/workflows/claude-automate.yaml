@@ -32,6 +32,10 @@ jobs:
 
             Note: A branch named "${{ env.BRANCH_NAME }}" has already been created and checked out for this issue.
 
+            ## Language Policy
+
+            Use the same language as the issue for commits, PR title, and PR body.
+
             ## Workflow
 
             1. Use mcp__github__get_issue to read and understand the issue
