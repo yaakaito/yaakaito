@@ -1485,6 +1485,7 @@ const canonicalUrl = new URL(Astro.url.pathname, Astro.site || Astro.url.origin)
                 copyButton.className = 'code-copy-button';
                 copyButton.textContent = 'copy';
                 copyButton.setAttribute('aria-label', 'コードをクリップボードにコピー');
+                let resetTimeout: number | null = null;
                 copyButton.addEventListener('click', async function() {
                     try {
                         // コードの内容をコピー
@@ -1496,11 +1497,17 @@ const canonicalUrl = new URL(Astro.url.pathname, Astro.site || Astro.url.origin)
                         copyButton.setAttribute('aria-label', 'コピー完了');
                         copyButton.classList.add('copied');
 
+                        // 既存のタイムアウトをクリア
+                        if (resetTimeout !== null) {
+                            clearTimeout(resetTimeout);
+                        }
+
                         // 2秒後に元に戻す
-                        setTimeout(() => {
+                        resetTimeout = setTimeout(() => {
                             copyButton.textContent = 'copy';
                             copyButton.setAttribute('aria-label', 'コードをクリップボードにコピー');
                             copyButton.classList.remove('copied');
+                            resetTimeout = null;
                         }, 2000);
                     } catch (err) {
                         console.error('コピーに失敗しました:', err);
