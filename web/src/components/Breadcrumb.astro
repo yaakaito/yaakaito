@@ -1,0 +1,49 @@
+---
+interface Props {
+    path: string;
+}
+
+const { path } = Astro.props;
+
+// Generate breadcrumb items from path
+// Example: "/blog/2025/example" -> ["yaakai.to", "blog"]
+// Example: "/note/1" -> ["yaakai.to", "note"]
+const generateBreadcrumbs = (pathname: string): string[] => {
+    const parts = pathname.split('/').filter(Boolean);
+    const items = ['yaakai.to'];
+
+    if (parts.length > 0) {
+        // Add the first part (blog or note)
+        items.push(parts[0]);
+    }
+
+    return items;
+};
+
+const breadcrumbs = generateBreadcrumbs(path);
+---
+
+<nav class="breadcrumb" aria-label="Breadcrumb">
+    {breadcrumbs.map((item, index) => (
+        <span>
+            {item}
+            {index < breadcrumbs.length - 1 && <span class="separator"> / </span>}
+        </span>
+    ))}
+</nav>
+
+<style>
+    .breadcrumb {
+        font-size: 0.9em;
+        color: var(--text-color-level-2);
+        margin-bottom: 1em;
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+    }
+
+    .separator {
+        margin: 0 0.3em;
+        color: var(--text-color-level-2);
+    }
+</style>
