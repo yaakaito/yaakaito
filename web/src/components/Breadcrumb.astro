@@ -1,0 +1,62 @@
+---
+// パンくずリストコンポーネント
+// 現在のページは含めず、親パスのみを表示する
+const { pathname } = Astro.props;
+
+// パスを分解してパンくずリストを作成
+const pathSegments = pathname.split('/').filter((segment: string) => segment !== '');
+
+// 最後のセグメント（現在のページ）を除外
+const breadcrumbSegments = pathSegments.slice(0, -1);
+
+// セグメントからパンくずリストのアイテムを作成
+const breadcrumbItems = breadcrumbSegments.map((segment: string, index: number) => {
+    const path = '/' + pathSegments.slice(0, index + 1).join('/') + '/';
+    return {
+        label: segment,
+        path: path
+    };
+});
+
+// ホームを先頭に追加
+const items = [
+    { label: 'yaakai.to', path: '/' },
+    ...breadcrumbItems
+];
+---
+
+<nav class="breadcrumb" aria-label="パンくずリスト">
+    {items.map((item, index) => (
+        <>
+            <a href={item.path} class="breadcrumb-item">{item.label}</a>
+            {index < items.length - 1 && <span class="breadcrumb-separator">/</span>}
+        </>
+    ))}
+</nav>
+
+<style>
+    .breadcrumb {
+        display: flex;
+        align-items: center;
+        gap: 0.5em;
+        font-size: 0.9em;
+        color: var(--text-color-level-2);
+        margin-bottom: 1em;
+    }
+
+    .breadcrumb-item {
+        color: var(--text-color-level-2);
+        text-decoration: none;
+        transition: color 0.2s ease;
+    }
+
+    .breadcrumb-item:hover {
+        color: var(--text-color-level-0);
+        text-decoration: underline;
+    }
+
+    .breadcrumb-separator {
+        color: var(--text-color-level-2);
+        user-select: none;
+    }
+</style>
