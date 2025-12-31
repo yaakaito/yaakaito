@@ -1,0 +1,55 @@
+---
+interface Props {
+    pathname: string;
+}
+
+const { pathname } = Astro.props;
+
+// パス名から最初のセグメントのみを取得（現在のページは除く）
+const segments = pathname.split('/').filter(Boolean);
+const firstSegment = segments.length > 0 ? segments[0] : null;
+
+// サイト名とセクションのパンくずリストを構築
+const breadcrumbItems = [
+    { label: 'yaakai.to', href: '/' }
+];
+
+if (firstSegment) {
+    breadcrumbItems.push({
+        label: firstSegment,
+        href: `/${firstSegment}/`
+    });
+}
+---
+
+<nav class="breadcrumb">
+    {breadcrumbItems.map((item, index) => (
+        <>
+            <a href={item.href} class="breadcrumb-link">{item.label}</a>
+            <span class="breadcrumb-separator"> / </span>
+        </>
+    ))}
+</nav>
+
+<style>
+    .breadcrumb {
+        display: flex;
+        align-items: center;
+        font-size: 0.9em;
+    }
+
+    .breadcrumb-link {
+        color: var(--text-color-level-2);
+        text-decoration: none;
+        padding: 0 4px;
+        transition: all 0.2s ease-in-out;
+    }
+
+    .breadcrumb-link:hover {
+        color: var(--primary-color-level-0);
+    }
+
+    .breadcrumb-separator {
+        color: var(--text-color-level-2);
+    }
+</style>

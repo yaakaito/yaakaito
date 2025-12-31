@@ -2,6 +2,7 @@
 import GlobalLayout from "../layouts/global-layout.astro";
 import ThemeSwitcher from "../components/ThemeSwitcher.astro";
 import CopyPageMenu from "../components/CopyPageMenu.astro";
+import Breadcrumb from "../components/Breadcrumb.astro";
 import { getGenericEyecatchColor } from "../utils/eyecatch";
 import icon from "../../../icon/icon-128.png";
 const { frontmatter, content } = Astro.props;
@@ -1014,6 +1015,13 @@ const canonicalUrl = new URL(Astro.url.pathname, Astro.site || Astro.url.origin)
                 color: var(--text-color-level-2);
             }
 
+            .article-date {
+                display: block;
+                text-align: center;
+                margin-top: 0.8em;
+                margin-bottom: 1.2em;
+            }
+
             .title {
                 font-size: 2.4em;
                 font-weight: bold;
@@ -1323,10 +1331,11 @@ const canonicalUrl = new URL(Astro.url.pathname, Astro.site || Astro.url.origin)
     <header class="article-header">
         <div class="article-header-inner">
             <div class="article-header-top">
-                <time datetime={frontmatter.date}>{dateString}</time>
+                <Breadcrumb pathname={Astro.url.pathname} />
                 <ThemeSwitcher variant="toggle" />
             </div>
             <h1 class="title">{frontmatter.title}</h1>
+            <time class="article-date" datetime={frontmatter.date}>{dateString}</time>
         </div>
         {frontmatter.eyecatch ? (
             <div class="eyecatch-wrapper">
