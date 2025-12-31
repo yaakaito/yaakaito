@@ -21,6 +21,72 @@ let showGrid = true; // グリッド表示の状態（デフォルトは表示�
 let selectedScale = 8; // 画像の倍率（デフォルトは8x）
 let selectedBgColors = new Set(); // 背景色として選択された色のセット
 
+// 画像アップロード処理
+function handleImageUpload(file) {
+    return new Promise((resolve, reject) => {
+        if (!file) {
+            reject(new Error('ファイルが選択されていません'));
+            return;
+        }
+
+        const reader = new FileReader();
+
+        reader.onload = (event) => {
+            const imageSrc = event.target.result;
+
+            // プレビュー画像を設定
+            const previewImage = document.getElementById('previewImage');
+            if (previewImage) {
+                previewImage.src = imageSrc;
+            }
+
+            const selectedImagePreview = document.getElementById('selectedImagePreview');
+            if (selectedImagePreview) {
+                selectedImagePreview.src = imageSrc;
+            }
+
+            // 画像編集UIを表示
+            const imageEditor = document.getElementById('imageEditor');
+            if (imageEditor) {
+                imageEditor.style.display = 'block';
+            }
+
+            // キャンバスの初期化
+            initializeCanvas(imageSrc);
+
+            resolve(imageSrc);
+        };
+
+        reader.onerror = () => {
+            reject(new Error('画像ファイルの読み込みに失敗しました'));
+        };
+
+        reader.readAsDataURL(file);
+    });
+}
+
+// アップロードされた画像のプレビュー表示
+function setupUploadPreview() {
+    const uploadImageFile = document.getElementById('uploadImageFile');
+    const uploadedImagePreview = document.getElementById('uploadedImagePreview');
+
+    if (uploadImageFile && uploadedImagePreview) {
+        uploadImageFile.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    uploadedImagePreview.src = event.target.result;
+                    uploadedImagePreview.style.display = 'block';
+                };
+                reader.readAsDataURL(file);
+            } else {
+                uploadedImagePreview.style.display = 'none';
+            }
+        });
+    }
+}
+
 // キャンバスの初期化
 function initializeCanvas(imageSrc) {
     imageCanvas = document.getElementById('imageCanvas');

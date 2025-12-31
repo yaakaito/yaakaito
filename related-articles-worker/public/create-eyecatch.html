@@ -23,16 +23,37 @@
             <h2>アイキャッチ画像の生成</h2>
             <form id="eyecatchForm">
                 <div class="form-group">
-                    <label>記事の選択方法:</label>
+                    <label>画像の取得方法:</label>
                     <div style="margin-bottom: 10px;">
                         <label style="display: inline-block; margin-right: 15px;">
-                            <input type="radio" name="contentSource" value="text" checked> 本文を直接入力
+                            <input type="radio" name="imageSource" value="generate" checked> 画像生成
                         </label>
                         <label style="display: inline-block;">
-                            <input type="radio" name="contentSource" value="id"> 未作成の記事から選択
+                            <input type="radio" name="imageSource" value="upload"> 画像アップロード
                         </label>
                     </div>
                 </div>
+
+                <div id="uploadImageSection" class="form-group" style="display: none;">
+                    <label for="uploadImageFile">画像ファイル:</label>
+                    <input type="file" id="uploadImageFile" accept="image/*">
+                    <div id="uploadImagePreview" style="margin-top: 10px;">
+                        <img id="uploadedImagePreview" style="max-width: 300px; max-height: 200px; display: none; border: 1px solid #ddd; border-radius: 4px;" />
+                    </div>
+                </div>
+
+                <div id="generateImageSection">
+                    <div class="form-group">
+                        <label>記事の選択方法:</label>
+                        <div style="margin-bottom: 10px;">
+                            <label style="display: inline-block; margin-right: 15px;">
+                                <input type="radio" name="contentSource" value="text" checked> 本文を直接入力
+                            </label>
+                            <label style="display: inline-block;">
+                                <input type="radio" name="contentSource" value="id"> 未作成の記事から選択
+                            </label>
+                        </div>
+                    </div>
 
                 <div id="directInputSection" class="form-group">
                     <label for="eyecatchContent">記事の本文:</label>
@@ -87,12 +108,14 @@
                         </label>
                     </div>
                 </div>
-                <div class="form-group">
-                    <label>
-                        <input type="checkbox" id="useTestImages"> テスト画像を使用する（APIを呼び出さない）
-                    </label>
+                    <div class="form-group">
+                        <label>
+                            <input type="checkbox" id="useTestImages"> テスト画像を使用する（APIを呼び出さない）
+                        </label>
+                    </div>
                 </div>
-                <button type="submit">画像生成</button>
+
+                <button type="submit" id="submitButton">画像生成</button>
             </form>
             <div id="eyecatchResult" class="result">
                 <div id="eyecatchLoading" style="display: none;">画像生成中...</div>
@@ -281,11 +304,31 @@
     <script>
         // ページ読み込み時の初期化処理
         document.addEventListener('DOMContentLoaded', () => {
+            // 画像取得方法のラジオボタン切り替え処理
+            const imageSourceRadios = document.querySelectorAll('input[name="imageSource"]');
+            const uploadImageSection = document.getElementById('uploadImageSection');
+            const generateImageSection = document.getElementById('generateImageSection');
+            const submitButton = document.getElementById('submitButton');
+
+            imageSourceRadios.forEach(radio => {
+                radio.addEventListener('change', (e) => {
+                    if (e.target.value === 'upload') {
+                        uploadImageSection.style.display = 'block';
+                        generateImageSection.style.display = 'none';
+                        submitButton.textContent = '編集を開始';
+                    } else {
+                        uploadImageSection.style.display = 'none';
+                        generateImageSection.style.display = 'block';
+                        submitButton.textContent = '画像生成';
+                    }
+                });
+            });
+
             // モチーフ選択のラジオボタン切り替え処理
             const motifRadios = document.querySelectorAll('input[name="motifSource"]');
             const animalSelectSection = document.getElementById('animalSelectSection');
             const customMotifSection = document.getElementById('customMotifSection');
-            
+
             motifRadios.forEach(radio => {
                 radio.addEventListener('change', (e) => {
                     if (e.target.value === 'list') {
@@ -297,6 +340,9 @@
                     }
                 });
             });
+
+            // 画像アップロードのプレビュー機能
+            setupUploadPreview();
 
             // 背景色パレットの初期化
             const generateBgColorPalette = document.getElementById('generateBgColorPalette');
@@ -353,6 +399,26 @@
             imagesGrid.innerHTML = '';
 
             try {
+                const imageSource = document.querySelector('input[name="imageSource"]:checked').value;
+
+                // 画像アップロードモードの場合
+                if (imageSource === 'upload') {
+                    const uploadImageFile = document.getElementById('uploadImageFile');
+                    if (!uploadImageFile.files || uploadImageFile.files.length === 0) {
+                        throw new Error('画像ファイルを選択してください');
+                    }
+
+                    const file = uploadImageFile.files[0];
+
+                    // eyecatch-editor.jsのhandleImageUpload関数を使用
+                    await handleImageUpload(file);
+
+                    imageContainer.style.display = 'block';
+                    loadingDiv.style.display = 'none';
+                    return;
+                }
+
+                // 画像生成モードの場合（既存の処理）
                 const contentSource = document.querySelector('input[name="contentSource"]:checked').value;
                 const useTestImages = document.getElementById('useTestImages').checked;
 
