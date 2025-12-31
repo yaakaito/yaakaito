@@ -365,6 +365,78 @@ const canonicalUrl = new URL(Astro.url.pathname, Astro.site || Astro.url.origin)
             margin: 0.6em 0;
         }
 
+        /* GitHub Alert Styles */
+        .markdown-alert {
+            border-left: 0.25em solid light-dark(#d0d7de, #30363d);
+            color: inherit;
+            margin-bottom: 16px;
+            padding: 0.5rem 1em;
+            border-radius: 0 4px 4px 0;
+        }
+
+        .markdown-alert > :last-child {
+            margin-bottom: 0 !important;
+        }
+
+        .markdown-alert .markdown-alert-title {
+            align-items: center;
+            display: flex;
+            font-size: 14px;
+            font-weight: 500;
+            line-height: 1;
+            margin-bottom: 8px;
+        }
+
+        .markdown-alert .markdown-alert-title svg.octicon {
+            margin-right: 8px !important;
+            fill: currentColor;
+        }
+
+        /* NOTE - blue */
+        .markdown-alert-note {
+            border-left-color: light-dark(#0969da, #58a6ff);
+        }
+
+        .markdown-alert-note .markdown-alert-title {
+            color: light-dark(#0969da, #58a6ff);
+        }
+
+        /* TIP - green */
+        .markdown-alert-tip {
+            border-left-color: light-dark(#1a7f37, #3fb950);
+        }
+
+        .markdown-alert-tip .markdown-alert-title {
+            color: light-dark(#1a7f37, #3fb950);
+        }
+
+        /* IMPORTANT - purple */
+        .markdown-alert-important {
+            border-left-color: light-dark(#8250df, #a371f7);
+        }
+
+        .markdown-alert-important .markdown-alert-title {
+            color: light-dark(#8250df, #a371f7);
+        }
+
+        /* WARNING - yellow/orange */
+        .markdown-alert-warning {
+            border-left-color: light-dark(#9a6700, #d29922);
+        }
+
+        .markdown-alert-warning .markdown-alert-title {
+            color: light-dark(#9a6700, #d29922);
+        }
+
+        /* CAUTION - red */
+        .markdown-alert-caution {
+            border-left-color: light-dark(#d1242f, #f85149);
+        }
+
+        .markdown-alert-caution .markdown-alert-title {
+            color: light-dark(#d1242f, #f85149);
+        }
+
         .markdown pre,
         .markdown code,
         .markdown kbd,
