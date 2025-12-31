@@ -731,9 +731,7 @@ const canonicalUrl = new URL(Astro.url.pathname, Astro.site || Astro.url.origin)
         /* CSS Anchor Positioningをサポートしていないブラウザ向けのフォールバック */
         @supports not (anchor-name: --test) {
             .footnote-popover {
-                position: absolute;
-                bottom: 100%;
-                left: 50%;
+                position: fixed;
                 transform: translateX(-50%);
             }
         }
@@ -1480,62 +1478,71 @@ const canonicalUrl = new URL(Astro.url.pathname, Astro.site || Astro.url.origin)
             // 注釈がない場合は処理をスキップ
             if (footnoteRefs.length === 0) {
                 footnotePopover.remove();
-                return;
-            }
+            } else {
+                // 現在表示中の注釈参照要素を追跡
+                let currentFootnoteRef: HTMLAnchorElement | null = null;
 
-            // 現在表示中の注釈参照要素を追跡
-            let currentFootnoteRef: HTMLAnchorElement | null = null;
+                // CSS Anchor Positioningのサポート検出
+                const supportsAnchorPositioning = CSS.supports('anchor-name', '--test');
 
-            footnoteRefs.forEach(refLink => {
-                refLink.addEventListener('click', function(event) {
-                    event.preventDefault();
+                footnoteRefs.forEach(refLink => {
+                    refLink.addEventListener('click', function(event) {
+                        event.preventDefault();
 
-                    // 同じ注釈を再クリックした場合は閉じる
-                    if (currentFootnoteRef === refLink && footnotePopover.style.display === 'block') {
-                        footnotePopover.style.display = 'none';
-                        currentFootnoteRef = null;
-                        return;
-                    }
-
-                    // 注釈IDを取得（例: user-content-fnref-1 -> user-content-fn-1）
-                    const refId = refLink.getAttribute('id');
-                    if (!refId) return;
-
-                    const footnoteId = refId.replace('fnref-', 'fn-');
-                    const footnoteElement = document.getElementById(footnoteId);
-
-                    if (footnoteElement) {
-                        // 注釈の内容を取得（backrefリンクを除外）
-                        const footnoteContent = footnoteElement.cloneNode(true) as HTMLElement;
-                        const backref = footnoteContent.querySelector('.footnote-backref');
-                        if (backref) {
-                            backref.remove();
+                        // 同じ注釈を再クリックした場合は閉じる
+                        if (currentFootnoteRef === refLink && footnotePopover.style.display === 'block') {
+                            footnotePopover.style.display = 'none';
+                            currentFootnoteRef = null;
+                            return;
                         }
 
-                        // ポップオーバーの内容を更新
-                        footnotePopover.innerHTML = footnoteContent.innerHTML;
+                        // 注釈IDを取得（例: user-content-fnref-1 -> user-content-fn-1）
+                        const refId = refLink.getAttribute('id');
+                        if (!refId) return;
 
-                        // CSS変数を使ってアンカーを動的に設定
-                        const anchorName = `--footnote-${refId}`;
-                        refLink.style.setProperty('--footnote-anchor', anchorName);
-                        footnotePopover.style.setProperty('--footnote-anchor', anchorName);
+                        const footnoteId = refId.replace('fnref-', 'fn-');
+                        const footnoteElement = document.getElementById(footnoteId);
 
-                        // ポップオーバーを表示
-                        footnotePopover.style.display = 'block';
-                        currentFootnoteRef = refLink;
+                        if (footnoteElement) {
+                            // 注釈の内容を取得（backrefリンクを除外）
+                            const footnoteContent = footnoteElement.cloneNode(true) as HTMLElement;
+                            const backref = footnoteContent.querySelector('.footnote-backref');
+                            if (backref) {
+                                backref.remove();
+                            }
+
+                            // ポップオーバーの内容を更新
+                            footnotePopover.innerHTML = footnoteContent.innerHTML;
+
+                            // CSS変数を使ってアンカーを動的に設定
+                            const anchorName = `--footnote-${refId}`;
+                            refLink.style.setProperty('--footnote-anchor', anchorName);
+                            footnotePopover.style.setProperty('--footnote-anchor', anchorName);
+
+                            // CSS Anchor Positioning非対応時は座標を計算して設定
+                            if (!supportsAnchorPositioning) {
+                                const rect = refLink.getBoundingClientRect();
+                                footnotePopover.style.left = `${rect.left + rect.width / 2}px`;
+                                footnotePopover.style.top = `${rect.top + window.scrollY - footnotePopover.offsetHeight - 8}px`;
+                            }
+
+                            // ポップオーバーを表示
+                            footnotePopover.style.display = 'block';
+                            currentFootnoteRef = refLink;
+                        }
+                    });
+                });
+
+                // ポップオーバー外をクリックしたら閉じる
+                document.addEventListener('click', function(event) {
+                    const target = event.target as Node;
+                    if (!footnotePopover.contains(target) &&
+                        !Array.from(footnoteRefs).some(ref => ref.contains(target))) {
+                        footnotePopover.style.display = 'none';
+                        currentFootnoteRef = null;
                     }
                 });
-            });
-
-            // ポップオーバー外をクリックしたら閉じる
-            document.addEventListener('click', function(event) {
-                const target = event.target as Node;
-                if (!footnotePopover.contains(target) &&
-                    !Array.from(footnoteRefs).some(ref => ref.contains(target))) {
-                    footnotePopover.style.display = 'none';
-                    currentFootnoteRef = null;
-                }
-            });
+            }
 
             // 長いコードブロックを検出して折りたたみ機能を追加
             const codeBlocks = document.querySelectorAll('.markdown pre');
