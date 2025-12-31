@@ -43,7 +43,7 @@ jobs:
             3. Implement the changes
             4. Commit and push changes to the current branch
                - Include Co-authored-by: ${{ github.event.issue.user.login }} <${{ github.event.issue.user.id }}+${{ github.event.issue.user.login }}@users.noreply.github.com>
-            5. Use the pr-template skill to create PR body, then create PR with mcp__github__create_pull_request
+            5. Read .claude/skills/pr-template/SKILL.md for PR template, then create PR with mcp__github__create_pull_request
             6. Add "ai-automate:claude" label to the created PR
             7. Comment the PR URL to the issue using: gh issue comment ${{ github.event.issue.number }} --body "Created PR: [PR_URL]"
           claude_args: |
