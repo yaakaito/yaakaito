@@ -808,37 +808,14 @@ const canonicalUrl = new URL(Astro.url.pathname, Astro.site || Astro.url.origin)
             top: 8px;
             right: 14px;
             z-index: 10;
-            background-color: rgba(60, 60, 60, 0.9);
-            color: #e0e0e0;
-            border: 1px solid rgba(100, 100, 100, 0.3);
             padding: 4px 10px;
             border-radius: 3px;
             font-size: 0.75em;
             font-weight: normal;
             cursor: pointer;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
             transition: all 0.2s ease;
             font-family: 'JetBrains Mono', 'Fira Code', 'SF Mono', 'Menlo', 'Consolas', 'Courier New', monospace;
-        }
-
-        .markdown .code-copy-button:hover {
-            background-color: rgba(80, 80, 80, 0.95);
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
-            transform: scale(1.02);
-        }
-
-        .markdown .code-copy-button:focus {
-            outline: none;
-            box-shadow: 0 0 0 1px #e0e0e0, 0 0 0 3px rgba(100, 100, 100, 0.5);
-        }
-
-        .markdown .code-copy-button.copied {
-            background-color: rgba(40, 167, 69, 0.9);
-            border-color: rgba(40, 167, 69, 0.5);
-        }
-
-        /* コピーボタンのテーマ対応 */
-        .markdown .code-copy-button {
+            border: 1px solid;
             background-color: light-dark(rgba(240, 240, 240, 0.95), rgba(50, 50, 50, 0.95));
             color: light-dark(var(--text-color-level-0), #e0e0e0);
             border-color: light-dark(rgba(200, 200, 200, 0.4), rgba(80, 80, 80, 0.4));
@@ -847,6 +824,13 @@ const canonicalUrl = new URL(Astro.url.pathname, Astro.site || Astro.url.origin)
 
         .markdown .code-copy-button:hover {
             background-color: light-dark(rgba(230, 230, 230, 1), rgba(70, 70, 70, 1));
+            box-shadow: light-dark(0 2px 5px rgba(0, 0, 0, 0.15), 0 2px 5px rgba(0, 0, 0, 0.5));
+            transform: scale(1.02);
+        }
+
+        .markdown .code-copy-button:focus {
+            outline: none;
+            box-shadow: 0 0 0 1px light-dark(#333, #e0e0e0), 0 0 0 3px light-dark(rgba(100, 100, 100, 0.3), rgba(100, 100, 100, 0.5));
         }
 
         .markdown .code-copy-button.copied {
@@ -1501,10 +1485,33 @@ const canonicalUrl = new URL(Astro.url.pathname, Astro.site || Astro.url.origin)
                 const copyButton = document.createElement('button');
                 copyButton.className = 'code-copy-button';
                 copyButton.textContent = 'copy';
+                copyButton.setAttribute('type', 'button');
+                copyButton.setAttribute('aria-label', 'コードをクリップボードにコピー');
                 copyButton.addEventListener('click', async function() {
                     try {
                         const codeText = codeElement.textContent || '';
-                        await navigator.clipboard.writeText(codeText);
+
+                        // Clipboard API が利用可能かチェック
+                        if (navigator.clipboard && navigator.clipboard.writeText) {
+                            await navigator.clipboard.writeText(codeText);
+                        } else {
+                            // フォールバック: 古いブラウザ向け
+                            const textArea = document.createElement('textarea');
+                            textArea.value = codeText;
+                            textArea.style.position = 'fixed';
+                            textArea.style.left = '-999999px';
+                            textArea.style.top = '-999999px';
+                            document.body.appendChild(textArea);
+                            textArea.focus();
+                            textArea.select();
+                            try {
+                                document.execCommand('copy');
+                                textArea.remove();
+                            } catch (err) {
+                                textArea.remove();
+                                throw err;
+                            }
+                        }
 
                         // コピー成功のフィードバック
                         copyButton.textContent = 'copied!';
