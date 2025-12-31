@@ -33,19 +33,9 @@ jobs:
           github_token: ${{ secrets.AI_USER_GH_TOKEN }}
           allowed_bots: coderabbitai[bot]
           track_progress: true
-          prompt: |
-            Fix unresolved review comments on this GitHub PR.
-
-            ## Steps
-
-            1. Use the `github-pr-unresolved-review-fetcher` skill to fetch unresolved review comments.
-            2. Review each comment and apply the necessary fixes.
-               - If there are no unresolved reviews, exit.
-            3. Commit after each fix.
-            4. Repeat until all fixes are complete.
-            5. Push the branch to remote when all fixes are done.
+          prompt: /coderabbit:fix-pr-reviews
           plugin_marketplaces: https://github.com/yaakaito/env.git
-          plugins: base@yaakaito-env
+          plugins: coderabbit@yaakaito-env
           claude_args: |
             --allowedTools "Skill(*),Bash,Write,Edit,MultiEdit,Read,LS,Glob,Grep,mcp__github_inline_comment__create_inline_comment,Bash(gh pr comment:*),Bash(gh pr diff:*),Bash(gh pr view:*)"
 
