@@ -1470,6 +1470,9 @@ const canonicalUrl = new URL(Astro.url.pathname, Astro.site || Astro.url.origin)
             // 注釈ポップオーバー要素を作成
             const footnotePopover = document.createElement('div');
             footnotePopover.className = 'footnote-popover';
+            footnotePopover.setAttribute('role', 'tooltip');
+            footnotePopover.setAttribute('id', 'footnote-popover');
+            footnotePopover.setAttribute('aria-hidden', 'true');
             document.body.appendChild(footnotePopover);
 
             // すべての注釈参照リンクにクリックイベントを追加
@@ -1492,6 +1495,9 @@ const canonicalUrl = new URL(Astro.url.pathname, Astro.site || Astro.url.origin)
                         // 同じ注釈を再クリックした場合は閉じる
                         if (currentFootnoteRef === refLink && footnotePopover.style.display === 'block') {
                             footnotePopover.style.display = 'none';
+                            footnotePopover.setAttribute('aria-hidden', 'true');
+                            refLink.setAttribute('aria-expanded', 'false');
+                            refLink.removeAttribute('aria-describedby');
                             currentFootnoteRef = null;
                             return;
                         }
@@ -1521,13 +1527,22 @@ const canonicalUrl = new URL(Astro.url.pathname, Astro.site || Astro.url.origin)
 
                             // CSS Anchor Positioning非対応時は座標を計算して設定
                             if (!supportsAnchorPositioning) {
+                                // 高さを取得する前に表示状態にする
+                                footnotePopover.style.display = 'block';
+
                                 const rect = refLink.getBoundingClientRect();
                                 footnotePopover.style.left = `${rect.left + rect.width / 2}px`;
                                 footnotePopover.style.top = `${rect.top + window.scrollY - footnotePopover.offsetHeight - 8}px`;
+                            } else {
+                                // CSS Anchor Positioning対応時のみ表示を設定
+                                footnotePopover.style.display = 'block';
                             }
 
-                            // ポップオーバーを表示
-                            footnotePopover.style.display = 'block';
+                            // ARIA属性を設定してアクセシビリティを向上
+                            footnotePopover.setAttribute('aria-hidden', 'false');
+                            refLink.setAttribute('aria-expanded', 'true');
+                            refLink.setAttribute('aria-describedby', 'footnote-popover');
+
                             currentFootnoteRef = refLink;
                         }
                     });
@@ -1539,6 +1554,11 @@ const canonicalUrl = new URL(Astro.url.pathname, Astro.site || Astro.url.origin)
                     if (!footnotePopover.contains(target) &&
                         !Array.from(footnoteRefs).some(ref => ref.contains(target))) {
                         footnotePopover.style.display = 'none';
+                        footnotePopover.setAttribute('aria-hidden', 'true');
+                        if (currentFootnoteRef) {
+                            currentFootnoteRef.setAttribute('aria-expanded', 'false');
+                            currentFootnoteRef.removeAttribute('aria-describedby');
+                        }
                         currentFootnoteRef = null;
                     }
                 });
