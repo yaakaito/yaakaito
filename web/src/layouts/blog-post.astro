@@ -384,6 +384,7 @@ const canonicalUrl = new URL(Astro.url.pathname, Astro.site || Astro.url.origin)
             font-size: 14px;
             font-weight: 500;
             line-height: 1;
+            margin-top: 0;
             margin-bottom: 8px;
         }
 
@@ -803,7 +804,7 @@ const canonicalUrl = new URL(Astro.url.pathname, Astro.site || Astro.url.origin)
 
         /* OGP Card styles */
         .ogp-card {
-            margin: 1em 0;
+            margin: 0;
             display: flex;
             height: 124px; /* タイトル + 2行の説明 + URL に最適な高さ */
             width: 100%;
@@ -852,9 +853,13 @@ const canonicalUrl = new URL(Astro.url.pathname, Astro.site || Astro.url.origin)
             max-width: 100%;
         }
 
+        .ogp-content h3::before {
+            content: "";
+        }
+
         .ogp-content p {
             margin: 0 0 8px 0;
-            font-size: 14px;
+            font-size: 12px;
             color: var(--text-color-level-2);
             overflow: hidden;
             text-overflow: ellipsis;
