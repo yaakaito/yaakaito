@@ -2,6 +2,7 @@
 import GlobalLayout from "../layouts/global-layout.astro";
 import ThemeSwitcher from "../components/ThemeSwitcher.astro";
 import CopyPageMenu from "../components/CopyPageMenu.astro";
+import Breadcrumb from "../components/Breadcrumb.astro";
 import { getGenericEyecatchColor } from "../utils/eyecatch";
 import icon from "../../../icon/icon-128.png";
 const { frontmatter, content } = Astro.props;
@@ -962,7 +963,7 @@ const canonicalUrl = new URL(Astro.url.pathname, Astro.site || Astro.url.origin)
 
             .article-header-top {
                 display: flex;
-                justify-content: space-between;
+                justify-content: flex-end;
                 align-items: center;
                 margin-bottom: 0.5em;
                 text-align: left;
@@ -1028,6 +1029,17 @@ const canonicalUrl = new URL(Astro.url.pathname, Astro.site || Astro.url.origin)
                 letter-spacing: 0.02em;
                 color: var(--text-color-level-0);
                 text-align: left;
+            }
+
+            .article-date {
+                text-align: center;
+                margin-top: 0.75em;
+                margin-bottom: 1.5em;
+            }
+
+            .article-date time {
+                font-size: 0.9em;
+                color: var(--text-color-level-2);
             }
 
             /* Chrome系ブラウザでの文節境界改行 */
@@ -1246,6 +1258,11 @@ const canonicalUrl = new URL(Astro.url.pathname, Astro.site || Astro.url.origin)
                     font-size: 2em;
                 }
 
+                .article-date {
+                    margin-top: 0.6em;
+                    margin-bottom: 1.2em;
+                }
+
                 .emoji {
                     font-size: 5em;
                 }
@@ -1262,6 +1279,11 @@ const canonicalUrl = new URL(Astro.url.pathname, Astro.site || Astro.url.origin)
 
                 .title {
                     font-size: 1.6em;
+                }
+
+                .article-date {
+                    margin-top: 0.5em;
+                    margin-bottom: 1em;
                 }
 
                 .ai-badge {
@@ -1322,11 +1344,14 @@ const canonicalUrl = new URL(Astro.url.pathname, Astro.site || Astro.url.origin)
     </style>
     <header class="article-header">
         <div class="article-header-inner">
+            <Breadcrumb pathname={Astro.url.pathname} />
             <div class="article-header-top">
-                <time datetime={frontmatter.date}>{dateString}</time>
                 <ThemeSwitcher variant="toggle" />
             </div>
             <h1 class="title">{frontmatter.title}</h1>
+            <div class="article-date">
+                <time datetime={frontmatter.date}>{dateString}</time>
+            </div>
         </div>
         {frontmatter.eyecatch ? (
             <div class="eyecatch-wrapper">

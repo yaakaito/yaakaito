@@ -1,0 +1,67 @@
+---
+interface Props {
+    pathname: string;
+}
+
+const { pathname } = Astro.props;
+
+// パスを分割してセグメントを抽出
+const segments = pathname.split('/').filter(Boolean);
+
+// パンくずアイテムを生成
+interface BreadcrumbItem {
+    label: string;
+    href: string;
+}
+
+const breadcrumbItems: BreadcrumbItem[] = [
+    { label: 'yaakai.to', href: '/' }
+];
+
+// セグメントからパンくずを構築
+for (let i = 0; i < segments.length; i++) {
+    const segment = segments[i];
+
+    // blogまたはnoteのみを追加（年や記事スラッグは除外）
+    if (segment === 'blog') {
+        breadcrumbItems.push({ label: 'blog', href: '/blog' });
+    } else if (segment === 'note') {
+        breadcrumbItems.push({ label: 'note', href: '/note' });
+    }
+}
+---
+
+<nav class="breadcrumb">
+    {breadcrumbItems.map((item, index) => (
+        <>
+            <a href={item.href} class="breadcrumb-link">{item.label}</a>
+            <span class="breadcrumb-separator">/</span>
+        </>
+    ))}
+</nav>
+
+<style>
+    .breadcrumb {
+        display: flex;
+        align-items: center;
+        gap: 0.5em;
+        font-size: 0.9em;
+        color: var(--text-color-level-2);
+        margin-bottom: 0.75em;
+    }
+
+    .breadcrumb-link {
+        color: var(--text-color-level-2);
+        text-decoration: none;
+        transition: color 0.2s ease;
+    }
+
+    .breadcrumb-link:hover {
+        color: var(--primary-color-level-0);
+    }
+
+    .breadcrumb-separator {
+        color: var(--text-color-level-2);
+        user-select: none;
+    }
+</style>
