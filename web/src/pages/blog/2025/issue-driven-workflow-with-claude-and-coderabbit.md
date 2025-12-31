@@ -55,6 +55,9 @@ push 毎に Claude Code がレビューすると PR が荒れがちになるの�
 - https://github.com/yaakaito/yaakaito/pull/125
 
 ここでは Approved されているのでそれで終わっているが、 Request Changes された場合はさらに修正が自動で行われる。
+例えばこれは何度かやりとりを繰り返してる:
+
+- https://github.com/yaakaito/yaakaito/pull/127
 
 ## GitHub Actions の workflow
 
