@@ -7,9 +7,9 @@ const { url } = Astro.props;
 ---
 
 <div class="copy-page-container">
-  <button id="copy-page-button" class="copy-button">
+  <a id="copy-page-button" class="copy-link" href="#" role="button">
     Copy as Markdown
-  </button>
+  </a>
   <button
     id="copy-dropdown-button"
     class="dropdown-button"
@@ -25,9 +25,9 @@ const { url } = Astro.props;
     data-url={url}
     popover="auto"
   >
-    <button class="dropdown-item" data-action="copy-page">Copy as Markdown</button>
-    <button class="dropdown-item" data-action="view-markdown">View as Markdown</button>
-    <button class="dropdown-item" data-action="copy-markdown-url">Copy Markdown URL</button>
+    <a class="dropdown-item" href="#" role="button" data-action="copy-page">Copy as Markdown</a>
+    <a class="dropdown-item" href="#" role="button" data-action="view-markdown">View as Markdown</a>
+    <a class="dropdown-item" href="#" role="button" data-action="copy-markdown-url">Copy Markdown URL</a>
   </div>
 </div>
 
@@ -42,36 +42,39 @@ const { url } = Astro.props;
     anchor-name: --copy-dropdown-anchor;
   }
 
-  .copy-button,
-  .dropdown-button {
-    background-color: var(--bg-color-level-2);
-    color: var(--text-color-level-0);
-    border: 1px solid var(--bg-color-level-3);
+  .copy-link {
+    display: inline-block;
+    padding: 0.3em 0.8em;
+    color: var(--link-color, #3b82f6);
+    text-decoration: none;
     font-size: 0.85em;
     font-weight: 500;
     cursor: pointer;
     transition: all 0.2s ease;
+    border-radius: 16px 0 0 16px;
   }
 
-  .copy-button {
-    padding: 0.3em 0.8em;
-    border-radius: 16px 0 0 16px;
-    border-right: none;
+  .copy-link:hover {
+    text-decoration: underline;
   }
 
   .dropdown-button {
     padding: 0.3em 0.6em;
     border-radius: 0 16px 16px 0;
     font-size: 0.7em;
+    background-color: var(--bg-color-level-2);
+    color: var(--text-color-level-0);
+    border: 1px solid var(--bg-color-level-3);
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
   }
 
-  .copy-button:hover,
   .dropdown-button:hover {
     background-color: var(--bg-color-level-3);
     transform: translateY(-1px);
   }
 
-  .copy-button:active,
   .dropdown-button:active {
     background-color: var(--bg-color-level-4);
     transform: translateY(0);
@@ -122,17 +125,17 @@ const { url } = Astro.props;
     display: block;
     width: 100%;
     padding: 10px 16px;
-    background: none;
-    border: none;
+    text-decoration: none;
     text-align: left;
     font-size: 0.9em;
-    color: var(--text-color-level-0);
+    color: var(--link-color, #3b82f6);
     cursor: pointer;
     transition: background-color 0.2s ease;
   }
 
   .dropdown-item:hover {
     background-color: var(--bg-color-level-2);
+    text-decoration: underline;
   }
 
   .dropdown-item:active {
@@ -150,17 +153,17 @@ const { url } = Astro.props;
     }
   }
 
-  /* Success animation for copy button */
+  /* Success animation for copy link */
   @keyframes copy-success {
     0% { transform: scale(1); }
     50% { transform: scale(1.05); }
     100% { transform: scale(1); }
   }
 
-  .copy-button.success {
+  .copy-link.success {
     animation: copy-success 0.3s ease;
-    background-color: var(--success-color, #4caf50);
-    color: white;
+    color: var(--success-color, #4caf50);
+    font-weight: 600;
   }
 </style>
 
@@ -291,13 +294,17 @@ const { url } = Astro.props;
     }
 
     // Handle main copy button click
-    copyPageButton?.addEventListener('click', copyMarkdown);
+    copyPageButton?.addEventListener('click', (e) => {
+      e.preventDefault();
+      copyMarkdown();
+    });
 
     // Handle dropdown menu items
     dropdownMenu?.addEventListener('click', async (e) => {
       const target = e.target as HTMLElement;
       if (!target.matches('.dropdown-item')) return;
 
+      e.preventDefault();
       const action = target.getAttribute('data-action');
 
       switch (action) {
