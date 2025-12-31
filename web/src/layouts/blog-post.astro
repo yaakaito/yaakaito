@@ -802,6 +802,58 @@ const canonicalUrl = new URL(Astro.url.pathname, Astro.site || Astro.url.origin)
             }
         }
 
+        /* コピーボタン */
+        .markdown .code-copy-button {
+            position: absolute;
+            top: 8px;
+            right: 14px;
+            z-index: 10;
+            background-color: rgba(60, 60, 60, 0.9);
+            color: #e0e0e0;
+            border: 1px solid rgba(100, 100, 100, 0.3);
+            padding: 4px 10px;
+            border-radius: 3px;
+            font-size: 0.75em;
+            font-weight: normal;
+            cursor: pointer;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+            transition: all 0.2s ease;
+            font-family: 'JetBrains Mono', 'Fira Code', 'SF Mono', 'Menlo', 'Consolas', 'Courier New', monospace;
+        }
+
+        .markdown .code-copy-button:hover {
+            background-color: rgba(80, 80, 80, 0.95);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+            transform: scale(1.02);
+        }
+
+        .markdown .code-copy-button:focus {
+            outline: none;
+            box-shadow: 0 0 0 1px #e0e0e0, 0 0 0 3px rgba(100, 100, 100, 0.5);
+        }
+
+        .markdown .code-copy-button.copied {
+            background-color: rgba(40, 167, 69, 0.9);
+            border-color: rgba(40, 167, 69, 0.5);
+        }
+
+        /* コピーボタンのテーマ対応 */
+        .markdown .code-copy-button {
+            background-color: light-dark(rgba(240, 240, 240, 0.95), rgba(50, 50, 50, 0.95));
+            color: light-dark(var(--text-color-level-0), #e0e0e0);
+            border-color: light-dark(rgba(200, 200, 200, 0.4), rgba(80, 80, 80, 0.4));
+            box-shadow: light-dark(0 2px 5px rgba(0, 0, 0, 0.1), 0 2px 5px rgba(0, 0, 0, 0.4));
+        }
+
+        .markdown .code-copy-button:hover {
+            background-color: light-dark(rgba(230, 230, 230, 1), rgba(70, 70, 70, 1));
+        }
+
+        .markdown .code-copy-button.copied {
+            background-color: light-dark(rgba(40, 167, 69, 0.95), rgba(40, 167, 69, 0.9));
+            border-color: light-dark(rgba(40, 167, 69, 0.6), rgba(40, 167, 69, 0.5));
+        }
+
         /* OGP Card styles */
         .ogp-card {
             margin: 0;
@@ -1444,6 +1496,34 @@ const canonicalUrl = new URL(Astro.url.pathname, Astro.site || Astro.url.origin)
                 // コードブロック内のコード行数をカウント
                 const codeElement = pre.querySelector('code');
                 if (!codeElement) return;
+
+                // コピーボタンを追加
+                const copyButton = document.createElement('button');
+                copyButton.className = 'code-copy-button';
+                copyButton.textContent = 'copy';
+                copyButton.addEventListener('click', async function() {
+                    try {
+                        const codeText = codeElement.textContent || '';
+                        await navigator.clipboard.writeText(codeText);
+
+                        // コピー成功のフィードバック
+                        copyButton.textContent = 'copied!';
+                        copyButton.classList.add('copied');
+
+                        // 2秒後に元に戻す
+                        setTimeout(() => {
+                            copyButton.textContent = 'copy';
+                            copyButton.classList.remove('copied');
+                        }, 2000);
+                    } catch (err) {
+                        console.error('コピーに失敗しました:', err);
+                        copyButton.textContent = 'error';
+                        setTimeout(() => {
+                            copyButton.textContent = 'copy';
+                        }, 2000);
+                    }
+                });
+                pre.appendChild(copyButton);
 
                 // 高さがmax-heightを超える場合のみ処理
                 if (pre.scrollHeight > MIN_HEIGHT) {
