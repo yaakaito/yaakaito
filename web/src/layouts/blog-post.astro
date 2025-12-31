@@ -1484,6 +1484,7 @@ const canonicalUrl = new URL(Astro.url.pathname, Astro.site || Astro.url.origin)
                 const copyButton = document.createElement('button');
                 copyButton.className = 'code-copy-button';
                 copyButton.textContent = 'copy';
+                copyButton.setAttribute('aria-label', 'コードをクリップボードにコピー');
                 copyButton.addEventListener('click', async function() {
                     try {
                         // コードの内容をコピー
@@ -1492,15 +1493,19 @@ const canonicalUrl = new URL(Astro.url.pathname, Astro.site || Astro.url.origin)
 
                         // ボタンの表示を一時的に変更
                         copyButton.textContent = 'copied!';
+                        copyButton.setAttribute('aria-label', 'コピー完了');
                         copyButton.classList.add('copied');
 
                         // 2秒後に元に戻す
                         setTimeout(() => {
                             copyButton.textContent = 'copy';
+                            copyButton.setAttribute('aria-label', 'コードをクリップボードにコピー');
                             copyButton.classList.remove('copied');
                         }, 2000);
                     } catch (err) {
                         console.error('コピーに失敗しました:', err);
+                        copyButton.textContent = 'failed';
+                        copyButton.setAttribute('aria-label', 'コピーに失敗しました');
                     }
                 });
                 pre.appendChild(copyButton);
