@@ -9,10 +9,10 @@ async function fetchOgpData(url) {
     const ogpData = { url };
 
     // タイトル取得パターンの拡張
-    let ogTitleMatch = html.match(/<meta\s+property=["']og:title["']\s+content=["']([^"']+)["']\/?>/i) ||
-                      html.match(/<meta\s+content=["']([^"']+)["']\s+property=["']og:title["']\/?>/i) ||
-                      html.match(/<meta\s+name=["']twitter:title["']\s+content=["']([^"']+)["']\/?>/i) ||
-                      html.match(/<meta\s+content=["']([^"']+)["']\s+name=["']twitter:title["']\/?>/i) ||
+    let ogTitleMatch = html.match(/<meta\s+property=["']og:title["']\s+content=["']([^"']+)["']\s*\/?>/i) ||
+                      html.match(/<meta\s+content=["']([^"']+)["']\s+property=["']og:title["']\s*\/?>/i) ||
+                      html.match(/<meta\s+name=["']twitter:title["']\s+content=["']([^"']+)["']\s*\/?>/i) ||
+                      html.match(/<meta\s+content=["']([^"']+)["']\s+name=["']twitter:title["']\s*\/?>/i) ||
                       html.match(/<title>([^<]+)<\/title>/i);
 
     // H1タグからタイトル取得（最終フォールバック）
@@ -22,22 +22,22 @@ async function fetchOgpData(url) {
     }
 
     // 説明文取得パターンの拡張
-    const ogDescriptionMatch = html.match(/<meta\s+property=["']og:description["']\s+content=["']([^"']+)["']\/?>/i) ||
-                              html.match(/<meta\s+content=["']([^"']+)["']\s+property=["']og:description["']\/?>/i) ||
-                              html.match(/<meta\s+name=["']twitter:description["']\s+content=["']([^"']+)["']\/?>/i) ||
-                              html.match(/<meta\s+content=["']([^"']+)["']\s+name=["']twitter:description["']\/?>/i) ||
-                              html.match(/<meta\s+name=["']description["']\s+content=["']([^"']+)["']\/?>/i) ||
-                              html.match(/<meta\s+content=["']([^"']+)["']\s+name=["']description["']\/?>/i);
+    const ogDescriptionMatch = html.match(/<meta\s+property=["']og:description["']\s+content=["']([^"']+)["']\s*\/?>/i) ||
+                              html.match(/<meta\s+content=["']([^"']+)["']\s+property=["']og:description["']\s*\/?>/i) ||
+                              html.match(/<meta\s+name=["']twitter:description["']\s+content=["']([^"']+)["']\s*\/?>/i) ||
+                              html.match(/<meta\s+content=["']([^"']+)["']\s+name=["']twitter:description["']\s*\/?>/i) ||
+                              html.match(/<meta\s+name=["']description["']\s+content=["']([^"']+)["']\s*\/?>/i) ||
+                              html.match(/<meta\s+content=["']([^"']+)["']\s+name=["']description["']\s*\/?>/i);
 
     // 画像取得パターンの拡張
-    let ogImageMatch = html.match(/<meta\s+property=["']og:image["']\s+content=["']([^"']+)["']\/?>/i) ||
-                      html.match(/<meta\s+content=["']([^"']+)["']\s+property=["']og:image["']\/?>/i) ||
-                      html.match(/<meta\s+name=["']og:image["']\s+content=["']([^"']+)["']\/?>/i) ||
-                      html.match(/<meta\s+content=["']([^"']+)["']\s+name=["']og:image["']\/?>/i) ||
-                      html.match(/<meta\s+name=["']twitter:image["']\s+content=["']([^"']+)["']\/?>/i) ||
-                      html.match(/<meta\s+content=["']([^"']+)["']\s+name=["']twitter:image["']\/?>/i) ||
+    let ogImageMatch = html.match(/<meta\s+property=["']og:image["']\s+content=["']([^"']+)["']\s*\/?>/i) ||
+                      html.match(/<meta\s+content=["']([^"']+)["']\s+property=["']og:image["']\s*\/?>/i) ||
+                      html.match(/<meta\s+name=["']og:image["']\s+content=["']([^"']+)["']\s*\/?>/i) ||
+                      html.match(/<meta\s+content=["']([^"']+)["']\s+name=["']og:image["']\s*\/?>/i) ||
+                      html.match(/<meta\s+name=["']twitter:image["']\s+content=["']([^"']+)["']\s*\/?>/i) ||
+                      html.match(/<meta\s+content=["']([^"']+)["']\s+name=["']twitter:image["']\s*\/?>/i) ||
                       html.match(/<link\s+rel=["']image_src["']\s+href=["']([^"']+)["']\/?>/i);
-
+    console.log('ogImageMatch initial:', ogImageMatch);
     // 画像が見つからない場合は最初のimgタグを使用（最終フォールバック）
     if (!ogImageMatch) {
       const imgMatch = html.match(/<img\s+[^>]*src=["']([^"']+)["'][^>]*>/i);
