@@ -27,15 +27,71 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           gh pr checkout ${{ github.event.pull_request.number }}
+      - name: Fetch unresolved reviews
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          OWNER=$(echo "${{ github.repository }}" | cut -d/ -f1)
+          REPO=$(echo "${{ github.repository }}" | cut -d/ -f2)
+          PR_NUMBER=${{ github.event.pull_request.number }}
+
+          RESULT=$(gh api graphql -f query='
+          query($owner: String!, $repo: String!, $number: Int!) {
+              repository(owner: $owner, name: $repo) {
+                  pullRequest(number: $number) {
+                      reviewThreads(first: 100) {
+                          nodes {
+                              isResolved
+                              isOutdated
+                              path
+                              line
+                              comments(first: 10) {
+                                  nodes {
+                                      author { login }
+                                      body
+                                  }
+                              }
+                          }
+                      }
+                  }
+              }
+          }' -f owner="$OWNER" -f repo="$REPO" -F number="$PR_NUMBER")
+
+          echo "$RESULT" | jq -r '
+              .data.repository.pullRequest.reviewThreads.nodes
+              | map(select(.isResolved == false and .isOutdated == false))
+              | if length == 0 then
+                  "<no-unresolved-comments />"
+                else
+                  .[] |
+                  "<review-comment>",
+                  "  <file>\(.path // "unknown")</file>",
+                  "  <line>\(.line // "unknown")</line>",
+                  "  <author>\(.comments.nodes[0].author.login // "unknown")</author>",
+                  "  <body>\(.comments.nodes[0].body // "")</body>",
+                  "</review-comment>",
+                  ""
+                end
+          ' > .git/unresolved_reviews.xml
       - uses: anthropics/claude-code-action@v1
         with: &claude-code-fix-reviews
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           github_token: ${{ secrets.AI_USER_GH_TOKEN }}
           allowed_bots: coderabbitai[bot]
           track_progress: true
-          prompt: /coderabbit:fix-pr-reviews
+          prompt: |
+            Fix unresolved review comments on this GitHub PR.
+
+            ## Steps
+
+            1. Read the file `.git/unresolved_reviews.xml` which contains unresolved review comments.
+            2. Review each comment and apply the necessary fixes.
+               - If the file contains `<no-unresolved-comments />`, exit.
+            3. Commit after each fix.
+            4. Repeat until all fixes are complete.
+            5. Push the branch to remote when all fixes are done.
           plugin_marketplaces: https://github.com/yaakaito/env.git
-          plugins: coderabbit@yaakaito-env
+          plugins: base@yaakaito-env
           claude_args: |
             --allowedTools "Skill(*),Bash,Write,Edit,MultiEdit,Read,LS,Glob,Grep,mcp__github_inline_comment__create_inline_comment,Bash(gh pr comment:*),Bash(gh pr diff:*),Bash(gh pr view:*)"
 
@@ -121,5 +177,51 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           gh pr checkout ${{ github.event.issue.number }}
+      - name: Fetch unresolved reviews
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          OWNER=$(echo "${{ github.repository }}" | cut -d/ -f1)
+          REPO=$(echo "${{ github.repository }}" | cut -d/ -f2)
+          PR_NUMBER=${{ github.event.issue.number }}
+
+          RESULT=$(gh api graphql -f query='
+          query($owner: String!, $repo: String!, $number: Int!) {
+              repository(owner: $owner, name: $repo) {
+                  pullRequest(number: $number) {
+                      reviewThreads(first: 100) {
+                          nodes {
+                              isResolved
+                              isOutdated
+                              path
+                              line
+                              comments(first: 10) {
+                                  nodes {
+                                      author { login }
+                                      body
+                                  }
+                              }
+                          }
+                      }
+                  }
+              }
+          }' -f owner="$OWNER" -f repo="$REPO" -F number="$PR_NUMBER")
+
+          echo "$RESULT" | jq -r '
+              .data.repository.pullRequest.reviewThreads.nodes
+              | map(select(.isResolved == false and .isOutdated == false))
+              | if length == 0 then
+                  "<no-unresolved-comments />"
+                else
+                  .[] |
+                  "<review-comment>",
+                  "  <file>\(.path // "unknown")</file>",
+                  "  <line>\(.line // "unknown")</line>",
+                  "  <author>\(.comments.nodes[0].author.login // "unknown")</author>",
+                  "  <body>\(.comments.nodes[0].body // "")</body>",
+                  "</review-comment>",
+                  ""
+                end
+          ' > .git/unresolved_reviews.xml
       - uses: anthropics/claude-code-action@v1
         with: *claude-code-fix-reviews
