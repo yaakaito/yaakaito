@@ -721,9 +721,21 @@ const canonicalUrl = new URL(Astro.url.pathname, Astro.site || Astro.url.origin)
             line-height: 1.6;
         }
 
-        /* 元の注釈セクションを非表示 */
-        .footnotes {
-            display: none;
+        /* 元の注釈セクションを非表示（CSS Anchor Positioningサポート時のみ） */
+        @supports (anchor-name: --test) {
+            .footnotes {
+                display: none;
+            }
+        }
+
+        /* CSS Anchor Positioningをサポートしていないブラウザ向けのフォールバック */
+        @supports not (anchor-name: --test) {
+            .footnote-popover {
+                position: absolute;
+                bottom: 100%;
+                left: 50%;
+                transform: translateX(-50%);
+            }
         }
 
         /* 長いコードブロックのスタイル */
@@ -1462,11 +1474,17 @@ const canonicalUrl = new URL(Astro.url.pathname, Astro.site || Astro.url.origin)
             footnotePopover.className = 'footnote-popover';
             document.body.appendChild(footnotePopover);
 
-            // 現在表示中の注釈参照要素を追跡
-            let currentFootnoteRef: HTMLAnchorElement | null = null;
-
             // すべての注釈参照リンクにクリックイベントを追加
             const footnoteRefs = document.querySelectorAll<HTMLAnchorElement>('.markdown sup a[id^="user-content-fnref-"]');
+
+            // 注釈がない場合は処理をスキップ
+            if (footnoteRefs.length === 0) {
+                footnotePopover.remove();
+                return;
+            }
+
+            // 現在表示中の注釈参照要素を追跡
+            let currentFootnoteRef: HTMLAnchorElement | null = null;
 
             footnoteRefs.forEach(refLink => {
                 refLink.addEventListener('click', function(event) {
