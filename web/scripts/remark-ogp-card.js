@@ -37,7 +37,6 @@ async function fetchOgpData(url) {
                       html.match(/<meta\s+name=["']twitter:image["']\s+content=["']([^"']+)["']\s*\/?>/i) ||
                       html.match(/<meta\s+content=["']([^"']+)["']\s+name=["']twitter:image["']\s*\/?>/i) ||
                       html.match(/<link\s+rel=["']image_src["']\s+href=["']([^"']+)["']\/?>/i);
-    console.log('ogImageMatch initial:', ogImageMatch);
     // 画像が見つからない場合は最初のimgタグを使用（最終フォールバック）
     if (!ogImageMatch) {
       const imgMatch = html.match(/<img\s+[^>]*src=["']([^"']+)["'][^>]*>/i);
