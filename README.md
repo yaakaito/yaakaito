@@ -5,9 +5,9 @@
 
 ## Latest Blog Posts
 
-- 🐇 [Issue 起点の開発フローを claude-code-action と CodeRabbit で作った](https://yaakai.to/blog/2025/issue-driven-workflow-with-claude-and-coderabbit) - 12/31/2025
 - 🐙 [実装計画を Vibe Kanban で並列に開発する](https://yaakai.to/blog/2025/dev-with-vibe-kanban) - 11/4/2025
 - 🐧 [仕様駆動開発風のオレオレ実装計画を作って AI と併走する](https://yaakai.to/blog/2025/my-spec-driven-dev-plan) - 10/15/2025
+- 🐿️ [2025年7月版個人的開発スタイル with Claude Code](https://yaakai.to/blog/2025/dev-with-claude-code-2025-07) - 7/15/2025
 
 ## Latest Notes
 
