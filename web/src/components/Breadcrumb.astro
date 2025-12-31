@@ -1,0 +1,63 @@
+---
+interface Props {
+    pathname: string;
+}
+
+const { pathname } = Astro.props;
+
+// パスから階層を生成（最後のページは含めない）
+const segments = pathname.split('/').filter(Boolean);
+const breadcrumbItems: { label: string; path: string }[] = [];
+
+// ホームを追加
+breadcrumbItems.push({ label: 'yaakai.to', path: '/' });
+
+// blogまたはnoteセグメントを追加（存在する場合）
+if (segments.length > 0 && (segments[0] === 'blog' || segments[0] === 'note')) {
+    breadcrumbItems.push({
+        label: segments[0],
+        path: `/${segments[0]}/`
+    });
+}
+---
+
+<nav class="breadcrumb" aria-label="パンくずリスト">
+    {breadcrumbItems.map((item, index) => (
+        <>
+            <a href={item.path} class="breadcrumb-item">{item.label}</a>
+            <span class="breadcrumb-separator">/</span>
+        </>
+    ))}
+</nav>
+
+<style>
+    .breadcrumb {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 0.9em;
+        color: var(--text-color-level-2);
+        margin-bottom: 1em;
+    }
+
+    .breadcrumb-item {
+        color: var(--text-color-level-2);
+        text-decoration: none;
+        transition: color 0.2s ease;
+    }
+
+    .breadcrumb-item:hover {
+        color: var(--text-color-level-0);
+    }
+
+    .breadcrumb-separator {
+        color: var(--text-color-level-2);
+        user-select: none;
+    }
+
+    @media screen and (max-width: 480px) {
+        .breadcrumb {
+            font-size: 0.85em;
+        }
+    }
+</style>
