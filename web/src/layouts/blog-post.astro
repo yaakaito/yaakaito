@@ -951,6 +951,7 @@ const canonicalUrl = new URL(Astro.url.pathname, Astro.site || Astro.url.origin)
 
             .article-header {
                 padding: 40px 0 20px;
+                margin-bottom: 2em;
                 position: relative;
                 text-align: center;
             }
@@ -1014,14 +1015,14 @@ const canonicalUrl = new URL(Astro.url.pathname, Astro.site || Astro.url.origin)
                 display: block;
                 font-size: 0.9em;
                 color: var(--text-color-level-2);
-                margin-top: 0.5em;
+                margin: 0;
                 text-align: left;
             }
 
             .title {
                 font-size: 2.4em;
                 font-weight: bold;
-                margin: 0.3em 0 0 0;
+                margin: 0;
                 /* 行長のバランス調整（全ブラウザ対応） */
                 text-wrap: balance;
                 /* 厳格な禁則処理 */
@@ -1067,7 +1068,7 @@ const canonicalUrl = new URL(Astro.url.pathname, Astro.site || Astro.url.origin)
             .eyecatch-wrapper {
                 position: relative;
                 max-width: 850px;
-                margin: 0 auto;
+                margin: 2em auto;
                 display: inline-block;
             }
 
@@ -1288,7 +1289,7 @@ const canonicalUrl = new URL(Astro.url.pathname, Astro.site || Astro.url.origin)
                 width: 100%;
                 max-width: 850px;
                 height: 450px;
-                margin: 0 auto;
+                margin: 2em auto;
                 background-size: cover;
                 background-position: center;
                 border-radius: 8px;
