@@ -1,0 +1,51 @@
+---
+interface Props {
+  class?: string;
+}
+
+const { class: className = '' } = Astro.props;
+
+// URLから現在のページタイプを判定
+const pathname = Astro.url.pathname;
+let pageType = '';
+
+if (pathname.startsWith('/blog/')) {
+  pageType = 'blog';
+} else if (pathname.startsWith('/note/')) {
+  pageType = 'note';
+}
+---
+
+{pageType && (
+  <nav class={`breadcrumb ${className}`} aria-label="パンくずリスト">
+    <a href="/" class="breadcrumb-item">yaakai.to</a>
+    <span class="breadcrumb-separator">/</span>
+    <a href={`/${pageType}/`} class="breadcrumb-item">{pageType}</a>
+    <span class="breadcrumb-separator">/</span>
+  </nav>
+)}
+
+<style>
+  .breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.9em;
+    color: var(--text-color-level-2);
+  }
+
+  .breadcrumb-item {
+    color: var(--text-color-level-2);
+    text-decoration: none;
+    transition: color 0.2s ease;
+  }
+
+  .breadcrumb-item:hover {
+    color: var(--primary-color-level-0);
+  }
+
+  .breadcrumb-separator {
+    color: var(--text-color-level-2);
+    user-select: none;
+  }
+</style>

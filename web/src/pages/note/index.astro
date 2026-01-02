@@ -29,7 +29,7 @@ function loadPosts(posts: MarkdownInstance<{ title: string; date: string; emoji:
 const notes = loadPosts(notePosts);
 
 // OGP用の情報
-const pageTitle = "Notes - yaakai.to";
+const pageTitle = "Note - yaakai.to";
 const description = "短い備忘録や考え、アイデアなどのノートコレクション。技術的なメモや思考の断片を公開しています。";
 const canonicalUrl = new URL(Astro.url.pathname, Astro.site || Astro.url.origin).href;
 
@@ -49,7 +49,7 @@ const ogImage = notes.length > 0 && notes[0].frontmatter.eyecatch
 >
   <div class="note-container">
     <header class="note-header">
-      <h1 class="note-title">Notes</h1>
+      <h1 class="note-title">Note</h1>
       <p class="note-description">短い備忘録や考え、アイデアなど</p>
     </header>
 
