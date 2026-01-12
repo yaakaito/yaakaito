@@ -11,9 +11,9 @@
 
 ## Latest Notes
 
+- 🧩 [Claude Code で LSP サポートを使う](https://yaakai.to/note/130) - 1/12/2026
 - 🌍 [Claude Code の言語を settings.json で設定する](https://yaakai.to/note/129) - 1/8/2026
 - 🗒️ [CLAUDE.md を作る skill を作って整理する](https://yaakai.to/note/101) - 12/20/2025
-- 🍳 [Codex CLI でも Skills を使う](https://yaakai.to/note/100) - 12/8/2025
 
 <!--
 **yaakaito/yaakaito** is a ✨ _special_ ✨ repository because its `README.md` (this file) appears on your GitHub profile.
