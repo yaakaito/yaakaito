@@ -152,18 +152,21 @@ const genericEyecatchColor = getGenericEyecatchColor(url);
   .feature-image-container-sub {
     flex: 0 0 35%;
     margin-right: 12px;
+    height: 120px;
+    overflow: hidden;
   }
 
   .feature-eyecatch-sub {
     width: 100%;
-    aspect-ratio: 16 / 9;
+    height: 100%;
     object-fit: cover;
+    object-position: center;
     border-radius: 6px;
   }
 
   .feature-emoji-container-sub {
     width: 100%;
-    aspect-ratio: 16 / 9;
+    height: 100%;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -319,6 +322,7 @@ const genericEyecatchColor = getGenericEyecatchColor(url);
     .feature-image-container-sub {
       flex: 0 0 35%;
       margin-right: 12px;
+      height: 100px;
     }
   }
 </style>
