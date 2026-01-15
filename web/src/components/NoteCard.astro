@@ -22,7 +22,6 @@ const genericEyecatchColor = getGenericEyecatchColor(url);
 
 <a href={url} class="note-card-link">
   <div class="note-card">
-    <div class="note-indicator"></div>
     <div class="note-content">
       {eyecatch ? (
         <div class="note-eyecatch-container">
@@ -74,18 +73,9 @@ const genericEyecatchColor = getGenericEyecatchColor(url);
     transform: translateY(-2px);
     box-shadow: light-dark(0 4px 8px rgba(0, 0, 0, 0.1), 0 4px 8px rgba(0, 0, 0, 0.3));
   }
-  .note-indicator {
-    position: absolute;
-    top: 0;
-    left: 0;
-    height: 100%;
-    width: 4px;
-    background-color: var(--note-color);
-  }
-
 
   .note-content {
-    padding: 16px 16px 16px 24px;
+    padding: 16px;
     flex-grow: 1;
     display: flex;
     flex-direction: column;
@@ -156,7 +146,7 @@ const genericEyecatchColor = getGenericEyecatchColor(url);
 
   @media (max-width: 768px) {
     .note-content {
-      padding: 12px 12px 12px 20px;
+      padding: 12px;
     }
 
     .note-emoji {

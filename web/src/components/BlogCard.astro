@@ -23,7 +23,6 @@ const formattedDate = new Date(date).toLocaleDateString('ja-JP', {
 
 <a href={url} class="blog-card-link">
   <div class="blog-card">
-    <div class="blog-indicator"></div>
     <div class="blog-content">
       {eyecatch ? (
         <div class="blog-eyecatch-container">
@@ -76,17 +75,8 @@ const formattedDate = new Date(date).toLocaleDateString('ja-JP', {
     box-shadow: light-dark(0 4px 8px rgba(0, 0, 0, 0.1), 0 4px 8px rgba(0, 0, 0, 0.3));
   }
 
-  .blog-indicator {
-    position: absolute;
-    top: 0;
-    left: 0;
-    height: 100%;
-    width: 4px;
-    background-color: var(--blog-color);
-  }
-
   .blog-content {
-    padding: 16px 16px 16px 24px;
+    padding: 16px;
     flex-grow: 1;
     display: flex;
     flex-direction: column;
