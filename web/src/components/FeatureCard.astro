@@ -47,8 +47,6 @@ const genericEyecatchColor = getGenericEyecatchColor(url);
 
 <a href={url} class="feature-card-link">
   <div class={`feature-card ${isMain ? 'main-feature' : 'sub-feature'}`}>
-    <div class="feature-indicator"></div>
-
     {isMain ? (
       <div class="feature-content">
         <div class="feature-image-container-main">
@@ -130,16 +128,6 @@ const genericEyecatchColor = getGenericEyecatchColor(url);
     box-shadow: light-dark(0 8px 16px rgba(0, 0, 0, 0.12), 0 8px 16px rgba(0, 0, 0, 0.4));
   }
 
-  .feature-indicator {
-    position: absolute;
-    top: 0;
-    left: 0;
-    height: 100%;
-    width: 6px;
-    background-color: var(--blog-color);
-    z-index: 1;
-  }
-
   /* サブカード（右側）用の横型レイアウト */
   .feature-sub-layout {
     display: flex;
@@ -184,7 +172,7 @@ const genericEyecatchColor = getGenericEyecatchColor(url);
   }
 
   .feature-content {
-    padding: 20px 20px 20px 26px;
+    padding: 20px;
     flex-grow: 1;
     display: flex;
     flex-direction: column;
@@ -269,12 +257,8 @@ const genericEyecatchColor = getGenericEyecatchColor(url);
     box-shadow: light-dark(0 2px 4px rgba(0, 0, 0, 0.05), 0 2px 4px rgba(0, 0, 0, 0.2));
   }
 
-  .sub-feature .feature-indicator {
-    width: 4px;
-  }
-
   .sub-feature .feature-content {
-    padding: 16px 16px 16px 20px;
+    padding: 16px;
   }
 
   .sub-feature .feature-title {
@@ -290,7 +274,7 @@ const genericEyecatchColor = getGenericEyecatchColor(url);
     }
 
     .feature-content {
-      padding: 16px 16px 16px 22px;
+      padding: 16px;
     }
 
     /* モバイル表示の調整 */
