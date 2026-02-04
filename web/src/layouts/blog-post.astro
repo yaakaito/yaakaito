@@ -249,6 +249,59 @@ const canonicalUrl = new URL(Astro.url.pathname, Astro.site || Astro.url.origin)
 
         .markdown img {
             max-width: 100%;
+            cursor: zoom-in;
+        }
+
+        /* Lightbox styles */
+        .image-lightbox {
+            position: fixed;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            max-width: 100%;
+            max-height: 100%;
+            margin: 0;
+            padding: 0;
+            border: none;
+            background-color: rgba(0, 0, 0, 0.9);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .image-lightbox::backdrop {
+            background-color: rgba(0, 0, 0, 0.9);
+        }
+
+        .image-lightbox img {
+            max-width: 90vw;
+            max-height: 90vh;
+            object-fit: contain;
+            cursor: zoom-out;
+        }
+
+        .image-lightbox-close {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 24px;
+            line-height: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.2s;
+        }
+
+        .image-lightbox-close:hover {
+            background: rgba(255, 255, 255, 0.3);
         }
 
         .markdown h1,
@@ -1528,6 +1581,49 @@ const canonicalUrl = new URL(Astro.url.pathname, Astro.site || Astro.url.origin)
                     }
                 }
             }
+
+            // Lightbox機能
+            const lightbox = document.getElementById('image-lightbox') as HTMLDialogElement;
+            const lightboxImage = document.getElementById('lightbox-image') as HTMLImageElement;
+            const lightboxClose = document.querySelector('.image-lightbox-close');
+
+            if (lightbox && lightboxImage) {
+                const markdownImages = document.querySelectorAll('.markdown img');
+
+                markdownImages.forEach((img) => {
+                    const imgElement = img as HTMLImageElement;
+                    imgElement.addEventListener('click', (e) => {
+                        const link = imgElement.closest('a');
+                        if (link) {
+                            e.preventDefault();
+                            e.stopPropagation();
+                        }
+                        lightboxImage.src = imgElement.src;
+                        lightboxImage.alt = imgElement.alt || '';
+                        lightbox.showModal();
+                    });
+                });
+
+                lightboxClose?.addEventListener('click', () => {
+                    lightbox.close();
+                });
+
+                lightboxImage.addEventListener('click', () => {
+                    lightbox.close();
+                });
+
+                lightbox.addEventListener('click', (e) => {
+                    if (e.target === lightbox) {
+                        lightbox.close();
+                    }
+                });
+            }
         });
     </script>
+    <dialog id="image-lightbox" class="image-lightbox">
+        <button class="image-lightbox-close" aria-label="閉じる">
+            <i class="fas fa-xmark"></i>
+        </button>
+        <img id="lightbox-image" src="" alt="" />
+    </dialog>
 </GlobalLayout>
