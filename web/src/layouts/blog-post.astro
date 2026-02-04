@@ -1592,7 +1592,12 @@ const canonicalUrl = new URL(Astro.url.pathname, Astro.site || Astro.url.origin)
 
                 markdownImages.forEach((img) => {
                     const imgElement = img as HTMLImageElement;
-                    imgElement.addEventListener('click', () => {
+                    imgElement.addEventListener('click', (e) => {
+                        const link = imgElement.closest('a');
+                        if (link) {
+                            e.preventDefault();
+                            e.stopPropagation();
+                        }
                         lightboxImage.src = imgElement.src;
                         lightboxImage.alt = imgElement.alt || '';
                         lightbox.showModal();
