@@ -6,6 +6,7 @@ export interface Env {
 	API_KEY: string;
 	OPENAI_API_KEY: string;
 	EYECATCH_STORE: KVNamespace;
+	EYECATCH_R2: R2Bucket;
 	ASSETS: { fetch: (request: Request) => Promise<Response> };
 }
 
@@ -696,8 +697,20 @@ export default {
 				article.hasEyecatch = true;
 				await env.EYECATCH_STORE.put(articleKey, JSON.stringify(article));
 
-				// アイキャッチ画像を保存
-				await env.EYECATCH_STORE.put(`eyecatch:${data.id}`, data.imageData);
+				// Base64データをバイナリに変換
+				const base64Data = data.imageData.replace(/^data:image\/\w+;base64,/, '');
+				const binaryString = atob(base64Data);
+				const bytes = new Uint8Array(binaryString.length);
+				for (let i = 0; i < binaryString.length; i++) {
+					bytes[i] = binaryString.charCodeAt(i);
+				}
+
+				// アイキャッチ画像をR2に保存
+				await env.EYECATCH_R2.put(`${data.id}.png`, bytes, {
+					httpMetadata: {
+						contentType: 'image/png',
+					},
+				});
 
 				return new Response(JSON.stringify({ success: true }), {
 					headers: {
@@ -733,7 +746,21 @@ export default {
 			}
 
 			try {
-				// アイキャッチ画像を取得
+				// まずR2から取得を試みる
+				const r2Object = await env.EYECATCH_R2.get(`${id}.png`);
+
+				if (r2Object) {
+					// R2から取得できた場合
+					return new Response(r2Object.body, {
+						headers: {
+							"Content-Type": "image/png",
+							"Cache-Control": "public, max-age=86400", // 24時間のキャッシュ
+							...corsHeaders
+						}
+					});
+				}
+
+				// R2になければKVから取得（後方互換性のため）
 				const imageData = await env.EYECATCH_STORE.get(`eyecatch:${id}`);
 
 				if (!imageData) {
