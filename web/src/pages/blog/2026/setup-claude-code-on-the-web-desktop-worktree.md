@@ -1,6 +1,6 @@
 ---
 layout: ../../../layouts/blog-post.astro
-title: Claude Code on the web / on Desktop 向けの設定をしたログ
+title: Claude Code on the web / on Desktop 向けの設定をした
 emoji: ☁️
 date: 2026-02-21
 eyecatch: blog-setup-claude-code-on-the-web-desktop-worktree
