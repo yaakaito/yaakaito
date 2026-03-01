@@ -11,9 +11,9 @@
 
 ## Latest Notes
 
+- 🚜 [GitHub Agentic Workflows を使ってみる](https://yaakai.to/note/145) - 3/1/2026
 - 🖊 [Custom Slash Command を Skills に変換する](https://yaakai.to/note/144) - 2/27/2026
 - 💠 [claude-agent-sdk の output_format を zod で指定して任意の出力形式にする](https://yaakai.to/note/141) - 2/3/2026
-- 🔄 [code-simplifier が便利](https://yaakai.to/note/140) - 1/22/2026
 
 <!--
 **yaakaito/yaakaito** is a ✨ _special_ ✨ repository because its `README.md` (this file) appears on your GitHub profile.
