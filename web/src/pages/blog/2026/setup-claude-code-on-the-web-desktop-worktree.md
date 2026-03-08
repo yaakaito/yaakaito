@@ -156,6 +156,40 @@ Check if `gh` CLI is available by running `which gh`
 
 ただ、これはこれで PR を作成するのが今ブラウザでログインしているアカウントになってしまうため、分けている意味が少し薄れてしまうのがマイナス。そのうち解決しそうな話ではある。
 
+### 2026/03/09 追記
+
+デフォルトでも curl は動作するので、環境変数として PAT を設定して、フォールバックとして curl でのリクエストをするようにすると Skill 経由でうまくPR を作れるようになっているように思える。
+
+```markdown
+#### Fallback: when `gh` fails
+
+If `gh pr create` fails for any reason (not installed, auth error, API rate limit, etc.), fall back to creating the PR via `curl` using the GitHub REST API.
+
+```bash
+# Get repo info from remote URL
+REMOTE_URL=$(git remote get-url origin)
+# Extract owner/repo (handles both HTTPS and SSH formats)
+OWNER_REPO=$(echo "$REMOTE_URL" | sed -E 's#(https://github\.com/|git@github\.com:)##; s/\.git$//')
+
+curl -s -X POST \
+  -H "Authorization: token $GITHUB_TOKEN" \
+  -H "Accept: application/vnd.github+v3+json" \
+  "https://api.github.com/repos/$OWNER_REPO/pulls" \
+  -d "$(cat <<'EOF'
+{
+  "title": "...",
+  "body": "...",
+  "head": "<branch>",
+  "base": "<base-branch>"
+}
+EOF
+)"
+
+- Use `$GITHUB_TOKEN` or `$GH_TOKEN` environment variable for authentication (check both, prefer `GITHUB_TOKEN`)
+- Escape JSON special characters in the title and body (double quotes, backslashes, newlines)
+- Extract the PR URL from the response's `html_url` field
+```
+
 ## Previews for Claude Code
 
 今のところ対応しているのが on desktop の Local だけなのでまだ使っていない。そのうち ssh や on the web でも対応してくれると嬉しいのだが...。
