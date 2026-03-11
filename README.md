@@ -5,9 +5,9 @@
 
 ## Latest Blog Posts
 
+- ☁️ [docs を管理する Skill を作って (A)DR + 数個の Markdown で開発をしている](https://yaakai.to/blog/2026/dev-with-adr) - 3/11/2026
 - ☁️ [Claude Code on the web / on desktop 向けの設定をした](https://yaakai.to/blog/2026/setup-claude-code-on-the-web-desktop-worktree) - 2/21/2026
 - 🐇 [Issue 起点の開発フローを claude-code-action と CodeRabbit で作った](https://yaakai.to/blog/2025/issue-driven-workflow-with-claude-and-coderabbit) - 12/31/2025
-- 🐙 [実装計画を Vibe Kanban で並列に開発する](https://yaakai.to/blog/2025/dev-with-vibe-kanban) - 11/4/2025
 
 ## Latest Notes
 
