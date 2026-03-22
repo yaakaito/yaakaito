@@ -11,9 +11,9 @@
 
 ## Latest Notes
 
+- 🖊 [Arm64 Linux で playwright-cli を Chromium で使えるようにする](https://yaakai.to/note/147) - 3/22/2026
 - 🖊 [GitHub Agentic Workflows と通常の workflow を連携させたい](https://yaakai.to/note/146) - 3/8/2026
 - 🚜 [GitHub Agentic Workflows を使ってみる](https://yaakai.to/note/145) - 3/1/2026
-- 🖊 [Custom Slash Command を Skills に変換する](https://yaakai.to/note/144) - 2/27/2026
 
 <!--
 **yaakaito/yaakaito** is a ✨ _special_ ✨ repository because its `README.md` (this file) appears on your GitHub profile.
