@@ -156,8 +156,16 @@ Check if `gh` CLI is available by running `which gh`
 
 ただ、これはこれで PR を作成するのが今ブラウザでログインしているアカウントになってしまうため、分けている意味が少し薄れてしまうのがマイナス。そのうち解決しそうな話ではある。
 
-### 2026/03/09 追記
 
+### 2026/03/30 追記
+
+GitHub MCP が連携しているアカウントで使えるようになったので、 `mcp__github__create_pull_request` を使うとよくなった。
+
+<details>
+    <summary>以前は代用に curl を使用していたが不要になった</summary>
+
+### 2026/03/09 追記
+    
 デフォルトでも curl は動作するので、環境変数として PAT を設定して、フォールバックとして curl でのリクエストをするようにすると Skill 経由でうまくPR を作れるようになっているように思える。
 
 ```markdown
@@ -189,6 +197,8 @@ EOF
 - Escape JSON special characters in the title and body (double quotes, backslashes, newlines)
 - Extract the PR URL from the response's `html_url` field
 ```
+</details>
+
 
 ## Previews for Claude Code
 
