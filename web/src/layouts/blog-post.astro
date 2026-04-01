@@ -743,27 +743,51 @@ const canonicalUrl = new URL(Astro.url.pathname, Astro.site || Astro.url.origin)
             color: var(--text-color-level-1);
             text-decoration: none;
             border-bottom: 1px dotted var(--text-color-level-2);
+            cursor: pointer;
         }
 
-        .footnotes {
-            margin-top: 3em;
+        /* アンカー要素としてのsup a要素（注釈リファレンス） */
+        .markdown sup a[id^="user-content-fnref-"] {
+            anchor-name: var(--footnote-anchor);
+        }
+
+        /* 注釈のポップオーバー */
+        .footnote-popover {
+            position: fixed;
+            position-anchor: var(--footnote-anchor);
+            position-area: top span-left;
+            margin: 0 0 8px 0;
+            width: max-content;
+            max-width: 350px;
+            background-color: var(--bg-color-level-1);
+            border: 1px solid var(--bg-color-level-3);
+            padding: 12px 16px;
+            border-radius: 6px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+            z-index: 100;
             font-size: 0.9em;
-            color: var(--text-color-level-2);
-            padding-top: 1em;
+            line-height: 1.6;
+            color: var(--text-color-level-0);
         }
 
-        .footnotes p {
-            line-height: 1.7;
-            margin: 0.6em 0;
+        .footnote-popover p {
+            margin: 0;
+            line-height: 1.6;
         }
 
-        .footnotes .footnote-backref {
-            text-decoration: none;
-            margin-left: 0.3em;
+        /* 元の注釈セクションを非表示（CSS Anchor Positioningサポート時のみ） */
+        @supports (anchor-name: --test) {
+            .footnotes {
+                display: none;
+            }
         }
 
-        .footnotes h2 {
-            display: none;
+        /* CSS Anchor Positioningをサポートしていないブラウザ向けのフォールバック */
+        @supports not (anchor-name: --test) {
+            .footnote-popover {
+                position: fixed;
+                transform: translateX(-50%);
+            }
         }
 
         /* 長いコードブロックのスタイル */
@@ -1491,6 +1515,110 @@ const canonicalUrl = new URL(Astro.url.pathname, Astro.site || Astro.url.origin)
                 document.addEventListener('click', function(event) {
                     if (!aiButton.contains(event.target as Node) && !aiPopover.contains(event.target as Node)) {
                         aiPopover.classList.remove('show');
+                    }
+                });
+            }
+
+            /*
+             * 注釈ポップオーバーの実装
+             *
+             * CSS Anchor Positioning を使用して注釈のポップオーバーを表示します。
+             * 注釈リンクをクリックすると、対応する注釈内容がポップオーバーで表示されます。
+             */
+
+            // 注釈ポップオーバー要素を作成
+            const footnotePopover = document.createElement('div');
+            footnotePopover.className = 'footnote-popover';
+            footnotePopover.setAttribute('role', 'tooltip');
+            footnotePopover.setAttribute('id', 'footnote-popover');
+            footnotePopover.setAttribute('aria-hidden', 'true');
+            document.body.appendChild(footnotePopover);
+
+            // すべての注釈参照リンクにクリックイベントを追加
+            const footnoteRefs = document.querySelectorAll<HTMLAnchorElement>('.markdown sup a[id^="user-content-fnref-"]');
+
+            // 注釈がない場合は処理をスキップ
+            if (footnoteRefs.length === 0) {
+                footnotePopover.remove();
+            } else {
+                // 現在表示中の注釈参照要素を追跡
+                let currentFootnoteRef: HTMLAnchorElement | null = null;
+
+                // CSS Anchor Positioningのサポート検出
+                const supportsAnchorPositioning = CSS.supports('anchor-name', '--test');
+
+                footnoteRefs.forEach(refLink => {
+                    refLink.addEventListener('click', function(event) {
+                        event.preventDefault();
+
+                        // 同じ注釈を再クリックした場合は閉じる
+                        if (currentFootnoteRef === refLink && footnotePopover.style.display === 'block') {
+                            footnotePopover.style.display = 'none';
+                            footnotePopover.setAttribute('aria-hidden', 'true');
+                            refLink.setAttribute('aria-expanded', 'false');
+                            refLink.removeAttribute('aria-describedby');
+                            currentFootnoteRef = null;
+                            return;
+                        }
+
+                        // 注釈IDを取得（例: user-content-fnref-1 -> user-content-fn-1）
+                        const refId = refLink.getAttribute('id');
+                        if (!refId) return;
+
+                        const footnoteId = refId.replace('fnref-', 'fn-');
+                        const footnoteElement = document.getElementById(footnoteId);
+
+                        if (footnoteElement) {
+                            // 注釈の内容を取得（backrefリンクを除外）
+                            const footnoteContent = footnoteElement.cloneNode(true) as HTMLElement;
+                            const backref = footnoteContent.querySelector('.footnote-backref');
+                            if (backref) {
+                                backref.remove();
+                            }
+
+                            // ポップオーバーの内容を更新
+                            footnotePopover.innerHTML = footnoteContent.innerHTML;
+
+                            // CSS変数を使ってアンカーを動的に設定
+                            const anchorName = `--footnote-${refId}`;
+                            refLink.style.setProperty('--footnote-anchor', anchorName);
+                            footnotePopover.style.setProperty('--footnote-anchor', anchorName);
+
+                            // CSS Anchor Positioning非対応時は座標を計算して設定
+                            if (!supportsAnchorPositioning) {
+                                // 高さを取得する前に表示状態にする
+                                footnotePopover.style.display = 'block';
+
+                                const rect = refLink.getBoundingClientRect();
+                                footnotePopover.style.left = `${rect.left + rect.width / 2}px`;
+                                footnotePopover.style.top = `${rect.top + window.scrollY - footnotePopover.offsetHeight - 8}px`;
+                            } else {
+                                // CSS Anchor Positioning対応時のみ表示を設定
+                                footnotePopover.style.display = 'block';
+                            }
+
+                            // ARIA属性を設定してアクセシビリティを向上
+                            footnotePopover.setAttribute('aria-hidden', 'false');
+                            refLink.setAttribute('aria-expanded', 'true');
+                            refLink.setAttribute('aria-describedby', 'footnote-popover');
+
+                            currentFootnoteRef = refLink;
+                        }
+                    });
+                });
+
+                // ポップオーバー外をクリックしたら閉じる
+                document.addEventListener('click', function(event) {
+                    const target = event.target as Node;
+                    if (!footnotePopover.contains(target) &&
+                        !Array.from(footnoteRefs).some(ref => ref.contains(target))) {
+                        footnotePopover.style.display = 'none';
+                        footnotePopover.setAttribute('aria-hidden', 'true');
+                        if (currentFootnoteRef) {
+                            currentFootnoteRef.setAttribute('aria-expanded', 'false');
+                            currentFootnoteRef.removeAttribute('aria-describedby');
+                        }
+                        currentFootnoteRef = null;
                     }
                 });
             }
