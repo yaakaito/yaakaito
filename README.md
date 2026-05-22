@@ -11,9 +11,9 @@
 
 ## Latest Notes
 
+- 🧹 [Agentic Workflow で code-simplifier 的なものを動かしていた](https://yaakai.to/note/151) - 5/22/2026
 - 🖊 [Codex と Claude Code の `/goal`](https://yaakai.to/note/150) - 5/17/2026
 - 🪝 [config ベースで Git hook を共有する](https://yaakai.to/note/148) - 4/25/2026
-- 🖊 [Arm64 Linux で playwright-cli を Chromium で使えるようにする](https://yaakai.to/note/147) - 3/22/2026
 
 <!--
 **yaakaito/yaakaito** is a ✨ _special_ ✨ repository because its `README.md` (this file) appears on your GitHub profile.
