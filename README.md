@@ -12,7 +12,7 @@
 ## Latest Notes
 
 - 🧹 [Agentic Workflow で code-simplifier 的なものを動かしていた](https://yaakai.to/note/151) - 5/22/2026
-- 🖊 [Codex と Claude Code の `/goal`](https://yaakai.to/note/150) - 5/17/2026
+- 🥅 [Codex と Claude Code の `/goal`](https://yaakai.to/note/150) - 5/17/2026
 - 🪝 [config ベースで Git hook を共有する](https://yaakai.to/note/148) - 4/25/2026
 
 <!--
