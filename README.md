@@ -11,9 +11,9 @@
 
 ## Latest Notes
 
+- 💭 [オーケストレーション Skill を作る時の備忘録](https://yaakai.to/note/157) - 7/1/2026
 - 🔑 [リポジトリ毎に異なる user.email で commit に署名したい](https://yaakai.to/note/155) - 5/29/2026
 - 🧹 [Agentic Workflows で code-simplifier 的なものを動かしていた](https://yaakai.to/note/151) - 5/22/2026
-- 🥅 [Codex と Claude Code の `/goal`](https://yaakai.to/note/150) - 5/17/2026
 
 <!--
 **yaakaito/yaakaito** is a ✨ _special_ ✨ repository because its `README.md` (this file) appears on your GitHub profile.
