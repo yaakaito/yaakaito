@@ -3,3 +3,9 @@
 
 /llms-full.txt
   Content-Type: text/plain; charset=utf-8
+
+/blog/*.md
+  Content-Type: text/plain; charset=utf-8
+
+/note/*.md
+  Content-Type: text/plain; charset=utf-8
