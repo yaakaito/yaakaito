@@ -28,6 +28,10 @@ const ogImage = frontmatter.eyecatch
 
 // 完全なURL
 const canonicalUrl = new URL(Astro.url.pathname, Astro.site || Astro.url.origin).href;
+
+// AI Content Disclosure: ブログ記事は AI による推敲を経ているため ai-assisted、メモは none
+// https://www.w3.org/community/ai-content-disclosure/
+const aiDisclosure = Astro.url.pathname.startsWith("/blog/") ? "ai-assisted" : "none";
 ---
 <GlobalLayout
     title={frontmatter.title}
@@ -1426,7 +1430,7 @@ const canonicalUrl = new URL(Astro.url.pathname, Astro.site || Astro.url.origin)
 
     <div class="article-container">
         <article class="article-content">
-            <div class="markdown"><slot /></div>
+            <div class="markdown" ai-disclosure={aiDisclosure}><slot /></div>
 
             <footer class="author">
                 <img src={icon.src} width="28" height="28">
