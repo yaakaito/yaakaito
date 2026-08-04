@@ -11,7 +11,7 @@
 
 ## Latest Notes
 
-- 🖊 [Claude Code on the Web で確認用や中間成果物の HTML を Artifact に作るようにする](https://yaakai.to/note/160) - 8/4/2026
+- 📦 [Claude Code on the Web で確認用や中間成果物の HTML を Artifact に作るようにする](https://yaakai.to/note/160) - 8/4/2026
 - 💭 [オーケストレーション Skill を作る時の備忘録](https://yaakai.to/note/157) - 7/1/2026
 - 🔑 [リポジトリ毎に異なる user.email で commit に署名したい](https://yaakai.to/note/155) - 5/29/2026
 
