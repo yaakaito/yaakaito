@@ -196,8 +196,14 @@ const { url } = Astro.props;
     const copyPageButton = document.getElementById('copy-page-button');
     const copyLabel = copyPageButton?.querySelector('.copy-label');
     const copyStatus = document.getElementById('copy-page-status');
-    let pendingRestore = null;
+    // 復元先は初期化時に固定する。表示中の文言を読むと、連続実行したときに
+    // 「Copied!」を元の文言として覚えてしまう
+    const baseLabel = copyLabel?.textContent ?? '';
+    let pendingFeedback = null;
     const dropdownMenu = document.getElementById('copy-dropdown-menu');
+    for (const item of dropdownMenu?.querySelectorAll('.dropdown-item') ?? []) {
+      item.dataset.label = item.textContent ?? '';
+    }
     const url = dropdownMenu?.getAttribute('data-url') || window.location.pathname;
 
     // Function to get markdown URL
@@ -263,41 +269,52 @@ const { url } = Astro.props;
       }
     }
 
+    // コピー結果の一時表示は、ボタンとメニュー項目のどちらから出しても
+    // 同じライブリージョンを共有する。別々にタイマーを持つと互いの表示を
+    // 途中で消してしまうので、常に最新の 1 件だけが表示と復元を担当する。
+    function showFeedback(text, apply, restore) {
+      if (pendingFeedback) {
+        clearTimeout(pendingFeedback.timer);
+        pendingFeedback.finish();
+      }
+
+      apply(text);
+      if (copyStatus) {
+        copyStatus.textContent = text;
+      }
+
+      const finish = () => {
+        pendingFeedback = null;
+        restore();
+        if (copyStatus) {
+          copyStatus.textContent = '';
+        }
+      };
+
+      pendingFeedback = { timer: setTimeout(finish, 2000), finish };
+    }
+
     // ボタンの中身はアイコンとラベルなので、textContent ごと書き換えず
     // ラベルだけを一時的に差し替える。
     // ラベルは狭い画面では隠れており、ボタンのアクセシブルネームも固定なので、
     // 表示している間だけラベルを出しつつ、ライブリージョンにも同じ結果を流す。
     function showTemporaryLabel(text, onRestore) {
-      // 連続でコピーすると、先に仕掛けたタイマーが「結果表示中のラベル」を
-      // 元の文言として復元してしまうため、保留中のものは必ず畳んでおく
-      if (pendingRestore) {
-        clearTimeout(pendingRestore.timer);
-        pendingRestore.restore();
-      }
-
-      const originalText = copyLabel?.textContent;
-
-      if (copyStatus) {
-        copyStatus.textContent = text;
-      }
-      if (copyLabel) {
-        copyLabel.textContent = text;
-        copyPageButton?.classList.add('feedback');
-      }
-
-      const restore = () => {
-        pendingRestore = null;
-        if (copyLabel && originalText) {
-          copyLabel.textContent = originalText;
-        }
-        copyPageButton?.classList.remove('feedback');
-        if (copyStatus) {
-          copyStatus.textContent = '';
-        }
-        onRestore?.();
-      };
-
-      pendingRestore = { timer: setTimeout(restore, 2000), restore };
+      showFeedback(
+        text,
+        (result) => {
+          if (copyLabel) {
+            copyLabel.textContent = result;
+            copyPageButton?.classList.add('feedback');
+          }
+        },
+        () => {
+          if (copyLabel) {
+            copyLabel.textContent = baseLabel;
+          }
+          copyPageButton?.classList.remove('feedback');
+          onRestore?.();
+        },
+      );
     }
 
     // Function to fetch and copy markdown content
@@ -359,18 +376,15 @@ const { url } = Astro.props;
           }
 
           // メニュー項目は閉じてしまうので、結果はライブリージョンでも伝える
-          const urlResult = urlCopySuccess ? 'Copied!' : 'Failed';
-          const originalText = target.textContent;
-          target.textContent = urlResult;
-          if (copyStatus) {
-            copyStatus.textContent = urlResult;
-          }
-          setTimeout(() => {
-            target.textContent = originalText;
-            if (copyStatus) {
-              copyStatus.textContent = '';
-            }
-          }, 2000);
+          showFeedback(
+            urlCopySuccess ? 'Copied!' : 'Failed',
+            (result) => {
+              target.textContent = result;
+            },
+            () => {
+              target.textContent = target.dataset.label ?? '';
+            },
+          );
           break;
       }
 
