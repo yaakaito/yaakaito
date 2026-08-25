@@ -353,11 +353,13 @@ const { url } = Astro.props;
         }
 
         if (success) {
-          // Show success state
-          copyPageButton?.classList.add('success');
+          // Show success state.
+          // showTemporaryLabel は先行フィードバックの復元を同期的に走らせるので、
+          // 先に success を付けるとその復元処理に消されてしまう。必ず後に付ける
           showTemporaryLabel('Copied!', () => {
             copyPageButton?.classList.remove('success');
           });
+          copyPageButton?.classList.add('success');
         } else {
           console.error('Copy failed, clipboard not supported');
           // Show failure state
