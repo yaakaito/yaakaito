@@ -235,5 +235,14 @@ const note = '翻訳版は 100% AI が生成しています';
       });
     }
 
+    // Tab で辿り着いた場合も説明を出す。
+    // ただしマウスやタップでのフォーカスまで拾うと、popovertarget のトグルと
+    // 二重に効いて開いた直後に閉じるので、キーボード操作のときだけにする。
+    trigger.addEventListener('focusin', () => {
+      if (trigger.matches(':focus-visible')) {
+        show();
+      }
+    });
+    trigger.addEventListener('focusout', scheduleHide);
   });
 </script>
