@@ -200,6 +200,9 @@ const { url } = Astro.props;
     // 「Copied!」を元の文言として覚えてしまう
     const baseLabel = copyLabel?.textContent ?? '';
     let pendingFeedback = null;
+    // fetch や clipboard の完了を待つ間に次の操作が始まりうる。開始順に ID を振り、
+    // 追い抜かれた操作の結果は捨てる（そうしないと古い結果が新しい結果を上書きする）
+    let latestCopyOperation = 0;
     const dropdownMenu = document.getElementById('copy-dropdown-menu');
     for (const item of dropdownMenu?.querySelectorAll('.dropdown-item') ?? []) {
       item.dataset.label = item.textContent ?? '';
@@ -318,7 +321,14 @@ const { url } = Astro.props;
     }
 
     // Function to fetch and copy markdown content
+    function beginCopyOperation() {
+      latestCopyOperation += 1;
+      return latestCopyOperation;
+    }
+
     async function copyMarkdown() {
+      const operation = beginCopyOperation();
+
       try {
         const markdownUrl = getMarkdownUrl();
         const response = await fetch(markdownUrl);
@@ -329,6 +339,10 @@ const { url } = Astro.props;
 
         const markdown = await response.text();
         const success = await copyToClipboard(markdown);
+
+        if (operation !== latestCopyOperation) {
+          return;
+        }
 
         if (success) {
           // Show success state
@@ -343,6 +357,11 @@ const { url } = Astro.props;
         }
       } catch (error) {
         console.error('Failed to copy markdown:', error);
+
+        if (operation !== latestCopyOperation) {
+          return;
+        }
+
         // Show error state
         showTemporaryLabel('Error');
       }
@@ -368,11 +387,16 @@ const { url } = Astro.props;
           break;
 
         case 'copy-markdown-url':
+          const operation = beginCopyOperation();
           const fullUrl = new URL(getMarkdownUrl(), window.location.origin).href;
           const urlCopySuccess = await copyToClipboard(fullUrl);
 
           if (!urlCopySuccess) {
             console.error('URL copy failed, clipboard not supported');
+          }
+
+          if (operation !== latestCopyOperation) {
+            break;
           }
 
           // メニュー項目は閉じてしまうので、結果はライブリージョンでも伝える
