@@ -216,10 +216,16 @@ const note = '翻訳版は 100% AI が生成しています';
     const scheduleHide = () => {
       clearTimeout(hideTimer);
       hideTimer = setTimeout(() => {
-        // キーボードでフォーカスしている間は閉じない。
-        // ボタンにたまたま重なっていたポインタが離れただけで
-        // 説明が消えてしまうため
-        if (trigger.matches(':focus-visible')) {
+        // キーボードでフォーカスしている間、またはポインタが乗っている間は
+        // 閉じない。片方だけを見ていると、
+        //   - ポインタが重なったまま Tab でフォーカスを外す
+        //   - ボタンに重なっていたポインタが離れる
+        // のどちらかで、もう片方が残っているのに説明が消えてしまう
+        if (
+          trigger.matches(':focus-visible') ||
+          trigger.matches(':hover') ||
+          popover.matches(':hover')
+        ) {
           return;
         }
 

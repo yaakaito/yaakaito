@@ -338,6 +338,14 @@ const { url } = Astro.props;
         }
 
         const markdown = await response.text();
+
+        // 取得を待っている間に追い越されていた場合、ここで書き込むと
+        // 後続操作が書いた内容を古い内容で上書きしてしまう。
+        // 表示だけでなくクリップボードの中身が壊れるので、書く前に確認する
+        if (operation !== latestCopyOperation) {
+          return;
+        }
+
         const success = await copyToClipboard(markdown);
 
         if (operation !== latestCopyOperation) {
