@@ -7,8 +7,9 @@ const { url } = Astro.props;
 ---
 
 <div class="copy-page-container">
-  <button id="copy-page-button" class="copy-button">
-    Copy as Markdown
+  <button id="copy-page-button" class="copy-button" aria-label="Copy as Markdown">
+    <i class="fas fa-copy" aria-hidden="true"></i>
+    <span class="copy-label">Markdown</span>
   </button>
   <button
     id="copy-dropdown-button"
@@ -17,7 +18,7 @@ const { url } = Astro.props;
     popovertarget="copy-dropdown-menu"
     popovertargetaction="toggle"
   >
-    ▽
+    <i class="fas fa-caret-down" aria-hidden="true"></i>
   </button>
   <div
     id="copy-dropdown-menu"
@@ -34,6 +35,8 @@ const { url } = Astro.props;
 <style>
   .copy-page-container {
     display: flex;
+    align-items: center;
+    gap: 2px;
     position: relative;
   }
 
@@ -42,39 +45,42 @@ const { url } = Astro.props;
     anchor-name: --copy-dropdown-anchor;
   }
 
+  /* 記事ヘッダーのタグ・開示インジケータと同じ調子に揃えるため、枠は持たせない */
   .copy-button,
   .dropdown-button {
-    background-color: var(--bg-color-level-2);
-    color: var(--text-color-level-0);
-    border: 1px solid var(--bg-color-level-3);
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    background: none;
+    border: none;
+    color: var(--text-color-level-2);
     font-size: 0.85em;
-    font-weight: 500;
+    letter-spacing: 0.02em;
     cursor: pointer;
-    transition: all 0.2s ease;
+    /* 行の高さを変えずにタップ領域だけ広げる */
+    padding: 4px 6px;
+    margin: -4px 0;
+    border-radius: 6px;
+    transition:
+      color 0.2s ease,
+      background-color 0.2s ease;
   }
 
-  .copy-button {
-    padding: 0.3em 0.8em;
-    border-radius: 16px 0 0 16px;
-    border-right: none;
-  }
-
-  .dropdown-button {
-    padding: 0.3em 0.6em;
-    border-radius: 0 16px 16px 0;
-    font-size: 0.7em;
+  .dropdown-button > i {
+    font-size: 0.9em;
   }
 
   .copy-button:hover,
   .dropdown-button:hover {
-    background-color: var(--bg-color-level-3);
-    transform: translateY(-1px);
+    background-color: var(--bg-color-level-2);
+    color: var(--text-color-level-0);
   }
 
-  .copy-button:active,
-  .dropdown-button:active {
-    background-color: var(--bg-color-level-4);
-    transform: translateY(0);
+  /* 狭い画面ではラベルを落とし、アイコンだけで 1 行に収める */
+  @media screen and (max-width: 480px) {
+    .copy-label {
+      display: none;
+    }
   }
 
   /* Popover styling with anchor positioning */
@@ -157,16 +163,19 @@ const { url } = Astro.props;
     100% { transform: scale(1); }
   }
 
-  .copy-button.success {
+  /* 枠を持たないボタンになったので、成功は塗りではなく文字色で示す */
+  .copy-button.success,
+  .copy-button.success:hover {
     animation: copy-success 0.3s ease;
-    background-color: var(--success-color, #4caf50);
-    color: white;
+    background: none;
+    color: var(--success-color, #4caf50);
   }
 </style>
 
 <script>
   document.addEventListener('DOMContentLoaded', () => {
     const copyPageButton = document.getElementById('copy-page-button');
+    const copyLabel = copyPageButton?.querySelector('.copy-label');
     const dropdownMenu = document.getElementById('copy-dropdown-menu');
     const url = dropdownMenu?.getAttribute('data-url') || window.location.pathname;
 
@@ -233,6 +242,25 @@ const { url } = Astro.props;
       }
     }
 
+    // ボタンの中身はアイコンとラベルなので、textContent ごと書き換えず
+    // ラベルだけを一時的に差し替える
+    function showTemporaryLabel(text, onRestore) {
+      if (!copyLabel) {
+        onRestore?.();
+        return;
+      }
+
+      const originalText = copyLabel.textContent;
+      copyLabel.textContent = text;
+
+      setTimeout(() => {
+        if (originalText) {
+          copyLabel.textContent = originalText;
+        }
+        onRestore?.();
+      }, 2000);
+    }
+
     // Function to fetch and copy markdown content
     async function copyMarkdown() {
       try {
@@ -249,44 +277,18 @@ const { url } = Astro.props;
         if (success) {
           // Show success state
           copyPageButton?.classList.add('success');
-          const originalText = copyPageButton?.textContent;
-          if (copyPageButton) {
-            copyPageButton.textContent = 'Copied!';
-          }
-
-          setTimeout(() => {
+          showTemporaryLabel('Copied!', () => {
             copyPageButton?.classList.remove('success');
-            if (copyPageButton && originalText) {
-              copyPageButton.textContent = originalText;
-            }
-          }, 2000);
+          });
         } else {
           console.error('Copy failed, clipboard not supported');
           // Show failure state
-          const originalText = copyPageButton?.textContent;
-          if (copyPageButton) {
-            copyPageButton.textContent = 'Copy failed';
-          }
-
-          setTimeout(() => {
-            if (copyPageButton && originalText) {
-              copyPageButton.textContent = originalText;
-            }
-          }, 2000);
+          showTemporaryLabel('Copy failed');
         }
       } catch (error) {
         console.error('Failed to copy markdown:', error);
         // Show error state
-        const originalText = copyPageButton?.textContent;
-        if (copyPageButton) {
-          copyPageButton.textContent = 'Error';
-        }
-
-        setTimeout(() => {
-          if (copyPageButton && originalText) {
-            copyPageButton.textContent = originalText;
-          }
-        }, 2000);
+        showTemporaryLabel('Error');
       }
     }
 
