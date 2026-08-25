@@ -30,6 +30,8 @@ const { url } = Astro.props;
     <button class="dropdown-item" data-action="view-markdown">View as Markdown</button>
     <button class="dropdown-item" data-action="copy-markdown-url">Copy Markdown URL</button>
   </div>
+  <!-- ボタンの aria-label は固定なので、コピーの結果は別のライブリージョンで伝える -->
+  <span id="copy-page-status" class="copy-status" role="status" aria-live="polite"></span>
 </div>
 
 <style>
@@ -76,10 +78,27 @@ const { url } = Astro.props;
     color: var(--text-color-level-0);
   }
 
-  /* 狭い画面ではラベルを落とし、アイコンだけで 1 行に収める */
+  .copy-status {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    border: 0;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  /* 狭い画面ではラベルを落とし、アイコンだけで 1 行に収める。
+     ただしコピーの結果を表示している間は、狭い画面でも見せる */
   @media screen and (max-width: 480px) {
     .copy-label {
       display: none;
+    }
+
+    .copy-button.feedback .copy-label {
+      display: inline;
     }
   }
 
@@ -176,6 +195,7 @@ const { url } = Astro.props;
   document.addEventListener('DOMContentLoaded', () => {
     const copyPageButton = document.getElementById('copy-page-button');
     const copyLabel = copyPageButton?.querySelector('.copy-label');
+    const copyStatus = document.getElementById('copy-page-status');
     const dropdownMenu = document.getElementById('copy-dropdown-menu');
     const url = dropdownMenu?.getAttribute('data-url') || window.location.pathname;
 
@@ -243,19 +263,27 @@ const { url } = Astro.props;
     }
 
     // ボタンの中身はアイコンとラベルなので、textContent ごと書き換えず
-    // ラベルだけを一時的に差し替える
+    // ラベルだけを一時的に差し替える。
+    // ラベルは狭い画面では隠れており、ボタンのアクセシブルネームも固定なので、
+    // 表示している間だけラベルを出しつつ、ライブリージョンにも同じ結果を流す。
     function showTemporaryLabel(text, onRestore) {
-      if (!copyLabel) {
-        onRestore?.();
-        return;
+      const originalText = copyLabel?.textContent;
+
+      if (copyStatus) {
+        copyStatus.textContent = text;
+      }
+      if (copyLabel) {
+        copyLabel.textContent = text;
+        copyPageButton?.classList.add('feedback');
       }
 
-      const originalText = copyLabel.textContent;
-      copyLabel.textContent = text;
-
       setTimeout(() => {
-        if (originalText) {
+        if (copyLabel && originalText) {
           copyLabel.textContent = originalText;
+        }
+        copyPageButton?.classList.remove('feedback');
+        if (copyStatus) {
+          copyStatus.textContent = '';
         }
         onRestore?.();
       }, 2000);
@@ -315,22 +343,23 @@ const { url } = Astro.props;
           const fullUrl = new URL(getMarkdownUrl(), window.location.origin).href;
           const urlCopySuccess = await copyToClipboard(fullUrl);
 
-          if (urlCopySuccess) {
-            // Show success feedback
-            const originalText = target.textContent;
-            target.textContent = 'Copied!';
-            setTimeout(() => {
-              target.textContent = originalText;
-            }, 2000);
-          } else {
+          if (!urlCopySuccess) {
             console.error('URL copy failed, clipboard not supported');
-            // Show failure feedback
-            const originalText = target.textContent;
-            target.textContent = 'Failed';
-            setTimeout(() => {
-              target.textContent = originalText;
-            }, 2000);
           }
+
+          // メニュー項目は閉じてしまうので、結果はライブリージョンでも伝える
+          const urlResult = urlCopySuccess ? 'Copied!' : 'Failed';
+          const originalText = target.textContent;
+          target.textContent = urlResult;
+          if (copyStatus) {
+            copyStatus.textContent = urlResult;
+          }
+          setTimeout(() => {
+            target.textContent = originalText;
+            if (copyStatus) {
+              copyStatus.textContent = '';
+            }
+          }, 2000);
           break;
       }
 

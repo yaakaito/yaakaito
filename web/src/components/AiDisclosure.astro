@@ -28,7 +28,7 @@ const label = ai > 0
     type="button"
     id="ai-disclosure-anchor"
     class="ai-disclosure-trigger"
-    aria-label={`${label}。詳細を表示`}
+    aria-label={`${label}。${description}`}
     popovertarget="ai-disclosure-popover"
     popovertargetaction="toggle"
   >
@@ -46,7 +46,8 @@ const label = ai > 0
     {ai > 0 && <i class="fas fa-robot" aria-hidden="true"></i>}
   </button>
 
-  <div id="ai-disclosure-popover" class="ai-disclosure-popover" popover="auto">
+  <!-- 同じ内容がボタンの aria-label に入っているので、読み上げでは重複させない -->
+  <div id="ai-disclosure-popover" class="ai-disclosure-popover" popover="auto" aria-hidden="true">
     <p class="ai-disclosure-description">{description}</p>
     <p class="ai-disclosure-note">翻訳版は 100% AI が生成しています</p>
   </div>
