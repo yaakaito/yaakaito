@@ -21,6 +21,7 @@ const description = ai > 0
 const label = ai > 0
   ? `人間が ${human}%、AI が ${ai}%`
   : '人間が 100%';
+const note = '翻訳版は 100% AI が生成しています';
 ---
 
 <div class="ai-disclosure">
@@ -28,7 +29,7 @@ const label = ai > 0
     type="button"
     id="ai-disclosure-anchor"
     class="ai-disclosure-trigger"
-    aria-label={`${label}。${description}`}
+    aria-label={`${label}。${description}。${note}`}
     popovertarget="ai-disclosure-popover"
     popovertargetaction="toggle"
   >
@@ -49,7 +50,7 @@ const label = ai > 0
   <!-- 同じ内容がボタンの aria-label に入っているので、読み上げでは重複させない -->
   <div id="ai-disclosure-popover" class="ai-disclosure-popover" popover="auto" aria-hidden="true">
     <p class="ai-disclosure-description">{description}</p>
-    <p class="ai-disclosure-note">翻訳版は 100% AI が生成しています</p>
+    <p class="ai-disclosure-note">{note}</p>
   </div>
 </div>
 
@@ -197,17 +198,10 @@ const label = ai > 0
       return;
     }
 
-    // タップはボタンの popovertarget がそのまま処理する。
-    if (!window.matchMedia('(hover: hover)').matches) {
-      return;
-    }
-
-    // ポインタで操作できる環境ではホバーで開閉する。
-    // popovertarget によるトグルを残すと、ホバーで開いた直後にクリックで
-    // 閉じてしまい、タッチも使える端末ではタップが効かなくなる。
-    trigger.removeAttribute('popovertarget');
-    trigger.removeAttribute('popovertargetaction');
-
+    // クリック・タップ・キーボードはボタンの popovertarget がそのまま処理する。
+    // ここで足すのはマウスのホバーだけ。
+    // pointerType を見ずにホバーで開くと、タッチも使える端末で
+    // タップが pointerenter を起こして開いた直後に popovertarget が閉じてしまう。
     let hideTimer: ReturnType<typeof setTimeout> | undefined;
 
     const show = () => {
@@ -229,12 +223,17 @@ const label = ai > 0
     };
 
     for (const element of [trigger, popover]) {
-      element.addEventListener('pointerenter', show);
-      element.addEventListener('pointerleave', scheduleHide);
+      element.addEventListener('pointerenter', (event) => {
+        if ((event as PointerEvent).pointerType === 'mouse') {
+          show();
+        }
+      });
+      element.addEventListener('pointerleave', (event) => {
+        if ((event as PointerEvent).pointerType === 'mouse') {
+          scheduleHide();
+        }
+      });
     }
 
-    // キーボード操作でも読めるようにする
-    trigger.addEventListener('focus', show);
-    trigger.addEventListener('blur', scheduleHide);
   });
 </script>
