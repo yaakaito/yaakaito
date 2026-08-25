@@ -216,6 +216,13 @@ const note = '翻訳版は 100% AI が生成しています';
     const scheduleHide = () => {
       clearTimeout(hideTimer);
       hideTimer = setTimeout(() => {
+        // キーボードでフォーカスしている間は閉じない。
+        // ボタンにたまたま重なっていたポインタが離れただけで
+        // 説明が消えてしまうため
+        if (trigger.matches(':focus-visible')) {
+          return;
+        }
+
         if (popover.matches(':popover-open')) {
           popover.hidePopover();
         }
