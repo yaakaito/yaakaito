@@ -1,0 +1,261 @@
+---
+/**
+ * 記事に対する AI の関与を、人間と AI の比率として開示するインジケータ。
+ * ホバー（PC）またはタップ（モバイル）で説明を表示する。
+ *
+ * 比率は厳密な計測値ではなく記号的な表明なので、10 の倍数に丸めて扱う。
+ */
+export interface Props {
+  /** 人間が書いた割合。残りが AI の割合になる */
+  human: number;
+  /** 推敲に使ったモデル名。不明な場合は「AI」と表記する */
+  model?: string;
+}
+
+const { human, model } = Astro.props;
+const ai = 100 - human;
+
+const description = ai > 0
+  ? `これは人間が書き、${model ?? 'AI'} が推敲しました`
+  : 'これは人間が書きました';
+const label = ai > 0
+  ? `人間が ${human}%、AI が ${ai}%`
+  : '人間が 100%';
+const note = '翻訳版は 100% AI が生成しています';
+---
+
+<div class="ai-disclosure">
+  <button
+    type="button"
+    id="ai-disclosure-anchor"
+    class="ai-disclosure-trigger"
+    aria-label={`${label}。${description}。${note}`}
+    popovertarget="ai-disclosure-popover"
+    popovertargetaction="toggle"
+  >
+    <i class="fas fa-user" aria-hidden="true"></i>
+    <span class="ai-disclosure-meter">
+      <span class="ai-disclosure-nums">
+        <span>{human}%</span>
+        {ai > 0 && <span>{ai}%</span>}
+      </span>
+      <span class="ai-disclosure-bar">
+        <span class="is-human" style={`flex: ${human}`}></span>
+        {ai > 0 && <span class="is-ai" style={`flex: ${ai}`}></span>}
+      </span>
+    </span>
+    {ai > 0 && <i class="fas fa-robot" aria-hidden="true"></i>}
+  </button>
+
+  <!-- 同じ内容がボタンの aria-label に入っているので、読み上げでは重複させない -->
+  <div id="ai-disclosure-popover" class="ai-disclosure-popover" popover="auto" aria-hidden="true">
+    <p class="ai-disclosure-description">{description}</p>
+    <p class="ai-disclosure-note">{note}</p>
+  </div>
+</div>
+
+<style>
+  .ai-disclosure {
+    display: inline-flex;
+  }
+
+  .ai-disclosure-trigger {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    /* タグ・コピーボタンと同じ調子に揃える */
+    font-size: 0.85em;
+    letter-spacing: 0.02em;
+    color: var(--text-color-level-2);
+    white-space: nowrap;
+    background: none;
+    border: none;
+    /* 押せることは伝えたいが、操作ではなく説明なので help にする */
+    cursor: help;
+    /* 行の高さを変えずにタップ領域だけ広げる */
+    padding: 4px 8px;
+    margin: -4px -8px;
+    border-radius: 6px;
+    transition: background-color 0.2s ease;
+  }
+
+  .ai-disclosure-trigger:hover {
+    background-color: var(--bg-color-level-2);
+  }
+
+  .ai-disclosure-trigger > i {
+    font-size: 13px;
+  }
+
+  /* 数値とバーを縦に積む。10 + 3 + 5 = 18px なので行の高さには収まる */
+  .ai-disclosure-meter {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    width: 92px;
+  }
+
+  .ai-disclosure-nums {
+    display: flex;
+    justify-content: space-between;
+    font-size: 10px;
+    line-height: 1;
+    letter-spacing: 0;
+  }
+
+  .ai-disclosure-bar {
+    display: flex;
+    height: 5px;
+    border-radius: 3px;
+    overflow: hidden;
+    background-color: var(--bg-color-level-3);
+  }
+
+  .ai-disclosure-bar > .is-human {
+    background-color: var(--text-color-level-2);
+  }
+
+  .ai-disclosure-bar > .is-ai {
+    background-color: var(--primary-color-level-0);
+  }
+
+  /* アンカー要素の定義。位置指定は CopyPageMenu のドロップダウンと同じ作法 */
+  #ai-disclosure-anchor {
+    anchor-name: --ai-disclosure;
+  }
+
+  .ai-disclosure-popover {
+    position-anchor: --ai-disclosure;
+    position-area: bottom span-left;
+    position-try-fallbacks: flip-block;
+    /* popover の UA スタイルが margin: auto を持っており、そのままだと
+       position-area の中で中央寄せになるので、左だけ auto にして右端を
+       アンカーに揃える */
+    margin: 10px 0 0 auto;
+    width: 260px;
+    padding: 14px;
+    background-color: var(--bg-color-level-1);
+    border: 1px solid var(--bg-color-level-3);
+    border-radius: 6px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    text-align: left;
+  }
+
+  .ai-disclosure-popover {
+    opacity: 0;
+    transform: translateY(-10px);
+    transition:
+      opacity 0.2s ease,
+      transform 0.2s ease,
+      overlay 0.2s ease allow-discrete,
+      display 0.2s ease allow-discrete;
+  }
+
+  .ai-disclosure-popover:popover-open {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  @starting-style {
+    .ai-disclosure-popover:popover-open {
+      opacity: 0;
+      transform: translateY(-10px);
+    }
+  }
+
+  .ai-disclosure-description {
+    margin: 0;
+    font-size: 0.8em;
+    line-height: 1.5;
+    letter-spacing: 0.02em;
+    color: var(--text-color-level-0);
+  }
+
+  .ai-disclosure-note {
+    margin: 9px 0 0;
+    padding-top: 9px;
+    border-top: 1px solid var(--bg-color-level-3);
+    font-size: 0.72em;
+    line-height: 1.5;
+    letter-spacing: 0.02em;
+    color: var(--text-color-level-2);
+  }
+
+  @media screen and (max-width: 480px) {
+    .ai-disclosure-popover {
+      width: 220px;
+      padding: 12px;
+    }
+  }
+</style>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const trigger = document.getElementById('ai-disclosure-anchor');
+    const popover = document.getElementById('ai-disclosure-popover');
+
+    if (!trigger || !(popover instanceof HTMLElement)) {
+      return;
+    }
+
+    // クリック・タップ・キーボードはボタンの popovertarget がそのまま処理する。
+    // ここで足すのはマウスのホバーだけ。
+    // pointerType を見ずにホバーで開くと、タッチも使える端末で
+    // タップが pointerenter を起こして開いた直後に popovertarget が閉じてしまう。
+    let hideTimer: ReturnType<typeof setTimeout> | undefined;
+
+    const show = () => {
+      clearTimeout(hideTimer);
+      if (!popover.matches(':popover-open')) {
+        popover.showPopover();
+      }
+    };
+
+    // ボタンとポップオーバーの間にはすきまがあるので、
+    // 少し待ってから閉じないと行き来できない
+    const scheduleHide = () => {
+      clearTimeout(hideTimer);
+      hideTimer = setTimeout(() => {
+        // キーボードでフォーカスしている間、またはポインタが乗っている間は
+        // 閉じない。片方だけを見ていると、
+        //   - ポインタが重なったまま Tab でフォーカスを外す
+        //   - ボタンに重なっていたポインタが離れる
+        // のどちらかで、もう片方が残っているのに説明が消えてしまう
+        if (
+          trigger.matches(':focus-visible') ||
+          trigger.matches(':hover') ||
+          popover.matches(':hover')
+        ) {
+          return;
+        }
+
+        if (popover.matches(':popover-open')) {
+          popover.hidePopover();
+        }
+      }, 150);
+    };
+
+    for (const element of [trigger, popover]) {
+      element.addEventListener('pointerenter', (event) => {
+        if ((event as PointerEvent).pointerType === 'mouse') {
+          show();
+        }
+      });
+      element.addEventListener('pointerleave', (event) => {
+        if ((event as PointerEvent).pointerType === 'mouse') {
+          scheduleHide();
+        }
+      });
+    }
+
+    // Tab で辿り着いた場合も説明を出す。
+    // ただしマウスやタップでのフォーカスまで拾うと、popovertarget のトグルと
+    // 二重に効いて開いた直後に閉じるので、キーボード操作のときだけにする。
+    trigger.addEventListener('focusin', () => {
+      if (trigger.matches(':focus-visible')) {
+        show();
+      }
+    });
+    trigger.addEventListener('focusout', scheduleHide);
+  });
+</script>

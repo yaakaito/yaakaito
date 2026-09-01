@@ -3,6 +3,7 @@ import GlobalLayout from "../layouts/global-layout.astro";
 import ThemeSwitcher from "../components/ThemeSwitcher.astro";
 import CopyPageMenu from "../components/CopyPageMenu.astro";
 import Breadcrumb from "../components/Breadcrumb.astro";
+import AiDisclosure from "../components/AiDisclosure.astro";
 import { getGenericEyecatchColor } from "../utils/eyecatch";
 import icon from "../../../icon/icon-128.png";
 const { frontmatter, content } = Astro.props;
@@ -28,6 +29,14 @@ const ogImage = frontmatter.eyecatch
 
 // 完全なURL
 const canonicalUrl = new URL(Astro.url.pathname, Astro.site || Astro.url.origin).href;
+
+// AI Content Disclosure: ブログ記事は AI による推敲を経ているため ai-assisted、メモは none
+// https://www.w3.org/community/ai-content-disclosure/
+const isBlogPost = Astro.url.pathname.startsWith("/blog/");
+const aiDisclosure = isBlogPost ? "ai-assisted" : "none";
+
+// 開示インジケータに出す人間の割合。記号的な表明なので厳密な計測値ではない
+const humanRatio = isBlogPost ? 80 : 100;
 ---
 <GlobalLayout
     title={frontmatter.title}
@@ -1027,8 +1036,22 @@ const canonicalUrl = new URL(Astro.url.pathname, Astro.site || Astro.url.origin)
                 display: flex;
                 justify-content: space-between;
                 align-items: center;
+                gap: 12px;
                 margin-top: 1.5em;
                 text-align: left;
+            }
+
+            .article-header-actions {
+                display: flex;
+                align-items: center;
+                gap: 12px;
+            }
+
+            .header-divider {
+                width: 1px;
+                height: 16px;
+                background-color: var(--bg-color-level-3);
+                flex: none;
             }
 
             .article-actions {
@@ -1095,19 +1118,19 @@ const canonicalUrl = new URL(Astro.url.pathname, Astro.site || Astro.url.origin)
                 }
             }
 
+            /* タグ・開示インジケータ・コピーボタンを同じ調子のメタ情報として並べる */
             .tags {
                 display: flex;
-                gap: 8px;
+                gap: 12px;
                 flex-wrap: wrap;
+                align-items: center;
+                font-size: 0.85em;
+                letter-spacing: 0.02em;
+                color: var(--text-color-level-2);
             }
 
-            .tag {
-                font-size: 0.85em;
-                background-color: var(--bg-color-level-2);
-                color: var(--text-color-level-0);
-                padding: 0.3em 0.8em;
-                border-radius: 16px;
-                border: 1px solid var(--bg-color-level-3);
+            .tag::before {
+                content: "#";
             }
 
             .emoji {
@@ -1419,14 +1442,18 @@ const canonicalUrl = new URL(Astro.url.pathname, Astro.site || Astro.url.origin)
                         <span class="tag">{tag}</span>
                     ))}
                 </div>
-                <CopyPageMenu url={Astro.url.pathname} />
+                <div class="article-header-actions">
+                    <AiDisclosure human={humanRatio} model={frontmatter.aiModel} />
+                    <span class="header-divider" aria-hidden="true"></span>
+                    <CopyPageMenu url={Astro.url.pathname} />
+                </div>
             </div>
         </div>
     </header>
 
     <div class="article-container">
         <article class="article-content">
-            <div class="markdown"><slot /></div>
+            <div class="markdown" ai-disclosure={aiDisclosure}><slot /></div>
 
             <footer class="author">
                 <img src={icon.src} width="28" height="28">
