@@ -11,9 +11,9 @@
 
 ## Latest Notes
 
+- 🔫 [Cloudflare Workers の Issues を使う](https://yaakai.to/note/164) - 10/25/2026
 - 🖼️ [iframe の高さをコンテンツに合わせる frame-sizing: content-height;](https://yaakai.to/note/163) - 9/24/2026
 - 💭 [AI Content Disclosure で人間 / AI のどちらが書いたかを表現する](https://yaakai.to/note/162) - 9/2/2026
-- 📦 [Claude Code on the Web で確認用や中間成果物の HTML を Artifact に作るようにする](https://yaakai.to/note/160) - 8/4/2026
 
 <!--
 **yaakaito/yaakaito** is a ✨ _special_ ✨ repository because its `README.md` (this file) appears on your GitHub profile.
