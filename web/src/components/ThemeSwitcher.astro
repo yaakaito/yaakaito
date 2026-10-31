@@ -64,10 +64,11 @@ const themes = [
   }
 
   /* 選択中。data-theme が未設定の状態がそのまま「自動」にあたるので、
-     JavaScript を待たずに初回ペイントから正しい位置に色がつく */
-  html:not([data-theme]) .theme-switcher label[for="theme-auto"],
-  html[data-theme="light"] .theme-switcher label[for="theme-light"],
-  html[data-theme="dark"] .theme-switcher label[for="theme-dark"] {
+     JavaScript を待たずに初回ペイントから正しい位置に色がつく。
+     html は GlobalLayout が出力する要素なので :global() でスコープ外に出す */
+  :global(html:not([data-theme])) .theme-switcher label[for="theme-auto"],
+  :global(html[data-theme="light"]) .theme-switcher label[for="theme-light"],
+  :global(html[data-theme="dark"]) .theme-switcher label[for="theme-dark"] {
     color: var(--primary-color-level-0);
     opacity: 1;
   }
