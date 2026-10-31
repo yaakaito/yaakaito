@@ -46,6 +46,10 @@ const noteSectionPosts = allNotes.slice(0, 4);
 
 <GlobalLayout>
   <main class="main-content">
+    <div class="theme-switcher-row">
+      <ThemeSwitcher />
+    </div>
+
     <!-- プロフィールセクション -->
     <section class="profile-section">
       <div class="profile-container">
@@ -93,13 +97,6 @@ const noteSectionPosts = allNotes.slice(0, 4);
       posts={noteSectionPosts}
       viewAllLink="/note"
     />
-
-    <!-- テーマセレクター -->
-    <section class="theme-selector-section">
-      <div class="theme-selector-container">
-        <ThemeSwitcher variant="selector" />
-      </div>
-    </section>
   </main>
 </GlobalLayout>
 
@@ -196,22 +193,10 @@ const noteSectionPosts = allNotes.slice(0, 4);
     margin-bottom: 48px;
   }
 
-  /* テーマセレクターのスタイル */
-  .theme-selector-section {
-    margin-top: 48px;
-    padding-top: 48px;
-    border-top: 1px solid var(--bg-color-level-3);
-  }
-
-  .theme-selector-container {
-    text-align: center;
-  }
-
-  .theme-selector-title {
-    font-size: 1.2em;
-    margin-bottom: 24px;
-    color: var(--text-color-level-1);
-    font-weight: bold;
+  .theme-switcher-row {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 8px;
   }
 
   @media (max-width: 768px) {

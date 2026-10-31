@@ -1,228 +1,123 @@
 ---
 interface Props {
-  variant?: 'toggle' | 'selector';
   class?: string;
 }
 
-const { variant = 'selector', class: className = '' } = Astro.props;
+const { class: className = '' } = Astro.props;
+
+// ライト ← 自動 → ダークの順。両端が固定で、真ん中がOS追従
+const themes = [
+  { value: 'light', icon: 'fa-sun', label: 'ライト' },
+  { value: 'auto', icon: 'fa-circle-half-stroke', label: '自動' },
+  { value: 'dark', icon: 'fa-moon', label: 'ダーク' },
+];
 ---
 
-<div class={`theme-switcher ${variant} ${className}`}>
-  {variant === 'selector' ? (
-    <>
-      <input type="radio" name="theme" id="theme-auto" data-command="to-auto">
-      <label for="theme-auto">
-        <i class="fas fa-circle-half-stroke"></i>
-        <span class="label-text">自動</span>
+<div class={`theme-switcher ${className}`} role="radiogroup" aria-label="テーマ">
+  {themes.map(({ value, icon, label }) => (
+    <Fragment>
+      <input type="radio" name="theme" id={`theme-${value}`} value={value}>
+      <label for={`theme-${value}`}>
+        <i class={`fas ${icon}`} aria-hidden="true"></i>
+        <span class="label-text">{label}</span>
       </label>
-
-      <input type="radio" name="theme" id="theme-light" data-command="to-light">
-      <label for="theme-light">
-        <i class="fas fa-sun"></i>
-        <span class="label-text">ライト</span>
-      </label>
-
-      <input type="radio" name="theme" id="theme-dark" data-command="to-dark">
-      <label for="theme-dark">
-        <i class="fas fa-moon"></i>
-        <span class="label-text">ダーク</span>
-      </label>
-    </>
-  ) : (
-    <>
-      <input type="radio" name="theme" id="toggle-theme-light" data-command="to-dark">
-      <label for="toggle-theme-light">
-        <i class="fas fa-sun"></i>
-        <span class="label-text">ライト</span>
-      </label>
-
-      <input type="radio" name="theme" id="toggle-theme-dark" data-command="to-light">
-      <label for="toggle-theme-dark">
-        <i class="fas fa-moon"></i>
-        <span class="label-text">ダーク</span>
-      </label>
-    </>
-  )}
+    </Fragment>
+  ))}
 </div>
 
 <style>
-  /* 共通スタイル */
   .theme-switcher {
-    display: flex;
+    display: inline-flex;
+    gap: 2px;
   }
 
-  .theme-switcher input[type="radio"] {
-    display: none;
+  /* 見た目からは外すが、フォーカスと支援技術には残す。
+     display: none だとフォーカスを受けられず、キーボードで操作できなくなる */
+  .theme-switcher input[type="radio"],
+  .theme-switcher .label-text {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+    border: 0;
   }
 
   .theme-switcher label {
-    cursor: pointer;
-    transition: all 0.3s ease;
-  }
-
-  /* トグルスタイル（記事ページ用） */
-  .theme-switcher.toggle {
-    /* position: fixedを削除してコンテナ内に配置 */
-  }
-
-  .theme-switcher.toggle label {
-    display: none;
-    align-items: center;
-    justify-content: center;
-    height: 48px;
-  }
-
-  .theme-switcher.toggle label:hover {
-    transform: scale(1.1);
-  }
-
-  .theme-switcher.toggle .label-text {
-    display: none;
-  }
-
-  .theme-switcher.toggle i {
-    font-size: 20px;
-    color: var(--text-color-level-0);
-  }
-
-  /* テーマに応じて表示を切り替え */
-  /* lightテーマ時: darkボタン（月アイコン）を表示 */
-  html[data-theme="light"] {
-    .theme-switcher.toggle label[for="toggle-theme-light"] {
-        display: flex;
-    }
-  }
-
-  /* darkテーマ時: lightボタン（太陽アイコン）を表示 */
-  html[data-theme="dark"] {
-    .theme-switcher.toggle label[for="toggle-theme-dark"] {
-        display: flex;
-    }
-  }
-
-  /* data-themeが未設定の場合はシステム設定に従う */
-  @media (prefers-color-scheme: light) {
-    html:not([data-theme]) .theme-switcher.toggle label[for="toggle-theme-light"] {
-      display: flex;
-    }
-  }
-
-  @media (prefers-color-scheme: dark) {
-    html:not([data-theme]) .theme-switcher.toggle label[for="toggle-theme-dark"] {
-      display: flex;
-    }
-  }
-
-  /* セレクタースタイル（indexページ用） */
-  .theme-switcher.selector {
-    justify-content: center;
-    gap: 32px;
-    flex-wrap: wrap;
-    position: relative;
-  }
-
-  .theme-switcher.selector label {
     display: flex;
     align-items: center;
-    gap: 8px;
-    padding: 8px 0;
-    font-weight: 500;
-    color: var(--text-color-level-1);
-    transition: color 0.3s ease;
-    position: relative;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    border-radius: 8px;
+    cursor: pointer;
+    color: var(--text-color-level-0);
+    opacity: 0.5;
+    transition: color 0.2s ease, opacity 0.2s ease, background-color 0.2s ease;
   }
 
-  .theme-switcher.selector input[type="radio"]:checked + label {
+  .theme-switcher i {
+    font-size: 18px;
+  }
+
+  /* 選択中。data-theme が未設定の状態がそのまま「自動」にあたるので、
+     JavaScript を待たずに初回ペイントから正しい位置に色がつく。
+     html は GlobalLayout が出力する要素なので :global() でスコープ外に出す */
+  :global(html:not([data-theme])) .theme-switcher label[for="theme-auto"],
+  :global(html[data-theme="light"]) .theme-switcher label[for="theme-light"],
+  :global(html[data-theme="dark"]) .theme-switcher label[for="theme-dark"] {
     color: var(--primary-color-level-0);
-    anchor-name: --active-theme;
+    opacity: 1;
   }
 
-  .theme-switcher.selector label:hover {
-    color: var(--primary-color-level-0);
+  /* 沈んでいる2つも押せることを見せる */
+  .theme-switcher:hover label,
+  .theme-switcher:focus-within label {
+    opacity: 1;
   }
 
-  .theme-switcher.selector i {
-    font-size: 1.1em;
+  .theme-switcher label:hover {
+    background-color: var(--bg-color-level-2);
   }
 
-  .theme-switcher.selector .label-text {
-    display: none;
-  }
-
-  /* CSS Anchor Positioning を使用した下線 */
-  .theme-switcher.selector::after {
-    content: '';
-    position: absolute;
-    height: 2px;
-    background-color: var(--primary-color-level-0);
-    border-radius: 1px;
-    bottom: 0;
-    left: anchor(--active-theme left);
-    right: anchor(--active-theme right);
-    transition: left 0.3s ease, right 0.3s ease;
+  .theme-switcher input[type="radio"]:focus-visible + label {
+    outline: 2px solid var(--primary-color-level-0);
+    outline-offset: 2px;
   }
 </style>
 
 <script>
+  const htmlElement = document.documentElement;
+
+  function getCurrentTheme() {
+    return htmlElement.getAttribute('data-theme') ?? 'auto';
+  }
+
+  function applyTheme(theme: string) {
+    if (theme === 'auto') {
+      htmlElement.removeAttribute('data-theme');
+      localStorage.removeItem('theme');
+    } else {
+      htmlElement.setAttribute('data-theme', theme);
+      localStorage.setItem('theme', theme);
+    }
+  }
+
   document.addEventListener('DOMContentLoaded', () => {
-    const switchers = document.querySelectorAll('.theme-switcher');
-    const htmlElement = document.documentElement;
+    const currentTheme = getCurrentTheme();
 
-    // 現在のテーマを取得
-    function getCurrentTheme() {
-      const dataTheme = htmlElement.getAttribute('data-theme');
-      if (dataTheme) return dataTheme;
+    document.querySelectorAll('.theme-switcher').forEach(switcher => {
+      const radios = switcher.querySelectorAll('input[name="theme"]') as NodeListOf<HTMLInputElement>;
 
-      const savedTheme = localStorage.getItem('theme');
-      if (savedTheme) return savedTheme;
+      radios.forEach(radio => {
+        radio.checked = radio.value === currentTheme;
 
-      return 'auto';
-    }
-
-    // テーマを適用
-    function applyTheme(command: string) {
-      switch (command) {
-        case 'to-auto':
-          htmlElement.removeAttribute('data-theme');
-          localStorage.removeItem('theme');
-          break;
-        case 'to-light':
-          htmlElement.setAttribute('data-theme', 'light');
-          localStorage.setItem('theme', 'light');
-          break;
-        case 'to-dark':
-          htmlElement.setAttribute('data-theme', 'dark');
-          localStorage.setItem('theme', 'dark');
-          break;
-      }
-    }
-
-    switchers.forEach(switcher => {
-      const themeRadios = switcher.querySelectorAll('input[name="theme"]') as NodeListOf<HTMLInputElement>;
-      const isToggleMode = switcher.classList.contains('toggle');
-
-      // 初期状態を設定（セレクターモードのみ）
-      if (!isToggleMode) {
-        const currentTheme = getCurrentTheme();
-        const currentRadio = Array.from(themeRadios).find(radio => radio.dataset.command === `to-${currentTheme}`);
-        if (currentRadio) {
-          currentRadio.checked = true;
-        }
-      }
-
-      // テーマ変更ハンドラー
-      themeRadios.forEach(radio => {
-        radio.addEventListener('change', (e) => {
-          const target = e.target as HTMLInputElement;
-          const command = target.dataset.command;
-
-          if (command) {
-            applyTheme(command);
-
-            // トグルモードの場合はチェック状態をリセット
-            if (isToggleMode) {
-              themeRadios.forEach(r => r.checked = false);
-            }
+        radio.addEventListener('change', () => {
+          if (radio.checked) {
+            applyTheme(radio.value);
           }
         });
       });
