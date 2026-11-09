@@ -1,0 +1,120 @@
+---
+import ThemeSwitcher from "./ThemeSwitcher.astro";
+import icon from "../../../icon/icon-128.png";
+
+const pathname = Astro.url.pathname;
+const sections = [
+  { href: "/blog", label: "Blog" },
+  { href: "/note", label: "Note" },
+];
+const isCurrent = (href: string) => pathname === href || pathname.startsWith(`${href}/`);
+---
+
+<header class="site-header">
+  <a href="/" class="site-logo">
+    <img src={icon.src} width="32" height="32" alt="" />
+    <span>yaakai.to</span>
+  </a>
+  <nav class="site-nav" aria-label="サイト">
+    {sections.map(({ href, label }) => (
+      <a href={href} class="site-nav-link" aria-current={isCurrent(href) ? "page" : undefined}>{label}</a>
+    ))}
+    <span class="site-nav-divider" aria-hidden="true"></span>
+    <a href="/rss.xml" class="site-nav-link site-nav-sub">RSS</a>
+    <a href="/llms.txt" class="site-nav-link site-nav-sub">llms.txt</a>
+    <a href="https://github.com/yaakaito" class="site-nav-link site-nav-sub" target="_blank" rel="noopener noreferrer">GitHub</a>
+  </nav>
+  <ThemeSwitcher class="site-theme" />
+</header>
+
+<style>
+  .site-header {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    grid-template-areas: "logo nav theme";
+    align-items: center;
+    gap: 8px 24px;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--bg-color-level-3);
+  }
+
+  .site-logo {
+    grid-area: logo;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--text-color-level-0);
+    text-decoration: none;
+  }
+
+  .site-logo:visited,
+  .site-logo:hover {
+    color: var(--text-color-level-0);
+  }
+
+  .site-logo img {
+    width: 32px;
+    height: 32px;
+    border-radius: 6px;
+  }
+
+  .site-logo span {
+    font-family: var(--font-display);
+    font-size: 20px;
+    letter-spacing: 0.03em;
+  }
+
+  .site-nav {
+    grid-area: nav;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 20px;
+    font-size: 14px;
+  }
+
+  .site-nav-link,
+  .site-nav-link:visited {
+    color: var(--text-color-level-2);
+    text-decoration: none;
+  }
+
+  .site-nav-link:hover {
+    color: var(--primary-color-level-0);
+  }
+
+  .site-nav-link[aria-current="page"] {
+    color: var(--text-color-level-0);
+    font-weight: bold;
+  }
+
+  .site-nav-divider {
+    width: 1px;
+    height: 14px;
+    background-color: var(--bg-color-level-3);
+  }
+
+  .site-header :global(.site-theme) {
+    grid-area: theme;
+  }
+
+  /* 狭い画面ではナビを 2 段目に回し、RSS などはフッターに任せる */
+  @media (max-width: 720px) {
+    .site-header {
+      grid-template-columns: 1fr auto;
+      grid-template-areas:
+        "logo theme"
+        "nav nav";
+      padding-bottom: 8px;
+    }
+
+    .site-nav {
+      justify-content: flex-start;
+    }
+
+    .site-nav-divider,
+    .site-nav-sub {
+      display: none;
+    }
+  }
+</style>

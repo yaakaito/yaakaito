@@ -1,27 +1,27 @@
 ---
+import { yearOf } from "../utils/posts";
+
 interface Props {
-  class?: string;
+  /** 記事の日付。Blog では URL と同じく年の階層を表示する */
+  date: string;
 }
 
-const { class: className = '' } = Astro.props;
+const { date } = Astro.props;
 
-// URLから現在のページタイプを判定
+// トップへの導線はヘッダーのロゴが担うので、ここでは一覧への戻り道だけを出す
 const pathname = Astro.url.pathname;
-let pageType = '';
-
-if (pathname.startsWith('/blog/')) {
-  pageType = 'blog';
-} else if (pathname.startsWith('/note/')) {
-  pageType = 'note';
-}
+const pageType = pathname.startsWith("/blog/") ? "blog" : pathname.startsWith("/note/") ? "note" : "";
 ---
 
 {pageType && (
-  <nav class={`breadcrumb ${className}`} aria-label="パンくずリスト">
-    <a href="/" class="breadcrumb-item">yaakai.to</a>
-    <span class="breadcrumb-separator">/</span>
-    <a href={`/${pageType}/`} class="breadcrumb-item">{pageType}</a>
-    <span class="breadcrumb-separator">/</span>
+  <nav class="breadcrumb" aria-label="パンくずリスト">
+    <a href={`/${pageType}/`}>{pageType}</a>
+    {pageType === "blog" && (
+      <Fragment>
+        <span aria-hidden="true">/</span>
+        <span>{yearOf(date)}</span>
+      </Fragment>
+    )}
   </nav>
 )}
 
@@ -30,22 +30,19 @@ if (pathname.startsWith('/blog/')) {
     display: flex;
     align-items: center;
     gap: 8px;
-    font-size: 0.9em;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    line-height: 1.6;
     color: var(--text-color-level-2);
   }
 
-  .breadcrumb-item {
+  .breadcrumb a,
+  .breadcrumb a:visited {
     color: var(--text-color-level-2);
     text-decoration: none;
-    transition: color 0.2s ease;
   }
 
-  .breadcrumb-item:hover {
+  .breadcrumb a:hover {
     color: var(--primary-color-level-0);
-  }
-
-  .breadcrumb-separator {
-    color: var(--text-color-level-2);
-    user-select: none;
   }
 </style>

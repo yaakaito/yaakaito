@@ -1,0 +1,38 @@
+---
+const links = [
+  { href: "/rss.xml", label: "RSS" },
+  { href: "/llms.txt", label: "llms.txt" },
+  { href: "/humans.txt", label: "humans.txt" },
+  { href: "https://github.com/yaakaito", label: "GitHub", external: true },
+];
+---
+
+<footer class="site-footer">
+  <span>© yaakaito</span>
+  {links.map(({ href, label, external }) => (
+    <a href={href} target={external ? "_blank" : undefined} rel={external ? "noopener noreferrer" : undefined}>{label}</a>
+  ))}
+</footer>
+
+<style>
+  .site-footer {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 16px;
+    margin-top: 64px;
+    padding: 18px 0 32px;
+    border-top: 1px solid var(--bg-color-level-3);
+    font-size: 13px;
+    color: var(--text-color-level-2);
+  }
+
+  .site-footer a,
+  .site-footer a:visited {
+    color: var(--text-color-level-2);
+    text-decoration: none;
+  }
+
+  .site-footer a:hover {
+    color: var(--primary-color-level-0);
+  }
+</style>
