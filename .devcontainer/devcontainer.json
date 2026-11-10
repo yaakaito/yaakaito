@@ -7,7 +7,7 @@
     "initializeCommand": "mkdir -p ${localEnv:HOME}/.local/share/devcontainer/${devcontainerId} && touch ${localEnv:HOME}/.local/share/devcontainer/${devcontainerId}/.zsh_history",
     "postCreateCommand": ".devcontainer/setup-browser-action.sh",
     "features": {
-        "ghcr.io/devcontainers/features/node:1": {},
+        "ghcr.io/devcontainers/features/node:2": {},
         "ghcr.io/shyim/devcontainers-features/bun:0": {},
         "ghcr.io/devcontainers/features/github-cli:1": {}
     },
