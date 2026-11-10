@@ -1,216 +1,84 @@
 ---
 import GlobalLayout from "../layouts/global-layout.astro";
-import FeatureGrid from "../components/FeatureGrid.astro";
-import CategorySection from "../components/CategorySection.astro";
-import ThemeSwitcher from "../components/ThemeSwitcher.astro";
-import type { MarkdownInstance } from "astro";
+import BlogCard from "../components/BlogCard.astro";
+import PostList from "../components/PostList.astro";
+import SectionLabel from "../components/SectionLabel.astro";
 import * as humans from "../../humans.md";
-import icon from "../../../icon/icon-128.png";
+import { excerptOf, sortPosts, type PostFrontmatter } from "../utils/posts";
 
-// 投稿の型定義
-interface Post {
-  frontmatter: {
-    title: string;
-    date: string;
-    emoji: string;
-    eyecatch?: string;
-  };
-  url: string;
-}
+const blogs = sortPosts(await Astro.glob<PostFrontmatter>("./blog/**/*.md"));
+const notes = sortPosts(await Astro.glob<PostFrontmatter>("./note/**/*.md"));
 
-// ディレクトリ内の全ての .md ファイルを取得
-const blogPosts = await Astro.glob<{ title: string; date: string; emoji: string; eyecatch?: string }>('./blog/**/*.md');
-const notePosts = await Astro.glob<{ title: string; date: string; emoji: string; eyecatch?: string }>('./note/**/*.md');
-
-// ファイルを読み込む非同期関数
-function loadPosts(posts: MarkdownInstance<{ title: string; date: string; emoji: string; eyecatch?: string }>[]): Post[] {
-  return posts.map(post => ({
-    frontmatter: post.frontmatter,
-    url: post.url ?? '',
-  })).sort((a, b) => new Date(b.frontmatter.date).getTime() - new Date(a.frontmatter.date).getTime());
-}
-
-// すべての投稿を読み込み、新しい順に並べ替え
-const allBlogs = loadPosts(blogPosts);
-const allNotes = loadPosts(notePosts);
-
-// フィーチャーセクション用に最新の4つの投稿を取得（ブログ優先）
-const featurePosts = [...allBlogs.slice(0, 2), ...allNotes.slice(0, 2)].sort(
-  (a, b) => new Date(b.frontmatter.date).getTime() - new Date(a.frontmatter.date).getTime()
-).slice(0, 4);
-
-// カテゴリセクション用に各カテゴリの投稿を取得（最新4つ）
-const blogSectionPosts = allBlogs.slice(0, 4);
-const noteSectionPosts = allNotes.slice(0, 4);
+// 最新の Blog を大きく 1 本、続く 3 本をカードで。Note は 1 行リストにして重複させない
+const [featured, ...restBlogs] = blogs;
+const recentBlogs = restBlogs.slice(0, 3);
+const recentNotes = notes.slice(0, 6);
 ---
 
 <GlobalLayout>
-  <main class="main-content">
-    <div class="theme-switcher-row">
-      <ThemeSwitcher />
+  <main>
+    <!-- 紹介文は README と同じく humans.md から読み込む -->
+    <div class="intro"><humans.Content /></div>
+
+    <SectionLabel title="Blog" note={`${blogs.length} posts`} moreLink="/blog" />
+    {featured && (
+      <BlogCard
+        variant="feature"
+        title={featured.frontmatter.title}
+        date={featured.frontmatter.date}
+        emoji={featured.frontmatter.emoji}
+        url={featured.url}
+        eyecatch={featured.frontmatter.eyecatch}
+        tags={featured.frontmatter.tags}
+        excerpt={excerptOf(featured.rawContent())}
+      />
+    )}
+    <div class="blog-grid">
+      {recentBlogs.map((post) => (
+        <BlogCard
+          title={post.frontmatter.title}
+          date={post.frontmatter.date}
+          emoji={post.frontmatter.emoji}
+          url={post.url}
+          eyecatch={post.frontmatter.eyecatch}
+        />
+      ))}
     </div>
 
-    <!-- プロフィールセクション -->
-    <section class="profile-section">
-      <div class="profile-container">
-        <div class="profile-header">
-          <img src={icon.src} width="28" height="28" alt="yaakai.to" class="profile-icon">
-          <div class="profile-info">
-            <h1 class="profile-name">yaakai.to</h1>
-            <p class="profile-description"><humans.Content /></p>
-          </div>
-        </div>
-        <div class="profile-meta">
-          <a href="/rss.xml" class="profile-meta-link">
-            <i class="fas fa-rss"></i>
-            <span>RSS Feed</span>
-          </a>
-          <a href="/llms.txt" class="profile-meta-link">
-            <i class="fas fa-robot"></i>
-            <span>For LLMs</span>
-          </a>
-          <a href="https://github.com/yaakaito" class="profile-meta-link" target="_blank" rel="noopener noreferrer">
-            <i class="fab fa-github"></i>
-            <span>GitHub</span>
-          </a>
-        </div>
-      </div>
-    </section>
-
-    <!-- フィーチャーセクション -->
-    <section class="featured-section">
-      <FeatureGrid posts={featurePosts} />
-    </section>
-
-    <!-- ブログセクション -->
-    <CategorySection
-      title="Blog"
-      type="blog"
-      posts={blogSectionPosts}
-      viewAllLink="/blog"
-    />
-
-    <!-- ノートセクション -->
-    <CategorySection
-      title="Note"
-      type="note"
-      posts={noteSectionPosts}
-      viewAllLink="/note"
+    <SectionLabel title="Note" note="短い備忘録" moreLink="/note" />
+    <PostList
+      items={recentNotes.map((post) => ({
+        title: post.frontmatter.title,
+        date: post.frontmatter.date,
+        emoji: post.frontmatter.emoji,
+        url: post.url,
+      }))}
     />
   </main>
 </GlobalLayout>
 
 <style>
-  .main-content {
-    padding: 32px 0;
-  }
-
-  .profile-section {
-    margin-bottom: 48px;
-  }
-
-  .profile-container {
-    background-color: var(--bg-color-level-1);
-    border-radius: 12px;
-    padding: 24px;
-  }
-
-  .profile-header {
-    display: flex;
-    align-items: center;
-    margin-bottom: 24px;
-  }
-
-  .profile-icon {
-    width: 72px;
-    height: 72px;
-    border-radius: 50%;
-    margin-right: 24px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  }
-
-  .profile-info {
-    flex: 1;
-  }
-
-  .profile-name {
-    font-size: 1.8em;
-    margin: 0 0 8px 0;
+  .intro {
+    padding-top: 32px;
     color: var(--text-color-level-0);
   }
 
-  .profile-description {
-    font-size: 1em;
-    line-height: 1.5;
-    color: var(--text-color-level-1);
+  .intro :global(p) {
     margin: 0;
+    font-size: 16px;
   }
 
-  .profile-meta {
-    display: flex;
-    gap: 16px;
-    flex-wrap: wrap;
+  .blog-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+    margin-top: 32px;
   }
 
-  .profile-meta-link {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    background-color: var(--bg-color-level-2);
-    padding: 10px 18px;
-    border-radius: 24px;
-    transition: transform 0.2s ease, background-color 0.2s ease;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-    font-size: 0.9em;
-  }
-
-  .profile-meta-link:hover {
-    transform: translateY(-2px);
-    background-color: var(--bg-color-level-3);
-  }
-
-  .section-title {
-    font-size: 1.6em;
-    margin-bottom: 24px;
-    color: var(--text-color-level-0);
-    font-weight: bold;
-    position: relative;
-    padding-left: 16px;
-  }
-
-  .section-title::before {
-    content: '';
-    position: absolute;
-    left: 0;
-    top: 0;
-    bottom: 0;
-    width: 6px;
-    background-color: var(--primary-color-level-0);
-    border-radius: 3px;
-  }
-
-  .featured-section {
-    margin-bottom: 48px;
-  }
-
-  .theme-switcher-row {
-    display: flex;
-    justify-content: flex-end;
-    margin-bottom: 8px;
-  }
-
-  @media (max-width: 768px) {
-    .meta-content {
+  @media (max-width: 720px) {
+    .blog-grid {
+      grid-template-columns: 1fr;
       gap: 16px;
-    }
-
-    .meta-links {
-      flex-direction: column;
-      gap: 12px;
-    }
-
-    .meta-card {
-      padding: 20px;
     }
   }
 </style>

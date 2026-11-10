@@ -1,17 +1,12 @@
 ---
 import GlobalLayout from "../layouts/global-layout.astro";
-import ThemeSwitcher from "../components/ThemeSwitcher.astro";
 import CopyPageMenu from "../components/CopyPageMenu.astro";
 import Breadcrumb from "../components/Breadcrumb.astro";
 import AiDisclosure from "../components/AiDisclosure.astro";
 import { getGenericEyecatchColor } from "../utils/eyecatch";
-import icon from "../../../icon/icon-128.png";
+import { formatDate } from "../utils/posts";
 const { frontmatter, content } = Astro.props;
-const dateString = new Date(frontmatter.date).toLocaleDateString("en-US", {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-});
+const dateString = formatDate(frontmatter.date);
 
 // OGP用の説明文を用意（frontmatterのdescriptionがあればそれを使い、なければ最初の数行から生成）
 const description = frontmatter.description ||
@@ -51,178 +46,59 @@ const humanRatio = isBlogPost ? 80 : 100;
         body {
             overflow-x: hidden;
         }
-        /* 関連記事のスタイル */
+        /* 関連記事のスタイル（JS で挿入するので global に置く） */
         .related-section {
-            max-width: 850px;
+            max-width: var(--content-width);
             margin: 48px auto 0;
-            padding: 0;
-            color: var(--text-color-level-0);
-        }
-
-        .related-header {
-            display: flex;
-            align-items: center;
-            margin-bottom: 24px;
         }
 
         .related-title {
-            font-size: 1.5em;
-            font-weight: bold;
-            margin: 0;
+            margin: 0 0 8px;
+            font-family: var(--font-display);
+            font-weight: normal;
+            font-size: 18px;
+            letter-spacing: 0.04em;
             color: var(--text-color-level-0);
-            position: relative;
-            padding-left: 16px;
         }
 
-        .related-title::before {
-            content: '';
-            position: absolute;
-            left: 0;
-            top: 0;
-            bottom: 0;
-            width: 6px;
-            background-color: var(--primary-color-level-0);
-            border-radius: 3px;
+        .related-list {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            border-bottom: 1px solid var(--bg-color-level-3);
         }
 
-        .related-articles-grid {
+        .related-list li {
+            margin: 0;
+        }
+
+        .related-list a,
+        .related-list a:visited {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 24px;
-        }
-
-        .related-article-card {
-            background: var(--bg-color-level-1);
-            border-radius: 10px;
-            padding: 24px;
-            transition: all 0.2s ease-in-out;
+            grid-template-columns: 28px 1fr;
+            gap: 12px;
+            align-items: baseline;
+            padding: 11px 4px;
+            border-top: 1px solid var(--bg-color-level-3);
+            color: var(--text-color-level-0);
             text-decoration: none;
-            color: var(--text-color-level-0);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            height: 100%;
-            box-sizing: border-box;
-            overflow: hidden;
-            position: relative;
-            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+            transition: background-color 0.15s ease;
         }
 
-        .related-article-card:hover {
-            transform: translateY(-4px);
-            background: var(--bg-color-level-2);
-            box-shadow: 0 6px 14px rgba(0, 0, 0, 0.2);
+        .related-list a:hover {
+            background-color: var(--bg-color-level-1);
+            color: var(--primary-color-level-0);
         }
 
-        .related-article-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            height: 4px;
-            width: 100%;
-            background-color: var(--primary-color-level-0);
-            opacity: 0.8;
-        }
-
-        .related-article-emoji {
-            font-size: 3em;
-            margin: 8px 0 16px;
-            line-height: 1;
-            flex-shrink: 0;
-        }
-
-        .related-article-title {
-            font-size: 1.1em;
-            font-weight: bold;
-            margin: 0 0 12px 0;
-            color: var(--text-color-level-0);
+        .related-emoji {
+            font-size: 17px;
             text-align: center;
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
-            width: 100%;
-            flex-shrink: 0;
-            line-height: 1.4;
-            word-break: break-word;
         }
 
-        .related-article-content {
-            font-size: 0.9em;
-            color: var(--text-color-level-2);
-            display: -webkit-box;
-            -webkit-line-clamp: 3;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
-            margin: 0;
-            line-height: 1.5;
-            width: 100%;
-            text-align: center;
-            flex: 1;
-            word-break: break-word;
-        }
-
-        @media screen and (max-width: 900px) {
-            .related-section {
-                margin: 36px auto 0;
-                padding: 0 16px;
-            }
-
-            .related-title {
-                font-size: 1.3em;
-            }
-
-            .related-articles-grid {
-                grid-template-columns: repeat(2, 1fr);
-                gap: 20px;
-            }
-
-            .related-article-card {
-                padding: 20px;
-            }
-
-            .related-article-emoji {
-                font-size: 2.6em;
-                margin-bottom: 12px;
-            }
-
-            .related-article-title {
-                font-size: 1em;
-            }
-        }
-
-        @media screen and (max-width: 600px) {
-            .related-section {
-                margin: 28px auto 0;
-            }
-
-            .related-articles-grid {
-                grid-template-columns: 1fr;
-                gap: 16px;
-            }
-
-            .related-article-card {
-                padding: 16px;
-                flex-direction: row;
-                align-items: center;
-                text-align: left;
-            }
-
-            .related-article-emoji {
-                font-size: 2.2em;
-                margin: 0 16px 0 0;
-            }
-
-            .related-article-title {
-                text-align: left;
-                margin-bottom: 6px;
-            }
-
-            .related-article-content {
-                text-align: left;
-                -webkit-line-clamp: 2;
-            }
+        .related-name {
+            font-size: 15px;
+            line-height: 1.6;
+            overflow-wrap: anywhere;
         }
 
         /* Markdown styles */
@@ -262,21 +138,19 @@ const humanRatio = isBlogPost ? 80 : 100;
         }
 
         /* Lightbox styles */
+        /* dialog 自体は画像の大きさにして、暗い部分を ::backdrop にする。
+           こうすると closedby="any" で暗い部分のクリックが「外側」として扱われ、JS なしで閉じられる */
         .image-lightbox {
-            position: fixed;
+            /* リセット CSS（@acab/reset.css）が dialog の inset を unset にしているので、
+               UA と同じ inset: 0 + margin: auto で画面中央に置き直す */
             inset: 0;
-            width: 100%;
-            height: 100%;
-            max-width: 100%;
-            max-height: 100%;
-            margin: 0;
+            margin: auto;
+            max-width: 90vw;
+            max-height: 90vh;
             padding: 0;
             border: none;
-            background-color: rgba(0, 0, 0, 0.9);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 1000;
+            background: none;
+            overflow: visible;
         }
 
         .image-lightbox::backdrop {
@@ -284,6 +158,7 @@ const humanRatio = isBlogPost ? 80 : 100;
         }
 
         .image-lightbox img {
+            display: block;
             max-width: 90vw;
             max-height: 90vh;
             object-fit: contain;
@@ -976,25 +851,6 @@ const humanRatio = isBlogPost ? 80 : 100;
             /* モバイル用のスタイル調整 */
         }
 
-        .related-article-card {
-            background: var(--bg-color-level-1);
-            color: var(--text-color-level-0);
-            box-shadow: light-dark(0 2px 6px rgba(0, 0, 0, 0.08), 0 2px 6px rgba(0, 0, 0, 0.15));
-        }
-
-        .related-article-card:hover {
-            background: var(--bg-color-level-2);
-            box-shadow: light-dark(0 6px 14px rgba(0, 0, 0, 0.1), 0 6px 14px rgba(0, 0, 0, 0.2));
-        }
-
-        .related-article-title {
-            color: var(--text-color-level-0);
-        }
-
-        .related-article-content {
-            color: var(--text-color-level-2);
-        }
-
         .ogp-card:hover {
             box-shadow: light-dark(0 4px 12px rgba(0, 0, 0, 0.15), 0 4px 12px rgba(0, 0, 0, 0.3));
         }
@@ -1004,157 +860,99 @@ const humanRatio = isBlogPost ? 80 : 100;
         }
     </style>
     <style>
-            .article-container {
-                max-width: 850px;
-                margin: 0 auto 12px;
-                padding: 0;
-                position: relative;
+            .article {
+                max-width: var(--content-width);
+                margin: 0 auto;
+                padding-top: 40px;
             }
 
             .article-header {
-                padding: 12px 0 8px;
-                margin-bottom: 0.5em;
-                position: relative;
-                text-align: center;
+                display: grid;
+                gap: 14px;
             }
 
-            .article-header-inner {
-                max-width: 850px;
-                margin: 0 auto;
-                padding: 0 20px;
+            /* アイキャッチのない記事は、大きな単色画像の代わりに絵文字をタイトルの横に置く */
+            .article-heading {
+                display: grid;
+                gap: 10px;
             }
 
-            .article-header-top {
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-                margin-bottom: 0.5em;
-                text-align: left;
-            }
-
-            .article-header-bottom {
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-                gap: 12px;
-                margin-top: 1.5em;
-                text-align: left;
-            }
-
-            .article-header-actions {
-                display: flex;
-                align-items: center;
-                gap: 12px;
-            }
-
-            .header-divider {
-                width: 1px;
-                height: 16px;
-                background-color: var(--bg-color-level-3);
-                flex: none;
-            }
-
-            .article-actions {
-                display: flex;
-                align-items: center;
-                gap: 12px;
-            }
-
-            .article-meta {
-                display: flex;
+            .article-heading.with-emoji {
+                grid-template-columns: 64px 1fr;
+                gap: 18px;
                 align-items: center;
             }
 
-            .article-type {
-                font-size: 0.85em;
-                font-weight: bold;
-                color: white;
-                background-color: rgba(255, 255, 255, 0.2);
-                padding: 0.3em 0.8em;
-                border-radius: 16px;
-                margin-right: 1em;
-                display: inline-flex;
-                align-items: center;
-            }
-
-            .article-type::before {
-                content: '';
-                display: inline-block;
-                width: 6px;
-                height: 6px;
-                background-color: white;
-                border-radius: 50%;
-                margin-right: 0.4em;
-            }
-
-            time {
-                display: block;
-                font-size: 0.9em;
-                color: var(--text-color-level-2);
-                margin: 0;
-                text-align: left;
+            .article-emoji {
+                display: grid;
+                place-items: center;
+                width: 64px;
+                height: 64px;
+                border-radius: 12px;
+                border: 1px solid var(--bg-color-level-3);
+                background-color: var(--bg-color-level-1);
+                font-size: 32px;
+                line-height: 1;
             }
 
             .title {
-                font-size: 2.4em;
-                font-weight: bold;
                 margin: 0;
-                /* 行長のバランス調整（全ブラウザ対応） */
-                text-wrap: balance;
-                /* 厳格な禁則処理 */
-                line-break: strict;
-                /* 見出し用の適切な行間 */
-                line-height: 1.3;
-                /* 文字間隔の微調整 */
+                font-size: 2.1em;
+                font-weight: bold;
+                line-height: 1.35;
                 letter-spacing: 0.02em;
                 color: var(--text-color-level-0);
-                text-align: left;
             }
 
-            /* Chrome系ブラウザでの文節境界改行 */
             @supports (word-break: auto-phrase) {
                 .title {
                     word-break: auto-phrase;
                 }
             }
 
-            /* タグ・開示インジケータ・コピーボタンを同じ調子のメタ情報として並べる */
-            .tags {
+            .article-meta {
                 display: flex;
-                gap: 12px;
                 flex-wrap: wrap;
                 align-items: center;
-                font-size: 0.85em;
-                letter-spacing: 0.02em;
+                gap: 4px 14px;
+                font-family: var(--font-mono);
+                font-size: 12px;
+                line-height: 1.6;
                 color: var(--text-color-level-2);
+            }
+
+            .tag {
+                color: var(--primary-color-level-0);
             }
 
             .tag::before {
                 content: "#";
             }
 
-            .emoji {
-                display: block;
-                font-size: 6em;
-                line-height: 1.3em;
-                margin: 0 0 0.2em 0;
-                text-align: center;
+            /* 開示インジケータとコピーボタンを罫線で挟んだ 1 段にまとめる */
+            .article-tools {
+                display: flex;
+                flex-wrap: wrap;
+                align-items: center;
+                justify-content: space-between;
+                gap: 12px;
+                padding: 6px 0;
+                border-top: 1px solid var(--bg-color-level-3);
+                border-bottom: 1px solid var(--bg-color-level-3);
             }
 
             .eyecatch-wrapper {
                 position: relative;
-                max-width: 850px;
-                margin: 1em auto;
-                display: inline-block;
+                margin-top: 18px;
             }
 
             .eyecatch {
                 display: block;
                 width: 100%;
-                max-height: 450px;
+                aspect-ratio: 1200 / 630;
                 object-fit: cover;
-                border-radius: 8px;
-                box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+                border-radius: 10px;
+                image-rendering: pixelated;
             }
 
             .ai-badge {
@@ -1202,7 +1000,7 @@ const humanRatio = isBlogPost ? 80 : 100;
              * 1. アンカー要素に anchor-name プロパティを設定
              * 2. 位置指定要素に position-anchor プロパティを設定（アンカー要素の名前を指定）
              * 3. 位置指定要素の位置を anchor() 関数を使用して設定
-             * 4. JavaScript を使用して表示/非表示を制御
+             * 4. 表示/非表示はボタンの popovertarget と popover 属性に任せる（JS 不要）
              */
 
             /* アンカー要素の定義 */
@@ -1210,24 +1008,19 @@ const humanRatio = isBlogPost ? 80 : 100;
                 anchor-name: --ai-badge; /* カスタム識別子を定義（--で始まる必要がある） */
             }
 
-            /* ポップオーバー要素の定義 */
+            /* ポップオーバー要素の定義。popover="auto" なのでトップレイヤーに出て z-index は不要、
+               外側クリックと Esc で閉じる */
             .ai-badge-popover {
                 width: 260px;
                 background-color: var(--bg-color-level-1);
+                color: var(--text-color-level-0);
                 border: 1px solid var(--bg-color-level-3);
                 padding: 14px;
                 border-radius: 6px;
                 box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-                z-index: 12;
-                position: fixed; /* popoverはfixedが推奨 */
                 position-anchor: --ai-badge; /* アンカー要素の名前を指定して関連付け */
                 position-area: top span-left; /* AIバッジの上左側に配置 */
-                margin: 0 0 10px 0; /* 下に10pxの余白 */
-                display: none; /* 初期状態では非表示 */
-            }
-
-            .ai-badge-popover.show {
-                display: block;
+                margin: 0 0 10px 0; /* popover の UA スタイルの margin: auto を打ち消し、下に10pxの余白 */
             }
 
             .ai-badge-tooltip p {
@@ -1248,103 +1041,33 @@ const humanRatio = isBlogPost ? 80 : 100;
                 text-decoration: underline;
             }
 
-
             .article-content {
-                padding: 10px 20px 30px;
-                margin-top: 0;
-                position: relative;
+                margin-top: 24px;
                 color: var(--text-color-level-0);
             }
 
-            .author {
-                margin-top: 3em;
-                padding-top: 1.5em;
-                border-top: 1px solid var(--bg-color-level-3);
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                font-weight: bold;
-                color: var(--text-color-level-0);
-            }
-
-            .author > img {
-                margin-right: 0.5em;
-                width: 1.5em;
-                height: 1.5em;
-                border-radius: 50%;
-                vertical-align: middle;
-            }
-
-            .back-to-home {
-                margin-top: 2em;
-                text-align: center;
-            }
-
-            .back-link {
-                display: inline-block;
-                padding: 8px 16px;
-                color: var(--text-color-level-0);
-                border: 1px solid var(--bg-color-level-3);
-                border-radius: 4px;
-                transition: all 0.3s ease;
-                font-size: 0.9em;
-            }
-
-            .back-link:hover {
-                background-color: var(--bg-color-level-2);
-                color: var(--primary-color-level-0);
-                border-color: var(--bg-color-level-4);
-                transform: translateY(-2px);
-            }
-
-
-
-
-            .back-link {
-                color: var(--text-color-level-0);
-                border: 1px solid var(--bg-color-level-3);
-            }
-
-            .back-link:hover {
-                background-color: var(--bg-color-level-2);
-                color: var(--primary-color-level-0);
-            }
-
-            @media screen and (max-width: 900px) {
-                .article-container {
-                    margin: 0 auto 10px;
-                }
-
-                .article-header-inner {
-                    padding: 0 24px;
-                }
-
-                .article-content {
-                    padding: 12px 12px;
-                }
-
-                .title {
-                    font-size: 2em;
-                }
-
-                .emoji {
-                    font-size: 5em;
-                }
-            }
-
-            @media screen and (max-width: 480px) {
-                .article-header-inner {
-                    padding: 0 16px;
-                }
-
-                .article-content {
-                    padding: 10px 8px;
+            @media screen and (max-width: 720px) {
+                .article {
+                    padding-top: 28px;
                 }
 
                 .title {
                     font-size: 1.6em;
                 }
 
+                .article-heading.with-emoji {
+                    grid-template-columns: 48px 1fr;
+                    gap: 14px;
+                }
+
+                .article-emoji {
+                    width: 48px;
+                    height: 48px;
+                    font-size: 24px;
+                }
+            }
+
+            @media screen and (max-width: 480px) {
                 .ai-badge {
                     width: 24px;
                     height: 24px;
@@ -1359,121 +1082,55 @@ const humanRatio = isBlogPost ? 80 : 100;
                     padding: 12px;
                 }
             }
-
-            .generic-eyecatch {
-                position: relative;
-                width: 100%;
-                max-width: 850px;
-                height: 450px;
-                margin: 1em auto;
-                background-size: cover;
-                background-position: center;
-                border-radius: 8px;
-                box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
-                display: flex;
-                align-items: center;
-                justify-content: center;
-            }
-
-            .generic-eyecatch-emoji {
-                font-size: 8em;
-                line-height: 1;
-                text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-            }
-
-            @media screen and (max-width: 900px) {
-                .generic-eyecatch {
-                    height: 350px;
-                }
-
-                .generic-eyecatch-emoji {
-                    font-size: 6em;
-                }
-            }
-
-            @media screen and (max-width: 480px) {
-                .generic-eyecatch {
-                    height: 250px;
-                }
-
-                .generic-eyecatch-emoji {
-                    font-size: 4em;
-                }
-            }
     </style>
-    <header class="article-header">
-        <div class="article-header-inner">
-            <div class="article-header-top">
-                <Breadcrumb />
-                <ThemeSwitcher />
+    <main class="article">
+        <header class="article-header">
+            <Breadcrumb date={frontmatter.date} />
+            <div class={`article-heading${frontmatter.eyecatch ? "" : " with-emoji"}`}>
+                {!frontmatter.eyecatch && <span class="article-emoji" aria-hidden="true">{frontmatter.emoji}</span>}
+                <h1 class="title">{frontmatter.title}</h1>
             </div>
-            <h1 class="title">{frontmatter.title}</h1>
-            <time datetime={frontmatter.date}>{dateString}</time>
-        </div>
-        {frontmatter.eyecatch ? (
-            <div class="eyecatch-wrapper">
-                <img
-                    src={`https://articles.yaakai.to/eyecatch?id=${frontmatter.eyecatch}`}
-                    alt={frontmatter.title}
-                    class="eyecatch"
-                />
-                <button class="ai-badge" title="この画像はAIを使用して生成された後、人間が調整したものです" id="ai-badge-anchor">
-                    <span class="ai-badge-icon">ⓘ</span>
-                </button>
-                <div id="ai-badge-popover" class="ai-badge-popover">
-                    <div class="ai-badge-tooltip">
-                        <p>この画像はAIを使用して生成された後、人間が調整したものです</p>
-                        <a href="https://github.com/yaakaito/yaakaito/issues/new?template=ai-image-issue.md" target="_blank" rel="noopener noreferrer">問題を報告する</a>
+            <div class="article-meta">
+                <time datetime={new Date(frontmatter.date).toISOString()}>{dateString}</time>
+                {frontmatter.tags && frontmatter.tags.map((tag: string) => (
+                    <span class="tag">{tag}</span>
+                ))}
+            </div>
+            <div class="article-tools">
+                <AiDisclosure human={humanRatio} model={frontmatter.aiModel} />
+                <CopyPageMenu url={Astro.url.pathname} />
+            </div>
+            {frontmatter.eyecatch && (
+                <div class="eyecatch-wrapper">
+                    <img
+                        src={`https://articles.yaakai.to/eyecatch?id=${frontmatter.eyecatch}`}
+                        alt={frontmatter.title}
+                        class="eyecatch"
+                    />
+                    <button type="button" class="ai-badge" title="この画像はAIを使用して生成された後、人間が調整したものです" id="ai-badge-anchor" popovertarget="ai-badge-popover">
+                        <span class="ai-badge-icon">ⓘ</span>
+                    </button>
+                    <div id="ai-badge-popover" class="ai-badge-popover" popover="auto">
+                        <div class="ai-badge-tooltip">
+                            <p>この画像はAIを使用して生成された後、人間が調整したものです</p>
+                            <a href="https://github.com/yaakaito/yaakaito/issues/new?template=ai-image-issue.md" target="_blank" rel="noopener noreferrer">問題を報告する</a>
+                        </div>
                     </div>
                 </div>
-            </div>
-        ) : (
-            <div
-                class="generic-eyecatch"
-                style={`background-image: url('https://articles.yaakai.to/common/${genericEyecatchColor}.png')`}
-            >
-                <span class="generic-eyecatch-emoji">{frontmatter.emoji}</span>
-            </div>
-        )}
-        <div class="article-header-inner">
-            <div class="article-header-bottom">
-                <div class="tags">
-                    {frontmatter.tags && frontmatter.tags.map((tag: string) => (
-                        <span class="tag">{tag}</span>
-                    ))}
-                </div>
-                <div class="article-header-actions">
-                    <AiDisclosure human={humanRatio} model={frontmatter.aiModel} />
-                    <span class="header-divider" aria-hidden="true"></span>
-                    <CopyPageMenu url={Astro.url.pathname} />
-                </div>
-            </div>
-        </div>
-    </header>
+            )}
+        </header>
 
-    <div class="article-container">
         <article class="article-content">
             <div class="markdown" ai-disclosure={aiDisclosure}><slot /></div>
-
-            <footer class="author">
-                <img src={icon.src} width="28" height="28">
-                yaakai.to
-            </footer>
-
-            <div class="back-to-home">
-                <a href="/" class="back-link">← ホームへ戻る</a>
-            </div>
         </article>
-    </div>
 
-    <section class="related-section">
-        <header class="related-header">
+        <section class="related-section">
             <h2 class="related-title">関連記事</h2>
-        </header>
-        <div class="related-articles-grid" id="related-articles-container">
-            <!-- 関連記事がここに動的に挿入されます -->
-        </div>
-    </section>
+            <ul class="related-list" id="related-articles-container">
+                <!-- 関連記事がここに動的に挿入されます -->
+            </ul>
+        </section>
+    </main>
     <script>
         document.addEventListener("DOMContentLoaded", async function(event) {
             // a を target=_blank にする
@@ -1486,41 +1143,6 @@ const humanRatio = isBlogPost ? 80 : 100;
                 // norefferer
                 link.setAttribute("rel", "noopener noreferrer");
             });
-
-            /*
-             * CSS Anchor Positioning と JavaScript の連携
-             *
-             * CSS Anchor Positioning は要素の位置決めを担当しますが、
-             * 表示/非表示の制御は JavaScript で行う必要があります。
-             *
-             * 実装のポイント:
-             * 1. display: none と .show クラスを使って表示/非表示を切り替える
-             * 2. クリックイベントでクラスを付け外しする
-             * 3. ポップオーバー外のクリックを検知して閉じる処理を実装
-             *
-             * 注意点:
-             * - popover 属性を使う方法もありますが、ブラウザ互換性の問題がある
-             * - CSS Anchor Positioning は比較的新しい機能なので、フォールバック値を設定するとよい
-             * - position: absolute と組み合わせて使用する
-             */
-
-            // AIバッジのクリックイベント
-            const aiButton = document.getElementById('ai-badge-anchor');
-            const aiPopover = document.getElementById('ai-badge-popover');
-
-            if (aiButton && aiPopover) {
-                // クリックでポップオーバーの表示/非表示を切り替え
-                aiButton.addEventListener('click', function() {
-                    aiPopover.classList.toggle('show');
-                });
-
-                // ポップオーバー以外の場所をクリックしたら閉じる
-                document.addEventListener('click', function(event) {
-                    if (!aiButton.contains(event.target as Node) && !aiPopover.contains(event.target as Node)) {
-                        aiPopover.classList.remove('show');
-                    }
-                });
-            }
 
             // 長いコードブロックを検出して折りたたみ機能を追加
             const codeBlocks = document.querySelectorAll('.markdown pre');
@@ -1584,21 +1206,25 @@ const humanRatio = isBlogPost ? 80 : 100;
                         url: string;
                         title: string;
                         emoji: string;
-                        content: string;
                     }
 
                     (data.articles as RelatedArticle[]).forEach(article => {
-                        const card = document.createElement('a');
-                        card.href = article.url;
-                        card.className = 'related-article-card';
+                        const item = document.createElement('li');
+                        const link = document.createElement('a');
+                        link.href = article.url;
 
-                        card.innerHTML = `
-                            <span class="related-article-emoji">${article.emoji}</span>
-                            <h3 class="related-article-title">${article.title}</h3>
-                            <p class="related-article-content">${article.content}</p>
-                        `;
+                        const emoji = document.createElement('span');
+                        emoji.className = 'related-emoji';
+                        emoji.setAttribute('aria-hidden', 'true');
+                        emoji.textContent = article.emoji;
 
-                        container.appendChild(card);
+                        const title = document.createElement('span');
+                        title.className = 'related-name';
+                        title.textContent = article.title;
+
+                        link.append(emoji, title);
+                        item.append(link);
+                        container.append(item);
                     });
                 } catch (error) {
                     console.error('関連記事の取得に失敗しました:', error);
@@ -1631,24 +1257,30 @@ const humanRatio = isBlogPost ? 80 : 100;
                     });
                 });
 
-                lightboxClose?.addEventListener('click', () => {
-                    lightbox.close();
-                });
-
                 lightboxImage.addEventListener('click', () => {
                     lightbox.close();
                 });
 
-                lightbox.addEventListener('click', (e) => {
-                    if (e.target === lightbox) {
+                // 閉じるボタンは command="close"、外側クリックと Esc は closedby="any" が処理する。
+                // どちらかに未対応のブラウザだけ JavaScript で補う
+                if (!('command' in HTMLButtonElement.prototype)) {
+                    lightboxClose?.addEventListener('click', () => {
                         lightbox.close();
-                    }
-                });
+                    });
+                }
+
+                if (!('closedBy' in HTMLDialogElement.prototype)) {
+                    lightbox.addEventListener('click', (e) => {
+                        if (e.target === lightbox) {
+                            lightbox.close();
+                        }
+                    });
+                }
             }
         });
     </script>
-    <dialog id="image-lightbox" class="image-lightbox">
-        <button class="image-lightbox-close" aria-label="閉じる">
+    <dialog id="image-lightbox" class="image-lightbox" closedby="any">
+        <button type="button" class="image-lightbox-close" aria-label="閉じる" commandfor="image-lightbox" command="close">
             <i class="fas fa-xmark"></i>
         </button>
         <img id="lightbox-image" src="" alt="" />

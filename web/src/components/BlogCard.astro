@@ -1,5 +1,6 @@
 ---
-import { getGenericEyecatchColor } from '../utils/eyecatch';
+import { getGenericEyecatchColor } from "../utils/eyecatch";
+import { formatDate } from "../utils/posts";
 
 interface Props {
   title: string;
@@ -7,169 +8,153 @@ interface Props {
   emoji: string;
   url: string;
   eyecatch?: string;
+  tags?: string[];
+  /** feature は画像と本文を横に並べた大きな表示。excerpt はこのときだけ出す */
+  variant?: "feature" | "card";
+  excerpt?: string;
 }
 
-const { title, date, emoji, url, eyecatch } = Astro.props;
-
-// 汎用アイキャッチ画像の色を取得
+const { title, date, emoji, url, eyecatch, tags = [], variant = "card", excerpt } = Astro.props;
 const genericEyecatchColor = getGenericEyecatchColor(url);
-
-const formattedDate = new Date(date).toLocaleDateString('ja-JP', {
-  year: 'numeric',
-  month: '2-digit',
-  day: '2-digit'
-}).replace(/\//g, '/');
+const TitleTag = variant === "feature" ? "h2" : "h3";
 ---
 
-<a href={url} class="blog-card-link">
-  <div class="blog-card">
-    <div class="blog-content">
-      {eyecatch ? (
-        <div class="blog-eyecatch-container">
-          <img
-            src={`https://articles.yaakai.to/eyecatch?id=${eyecatch}`}
-            alt={title}
-            class="blog-eyecatch"
-          />
-        </div>
-      ) : (
-        <div class="blog-eyecatch-container">
-          <div
-            class="blog-generic-eyecatch"
-            style={`background-image: url('https://articles.yaakai.to/common/${genericEyecatchColor}.png')`}
-          >
-            <span class="blog-generic-eyecatch-emoji">{emoji}</span>
-          </div>
-        </div>
-      )}
-      <div class="blog-info">
-        <h3 class="blog-title">{title}</h3>
-        <div class="blog-date">{formattedDate}</div>
+<a href={url} class={`blog-card blog-card-${variant}`}>
+  <div class="blog-card-image">
+    {eyecatch ? (
+      <img src={`https://articles.yaakai.to/eyecatch?id=${eyecatch}`} alt="" loading="lazy" />
+    ) : (
+      <div
+        class="blog-card-generic"
+        style={`background-image: url('https://articles.yaakai.to/common/${genericEyecatchColor}.png')`}
+      >
+        <span>{emoji}</span>
       </div>
+    )}
+  </div>
+  <div class="blog-card-body">
+    <div class="blog-card-meta">
+      <time datetime={new Date(date).toISOString()}>{formatDate(date)}</time>
+      {tags.map((tag) => <span class="blog-card-tag">#{tag}</span>)}
     </div>
+    <TitleTag class="blog-card-title">{title}</TitleTag>
+    {variant === "feature" && excerpt && <p class="blog-card-excerpt">{excerpt}</p>}
   </div>
 </a>
 
 <style>
-  .blog-card-link {
-    display: block;
-    text-decoration: none;
-    color: inherit;
-    height: 100%;
-  }
-
   .blog-card {
-    position: relative;
-    background-color: var(--bg-color-level-1);
-    border-radius: 8px;
-    overflow: hidden;
-    box-shadow: light-dark(0 2px 4px rgba(0, 0, 0, 0.05), 0 2px 4px rgba(0, 0, 0, 0.2));
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-    height: 100%;
-    display: flex;
-    flex-direction: column;
+    display: grid;
+    gap: 10px;
+    align-content: start;
+    text-decoration: none;
   }
 
-  .blog-card-link:hover .blog-card {
-    transform: translateY(-4px);
-    box-shadow: light-dark(0 4px 8px rgba(0, 0, 0, 0.1), 0 4px 8px rgba(0, 0, 0, 0.3));
+  /* 色だけを状態ごとに指定する。レイアウトまで :hover に含めると feature の gap が上書きされて画像の幅が変わる */
+  .blog-card,
+  .blog-card:visited,
+  .blog-card:hover {
+    color: var(--text-color-level-0);
   }
 
-  .blog-content {
-    padding: 16px;
-    flex-grow: 1;
-    display: flex;
-    flex-direction: column;
-  }
-
-  .blog-eyecatch-container {
-    position: relative;
+  .blog-card-image img,
+  .blog-card-generic {
+    display: block;
     width: 100%;
-    margin-bottom: 16px;
-  }
-
-  .blog-eyecatch {
-    width: 100%;
-    height: 160px;
+    aspect-ratio: 1200 / 630;
     object-fit: cover;
-    border-radius: 4px;
+    border-radius: 8px;
+    image-rendering: pixelated;
   }
 
-  .blog-generic-eyecatch {
-    position: relative;
-    width: 100%;
-    height: 160px;
+  .blog-card-generic {
+    display: grid;
+    place-items: center;
     background-size: cover;
     background-position: center;
-    border-radius: 4px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-
-  .blog-generic-eyecatch-emoji {
     font-size: 3em;
     line-height: 1;
-    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
   }
 
-  .blog-emoji {
-    font-size: 2.5em;
-    margin-bottom: 16px;
-    text-align: center;
-  }
-
-  .blog-info {
-    flex-grow: 1;
+  .blog-card-meta {
     display: flex;
-    flex-direction: column;
+    flex-wrap: wrap;
+    gap: 4px 10px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    line-height: 1.6;
+    color: var(--text-color-level-2);
   }
 
-  .blog-title {
-    font-size: 1.2em;
-    font-weight: bold;
-    margin: 0 0 8px 0;
-    line-height: 1.4;
-    color: var(--text-color-level-0);
-    text-decoration: none;
-  }
-
-  .blog-card-link:hover .blog-title {
+  .blog-card-tag {
     color: var(--primary-color-level-0);
   }
 
-  .blog-date {
-    font-size: 0.9em;
-    color: var(--text-color-level-2);
-    margin-top: auto;
+  .blog-card-title {
+    margin: 0;
+    font-size: 16px;
+    line-height: 1.5;
   }
 
+  .blog-card:hover .blog-card-title {
+    color: var(--primary-color-level-0);
+  }
 
-  @media (max-width: 768px) {
-    .blog-eyecatch {
-      height: 140px;
+  .blog-card-feature {
+    grid-template-columns: 1.15fr 1fr;
+    gap: 28px;
+    align-items: center;
+  }
+
+  .blog-card-feature .blog-card-body {
+    display: grid;
+    gap: 10px;
+  }
+
+  .blog-card-feature .blog-card-title {
+    font-size: 26px;
+    line-height: 1.4;
+  }
+
+  .blog-card-feature .blog-card-generic {
+    font-size: 5em;
+  }
+
+  .blog-card-excerpt {
+    margin: 0;
+    font-size: 15px;
+    line-height: 1.8;
+    color: var(--text-color-level-2);
+  }
+
+  @media (max-width: 720px) {
+    .blog-card-feature {
+      grid-template-columns: 1fr;
+      gap: 14px;
     }
 
-    .blog-generic-eyecatch {
-      height: 140px;
+    .blog-card-feature .blog-card-title {
+      font-size: 21px;
     }
 
-    .blog-generic-eyecatch-emoji {
-      font-size: 2.5em;
+    /* 一覧の通常カードはサムネイル左・タイトル右に並べてスクロール量を減らす */
+    .blog-card-card {
+      grid-template-columns: 120px 1fr;
+      gap: 12px;
+      align-items: center;
     }
 
-    .ai-badge {
-      width: 20px;
-      height: 20px;
-      font-size: 12px;
-      bottom: 6px;
-      right: 6px;
+    .blog-card-card .blog-card-generic {
+      font-size: 1.8em;
     }
 
-    .ai-badge-tooltip {
-      width: 200px;
-      padding: 10px;
-      font-size: 0.85em;
+    .blog-card-card .blog-card-body {
+      display: grid;
+      gap: 4px;
+    }
+
+    .blog-card-card .blog-card-title {
+      font-size: 15px;
     }
   }
 </style>

@@ -1,0 +1,55 @@
+---
+interface Props {
+  title: string;
+  /** 見出しの横に添える補足（件数や説明） */
+  note?: string;
+  moreLink?: string;
+  /** ページの主見出しとして使うときは h1 にする */
+  as?: "h1" | "h2";
+}
+
+const { title, note, moreLink, as: Tag = "h2" } = Astro.props;
+---
+
+<div class="section-label">
+  <Tag>{title}</Tag>
+  {note && <span class="section-label-note">{note}</span>}
+  {moreLink && <a href={moreLink}>すべて見る →</a>}
+</div>
+
+<style>
+  .section-label {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    margin: 40px 0 16px;
+  }
+
+  .section-label h1,
+  .section-label h2 {
+    margin: 0;
+    font-family: var(--font-display);
+    font-weight: normal;
+    font-size: 20px;
+    letter-spacing: 0.04em;
+    color: var(--text-color-level-0);
+  }
+
+  .section-label-note {
+    font-size: 12px;
+    color: var(--text-color-level-2);
+  }
+
+  .section-label a,
+  .section-label a:visited {
+    margin-left: auto;
+    font-size: 13px;
+    color: var(--text-color-level-2);
+    text-decoration: none;
+    white-space: nowrap;
+  }
+
+  .section-label a:hover {
+    color: var(--primary-color-level-0);
+  }
+</style>
