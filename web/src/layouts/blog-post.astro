@@ -138,21 +138,19 @@ const humanRatio = isBlogPost ? 80 : 100;
         }
 
         /* Lightbox styles */
+        /* dialog 自体は画像の大きさにして、暗い部分を ::backdrop にする。
+           こうすると closedby="any" で暗い部分のクリックが「外側」として扱われ、JS なしで閉じられる */
         .image-lightbox {
-            position: fixed;
+            /* リセット CSS（@acab/reset.css）が dialog の inset を unset にしているので、
+               UA と同じ inset: 0 + margin: auto で画面中央に置き直す */
             inset: 0;
-            width: 100%;
-            height: 100%;
-            max-width: 100%;
-            max-height: 100%;
-            margin: 0;
+            margin: auto;
+            max-width: 90vw;
+            max-height: 90vh;
             padding: 0;
             border: none;
-            background-color: rgba(0, 0, 0, 0.9);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 1000;
+            background: none;
+            overflow: visible;
         }
 
         .image-lightbox::backdrop {
@@ -160,6 +158,7 @@ const humanRatio = isBlogPost ? 80 : 100;
         }
 
         .image-lightbox img {
+            display: block;
             max-width: 90vw;
             max-height: 90vh;
             object-fit: contain;
@@ -1001,7 +1000,7 @@ const humanRatio = isBlogPost ? 80 : 100;
              * 1. アンカー要素に anchor-name プロパティを設定
              * 2. 位置指定要素に position-anchor プロパティを設定（アンカー要素の名前を指定）
              * 3. 位置指定要素の位置を anchor() 関数を使用して設定
-             * 4. JavaScript を使用して表示/非表示を制御
+             * 4. 表示/非表示はボタンの popovertarget と popover 属性に任せる（JS 不要）
              */
 
             /* アンカー要素の定義 */
@@ -1009,24 +1008,19 @@ const humanRatio = isBlogPost ? 80 : 100;
                 anchor-name: --ai-badge; /* カスタム識別子を定義（--で始まる必要がある） */
             }
 
-            /* ポップオーバー要素の定義 */
+            /* ポップオーバー要素の定義。popover="auto" なのでトップレイヤーに出て z-index は不要、
+               外側クリックと Esc で閉じる */
             .ai-badge-popover {
                 width: 260px;
                 background-color: var(--bg-color-level-1);
+                color: var(--text-color-level-0);
                 border: 1px solid var(--bg-color-level-3);
                 padding: 14px;
                 border-radius: 6px;
                 box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-                z-index: 12;
-                position: fixed; /* popoverはfixedが推奨 */
                 position-anchor: --ai-badge; /* アンカー要素の名前を指定して関連付け */
                 position-area: top span-left; /* AIバッジの上左側に配置 */
-                margin: 0 0 10px 0; /* 下に10pxの余白 */
-                display: none; /* 初期状態では非表示 */
-            }
-
-            .ai-badge-popover.show {
-                display: block;
+                margin: 0 0 10px 0; /* popover の UA スタイルの margin: auto を打ち消し、下に10pxの余白 */
             }
 
             .ai-badge-tooltip p {
@@ -1113,10 +1107,10 @@ const humanRatio = isBlogPost ? 80 : 100;
                         alt={frontmatter.title}
                         class="eyecatch"
                     />
-                    <button class="ai-badge" title="この画像はAIを使用して生成された後、人間が調整したものです" id="ai-badge-anchor">
+                    <button type="button" class="ai-badge" title="この画像はAIを使用して生成された後、人間が調整したものです" id="ai-badge-anchor" popovertarget="ai-badge-popover">
                         <span class="ai-badge-icon">ⓘ</span>
                     </button>
-                    <div id="ai-badge-popover" class="ai-badge-popover">
+                    <div id="ai-badge-popover" class="ai-badge-popover" popover="auto">
                         <div class="ai-badge-tooltip">
                             <p>この画像はAIを使用して生成された後、人間が調整したものです</p>
                             <a href="https://github.com/yaakaito/yaakaito/issues/new?template=ai-image-issue.md" target="_blank" rel="noopener noreferrer">問題を報告する</a>
@@ -1149,41 +1143,6 @@ const humanRatio = isBlogPost ? 80 : 100;
                 // norefferer
                 link.setAttribute("rel", "noopener noreferrer");
             });
-
-            /*
-             * CSS Anchor Positioning と JavaScript の連携
-             *
-             * CSS Anchor Positioning は要素の位置決めを担当しますが、
-             * 表示/非表示の制御は JavaScript で行う必要があります。
-             *
-             * 実装のポイント:
-             * 1. display: none と .show クラスを使って表示/非表示を切り替える
-             * 2. クリックイベントでクラスを付け外しする
-             * 3. ポップオーバー外のクリックを検知して閉じる処理を実装
-             *
-             * 注意点:
-             * - popover 属性を使う方法もありますが、ブラウザ互換性の問題がある
-             * - CSS Anchor Positioning は比較的新しい機能なので、フォールバック値を設定するとよい
-             * - position: absolute と組み合わせて使用する
-             */
-
-            // AIバッジのクリックイベント
-            const aiButton = document.getElementById('ai-badge-anchor');
-            const aiPopover = document.getElementById('ai-badge-popover');
-
-            if (aiButton && aiPopover) {
-                // クリックでポップオーバーの表示/非表示を切り替え
-                aiButton.addEventListener('click', function() {
-                    aiPopover.classList.toggle('show');
-                });
-
-                // ポップオーバー以外の場所をクリックしたら閉じる
-                document.addEventListener('click', function(event) {
-                    if (!aiButton.contains(event.target as Node) && !aiPopover.contains(event.target as Node)) {
-                        aiPopover.classList.remove('show');
-                    }
-                });
-            }
 
             // 長いコードブロックを検出して折りたたみ機能を追加
             const codeBlocks = document.querySelectorAll('.markdown pre');
@@ -1298,24 +1257,30 @@ const humanRatio = isBlogPost ? 80 : 100;
                     });
                 });
 
-                lightboxClose?.addEventListener('click', () => {
-                    lightbox.close();
-                });
-
                 lightboxImage.addEventListener('click', () => {
                     lightbox.close();
                 });
 
-                lightbox.addEventListener('click', (e) => {
-                    if (e.target === lightbox) {
+                // 閉じるボタンは command="close"、外側クリックと Esc は closedby="any" が処理する。
+                // どちらかに未対応のブラウザだけ JavaScript で補う
+                if (!('command' in HTMLButtonElement.prototype)) {
+                    lightboxClose?.addEventListener('click', () => {
                         lightbox.close();
-                    }
-                });
+                    });
+                }
+
+                if (!('closedBy' in HTMLDialogElement.prototype)) {
+                    lightbox.addEventListener('click', (e) => {
+                        if (e.target === lightbox) {
+                            lightbox.close();
+                        }
+                    });
+                }
             }
         });
     </script>
-    <dialog id="image-lightbox" class="image-lightbox">
-        <button class="image-lightbox-close" aria-label="閉じる">
+    <dialog id="image-lightbox" class="image-lightbox" closedby="any">
+        <button type="button" class="image-lightbox-close" aria-label="閉じる" commandfor="image-lightbox" command="close">
             <i class="fas fa-xmark"></i>
         </button>
         <img id="lightbox-image" src="" alt="" />
