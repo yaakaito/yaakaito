@@ -43,14 +43,18 @@ const TitleTag = variant === "feature" ? "h2" : "h3";
 </a>
 
 <style>
-  .blog-card,
-  .blog-card:visited,
-  .blog-card:hover {
+  .blog-card {
     display: grid;
     gap: 10px;
     align-content: start;
-    color: var(--text-color-level-0);
     text-decoration: none;
+  }
+
+  /* 色だけを状態ごとに指定する。レイアウトまで :hover に含めると feature の gap が上書きされて画像の幅が変わる */
+  .blog-card,
+  .blog-card:visited,
+  .blog-card:hover {
+    color: var(--text-color-level-0);
   }
 
   .blog-card-image img,
@@ -121,16 +125,6 @@ const TitleTag = variant === "feature" ? "h2" : "h3";
     font-size: 15px;
     line-height: 1.8;
     color: var(--text-color-level-2);
-  }
-
-  @media (prefers-reduced-motion: no-preference) {
-    .blog-card-image {
-      transition: transform 0.2s ease;
-    }
-
-    .blog-card:hover .blog-card-image {
-      transform: translateY(-2px);
-    }
   }
 
   @media (max-width: 720px) {
